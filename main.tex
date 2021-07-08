@@ -5,12 +5,59 @@
 %% recommended packages
 \usepackage{thumbpdf,lmodern}
 
+%% Vasilis packages
+\usepackage{amsmath,amssymb,bbold, xfrac}
+
+%% just to show content -> they should be replaced by the journals packages in the end
+\usepackage{algorithm} 
+\usepackage[noend]{algpseudocode}
+
+%% just to show content -> they should be replaced by the journals packages in the end
+% Python style code
+\usepackage[finalizecache, cachedir=./minted_files]{minted}
+\usemintedstyle{tango}
+\usepackage{listings}
+\usepackage{xcolor}
+\newcommand{\pinline}[1]{\mintinline{python}{#1}}
+\newminted{python}{framesep=2mm,
+baselinestretch=1.2,
+fontsize=\small,
+frame=single
+}
+
+
 %% another package (only for this demo article)
 \usepackage{framed}
 
 %% new custom commands
 \newcommand{\class}[1]{`\code{#1}'}
 \newcommand{\fct}[1]{\code{#1()}}
+
+%% Vasilis' custom commands
+\newcommand{\bigO}{\mathcal{O}}
+\newcommand{\X}{\mathbf{x}}
+\newcommand{\Z}{\mathbf{z}}
+\newcommand{\V}{\mathbf{V}}
+\newcommand{\Y}{\mathbf{Y}}
+\newcommand{\hess}{\mathbf{H}}
+\newcommand{\Thetab}{\mathbf{\Theta}}
+
+\newcommand{\vb}{\mathbf{v}}
+\newcommand{\yb}{\mathbf{y}}
+\newcommand{\xb}{\mathbf{x}}
+
+\newcommand{\jac}{\mathbf{J}}
+\newcommand{\hessian}{\mathbf{H}}
+\newcommand{\thetab}{\boldsymbol{\theta}}
+\newcommand{\thetabij}{\thetab_{ij}}
+\newcommand{\thetabi}{\thetab_i}
+
+\newcommand{\region}{B_{d,\epsilon}}
+\newcommand{\indicator}[1]{\mathbb{1}_{#1}}
+\newcommand{\regioni}{B_{d,\epsilon}^i}
+\newcommand{\data}{\mathbf{y_0}}
+
+\newcommand{\R}{\mathbb{R}}
 
 
 %% -- Article metainformation (author, title, ...) -----------------------------
@@ -169,13 +216,18 @@
 
 \subsection{Likelihood-free inference}
 
-%% Material from sec 1.1, 2.1 
+%% Material from sec 1.1, 2.1
+\input{latex_files/ch1/1_1_motivation.tex}
+\input{latex_files/ch2/2_1_simulator_based_models.tex}
 
 \subsection{Robust optimisation Monte Carlo (ROMC)}
 %% section 2.2 and 2.3 (alternatively, we could have 2.3 only in the next section, see below)
+\input{latex_files/ch2/2_2_ROMC.tex}
+\input{latex_files/ch2/2_3_ROMC_algorithmic.tex}
 
 \subsection{Engine for likelihood-free inference (ELFI)}
 %% 2.4
+\input{latex_files/ch2/2_4_ELFI.tex}
 
 \section{ROMC module in ELFI}  % better title needed
 
@@ -188,11 +240,14 @@
 
 \section{Example}
 % perhaps just the MA example, with a subset of the timing plots
+\input{latex_files/ch4/4_2_ma2.tex}
+
+
 
 %% -- Summary/conclusions/discussion -------------------------------------------
 
 \section{Summary and discussion} \label{sec:summary}
-
+lalala
 
 %% -- Optional special unnumbered sections -------------------------------------
 

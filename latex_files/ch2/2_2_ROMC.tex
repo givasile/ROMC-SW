@@ -1,0 +1,155 @@
+The simplifications introduced by OMC, although quite useful from a
+computational point-of-view, they suffer from some significant failure modes:
+
+\begin{itemize}
+\item The whole acceptable region $\mathcal{S}_i$, for each nuisance variable,
+  shrinks to a single point $\thetab_i^*$; this simplification may add
+  significant error when then the area $\mathcal{S}_i$ is relatively big.
+\item The weight $w_i$ is computed based only at the curvature at the
+  point $\thetab_i^*$. This approach is error prone at many cases
+  e.g.\ when $g_i$ is almost flat at $\thetab_i^*$, leading to a
+  $\text{det}(\jac_i^{*T}\jac_i^*) \rightarrow 0 \Rightarrow w_i
+  \rightarrow \infty$, thus dominating the posterior.
+\item There is no way to solve the optimisation problem
+  $\thetab_i^* = \text{argmin}_{\thetab} \: g_i(\thetab)$ when $g_i$
+  is not differentiable.
+\end{itemize}
+
+
+\subsubsection{Sampling and computing expectation in ROMC}
+
+The ROMC approach resolves the aforementioned issues. Instead of
+collapsing the acceptance regions $\mathcal{S}_i$ into single points,
+it tries to approximate them with a bounding box.\footnote{The
+  description on how to estimate the bounding box is provided in the
+  following chapters.}. A uniform distribution is then defined on the
+bounding box area, used as the proposal distribution for importance
+sampling. If we define as $q_i$, the uniform distribution defined on
+the $i-th$ bounding box, weighted sampling is performed as:
+
+\begin{gather}
+  \label{eq:sampling}
+  \thetab_{ij} \sim q_i \\
+  w_{ij} = \frac{\indicator{\region(\data)}(M_d(\thetab_{ij}, \vb_i)) p(\thetab_{ij})}{q(\thetab_{ij})}
+\end{gather}
+
+\noindent
+Having defined the procedure for obtaining weighted samples, any
+expectation $E_{p(\thetab|\data)}[h(\thetab)]$, can be approximated
+as,
+
+\begin{equation} \label{eq:expectation}
+  E_{p(\thetab|\data)}[h(\thetab)] \approx \frac{\sum_{ij} w_{ij} h(\thetab_{ij})}{\sum_{ij} w_{ij}}
+\end{equation}
+
+
+\subsubsection{Construction of the proposal region}
+
+In this section we will describe mathematically the steps needed for
+computing the proposal distributions $q_i$. There will be also
+presented a Bayesian optimisation alternative when gradients are not
+available.
+
+\subsubsection*{Define and solve deterministic optimisation problems}
+
+For each set of nuisance variables $\vb_i, i = \{1,2,\ldots,n_1 \}$ a
+deterministic function is defined as
+$f_i(\thetab) = M_d(\thetab,\vb_i)$. For constructing the proposal
+region, we search for a point
+$\thetab_* : d(f_i(\thetab_*), \data) < \epsilon$; this point can be
+obtained by solving the the following optimisation problem:
+
+\begin{subequations}
+\begin{alignat}{2}
+&\!\min_{\thetab}        &\qquad& g_i(\thetab) = d(\data,  f_i(\thetab))\label{eq:optProb}\\
+&\text{subject to} &      & g_i(\thetab) \leq \epsilon
+\end{alignat}
+\end{subequations}
+%
+We maintain a list of the solutions $\thetab_i^*$ of the optimisation
+problems. If for a specific set of nuisance variables $\vb_i$, there
+is no feasible solution we add nothing to the list. The optimisation
+problem can be treated as unconstrained, accepting the optimal point
+$\thetab_i^* = \text{argmin}_{\thetab} g_i(\thetab)$ only if
+$g_i(\thetab_i^*) < \epsilon$.
+
+\subsubsection*{Gradient-based approach}
+\label{subsubsec:GB_approach}
+
+The nature of the generative model $M_r(\thetab)$, specifies the
+properties of the objective function $g_i$. If $g_i$ is continuous
+with smooth gradients $\nabla_{\thetab} g_i$ any gradient-based
+iterative algorithm can be used for solving~\ref{eq:optProb}. The
+gradients $\nabla_{\thetab} g_i$ can be either provided in closed form
+or approximated by finite differences.
+
+\subsubsection*{Bayesian optimisation approach}
+\label{subsubsec:GP_approach}
+
+In cases where the gradients are not available, the Bayesian
+optimisation scheme provides an alternative
+choice~\cite{Shahriari2016}. With this approach, apart from
+obtaining an optimal $\thetab_i^* $, a surrogate model $\hat{d}_i$ of
+the distance $g_i$ is fitted; this approximate model can be used in
+the following steps for making the method more
+efficient. Specifically, in the construction of the proposal region
+and in
+equations~\eqref{eq:approx_posterior},~\eqref{eq:sampling},~\eqref{eq:expectation}
+it could replace $g_i$ in the evaluation of the indicator
+function, providing a major speed-up.
+
+\subsubsection*{Construction of the proposal area $q_i$}
+
+After obtaining a $\thetab_i^*$ such that
+$g_i(\thetab_i^*) < \epsilon$, we need to construct a bounding box
+around it. The bounding box $\mathcal{\hat{S}}_i$ must contain the
+acceptance region around $\thetab_i^*$, i.e.\
+$\{ \thetab : g_i(\thetab) < \epsilon$,
+$d(\thetab, \thetab_i^*) < M \}$. The second condition
+$d(\thetab, \thetab_i^*) < M$ is meant to describe that if
+$\mathcal{S}_i := \{ \thetab : g_i(\thetab) < \epsilon \} $ contains a
+number of disjoint sets of $\thetab$ that respect
+$g_i(\thetab) < \epsilon$, we want our bounding box to fit only the
+one that contains $\thetab_i^*$. We seek for a bounding box that is as
+tight as possible to the local acceptance region (enlarging the
+bounding box without a reason decreases the acceptance rate) but large
+enough for not discarding accepted areas.
+
+In contrast with the OMC approach, we construct the bounding box by
+obtaining search directions and querying the indicator function as we move on them. The
+search directions $\mathbf{v}_d$ are computed as the eigenvectors of
+the curvature at $\thetab_i^*$ and a line-search method is used to
+obtain the limit point where
+$g_i(\thetab_i^* + \kappa \vb_d) \geq
+\epsilon$\footnote{$-\kappa$ is used as well for the opposite direction along the search line}. The Algorithm~\ref{alg:region_construction} describes the method in-depth. After the limits are obtained along all
+search directions, we define bounding box and the uniform distribution $q_i$. This is the proposal distribution used for the importance
+sampling as explained in \eqref{eq:sampling}.
+
+
+\subsubsection*{Fitting a local surrogate model $\hat{g}_i$}
+
+After the construction of the bounding box $\mathcal{\hat{S}}_i$, we
+are no longer interested in the surface outside the box. In the future
+steps (e.g. sampling, evaluating the posterior) we will only evaluate
+$g_i$ inside the corresponding bounding box. Hence, we could fit a
+local surrogate model $\hat{g}_i$ for representing the local area
+around $\theta_i^*$. Doing so, in the future steps we can exploit
+$\hat{g}_i$ for evaluating the indicator function instead of running
+the whole deterministic simulator.
+
+Any ML regression model may be chosen as local surrogates. The choice
+should consider the properties of the local region (i.e. size,
+smoothness). The ROMC proposes fitting a simple quadratic model. The
+training set $X: \mathbb{R}^{N \times D}$ is created by sampling $N$
+points from the bounding box and the labels $Y: \mathbb{R}^{N}$ are
+the computed by evaluating $g_i$. The quadratic model is fitted on the
+data points, for minimising the square error.
+
+
+This additional step places an
+additional step in the training part, increasing the computational
+demands, but promises a major speed at the inference phase (sampling,
+posterior evaluation). It is frequent in ML problems, to be quite
+generous with the execution time at the training phase, but quite
+eager at the inference phase. Fitting a local surrogate model aligns
+with this requirement.

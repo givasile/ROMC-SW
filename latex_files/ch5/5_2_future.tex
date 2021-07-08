@@ -1,0 +1,71 @@
+Future research directions involve both the theoretical and
+implementation aspect of the ROMC approach.
+
+
+In the theoretical part, an essential drawback of the ROMC approach is
+the creation of a single bounding box for each objective
+function. This simplification can be error-prone in situations where
+we have ignorance about the properties of the objective
+function. Consider, for example, the scenario where an objective
+function defines multiple tiny disjoint acceptance areas; the
+optimiser will (hopefully) reach only one, and a bounding box will be
+constructed around it, compressing all the mass of the distribution
+there. Therefore, this small region will erroneously dominate the
+specific objective function. In general, the existence of multiple
+disjoint acceptance regions complicates the inference. A naive
+approach for improving this failure would be solving each optimisation
+problem more than once, using different starting points. With this
+approach, we hope that the optimiser will reach a different local
+minimum in each execution. However, apart from the added computational
+complexity, this approach does not guarantee an improvement. In
+general, identifying all the acceptance regions in an unconstrained
+problem with many local optimums is quite challenging.
+
+
+Further research on the optimisation part, may also focus on modelling
+the case where the parameter space is constrained. Consider, for
+example, the case where a parameter represents a probability (as in
+the tuberculosis example). In this case, the parameter is constrained
+in the region $[0,1]$. Defining a prior with zero mass outside of this
+area ensures that all non-acceptable values will not contribute to the
+posterior. However, the optimiser does not consider the prior. Hence,
+we can observe the phenomenon where the majority of the (or all)
+acceptance regions is cancelled-out by the prior. In this case, the
+posterior will be dominated by a few acceptance region parts that
+overlap with the prior, which is not robust. Dealing with such
+constrained non-linear optimisation problems, which is particularly
+challenging, can serve as a second research line.
+
+
+The previous two research directions overlap with the field of
+optimisation. Another research avenue, more concentrated on the ROMC
+method, is the approximation of the acceptance regions with a more
+complex geometrical shape than the bounding box. In the current
+implementation, the bounding box only serves as the proposal region
+for sampling; running the indicator function afterwards, we manage to
+discard the samples that are above the distance threshold. This
+operation is quite expensive from a computational point of view. The
+workaround proposed from the current implementation is fitting a local
+surrogate model for avoiding running the expensive simulator. However,
+fitting a surrogate model for every objective function is still
+expensive. Approximating the acceptance region accurately with a more
+complicated geometrical structure could remove the burden of running
+the indicator function later. For example, a simple idea would be
+approximating the acceptance region with a set of non-overlapping
+bounding boxes. We insist on using the square as the basic shape
+because we can efficiently sample from a uniform distribution defined
+on it. A future research direction could investigate this capability.
+
+
+On the implementation side, the improvements are more concrete. A critical
+improvement would be performing the training and the inference phase
+in a batched fashion. For example, the practitioner may indicate that
+he would like to approximate the posterior in batches of N
+optimisation problems; this means that the approximation should be
+updated after each N new bounding boxes are constructed. Utilising
+this feature, the user may interactively decide when he would like to
+terminate the process. Finally, the implementation could also support
+saving the state of the training or the inference process for
+continuing later. In the current implementation, although the user can
+save the inference result, he cannot interrupt the training phase and
+continue later.

@@ -1,0 +1,47 @@
+In this dissertation, we have studied the likelihood-free inference
+approaches, focusing on the novel ROMC method that we implemented in
+an open-source software package. The main contribution of the
+dissertation is this implementation which can be used mainly by the
+research community for further experimentation.
+
+In chapter 2, we presented the simulator-based models explaining the
+particularities of the inference when the likelihood is not
+tractable. We then presented an overview of the Optimisation
+Monte-Carlo methods (OMC and ROMC) examining their strategies on
+approximating the posterior. We discussed the point-of-view of the
+ROMC approach, demonstrating the mathematic modelling it
+introduces. We also presented the aspect of ROMC as a
+meta-algorithm. Finally, at the end of chapter 2, we transformed the
+mathematical modelling of ROMC into algorithmic form. Up to this
+point, the dissertation mainly restates the ideas presented in the
+original paper \autocite{Ikonomov2019} and, hence, it can be used
+together with the paper by a reader who wants to understand the ROMC
+approach.
+
+The notable contribution of the dissertation is the implementation of
+the method in the ELFI package. Due to the novelty of the method, it
+has not been implemented in any other package so far. We tried to
+implement the method focusing on four principles: simplicity,
+accuracy, efficiency and extensibility. We tried to provide the user
+with a simple-to-use method. Therefore, we followed the guidelines of
+the ELFI package, aligning ROMC with the other provided inference methods. We
+also kept the function calls simple, asking only for the necessary
+arguments. Secondly, we tested the implementation on a range of
+examples for ensuring accurate inference results. We designed some
+artificial examples for evaluating our implementation using
+ground-truth information. We also tested that it works smoothly under
+general models, not artificially created by us. Thirdly, we tried to
+solve the tasks efficiently. We applied parallel processing which offers a major speedup in the the execution time of all tasks. Furthermore, we avoided using redundant calls, we
+exploited vectorisation when possible, and we avoided expensive
+for-loops.  We measured the execution time of the method for providing
+an overview of the time needed for performing each task. Finally, we
+preserved extensibility; this was a significant priority in the
+implementation design. Apart from offering a ready-to-use inference
+method, we want our implementation to serve as the initial point for
+researchers who would like to further experiment with the method. This
+requirement aligns with the nature of ROMC as a meta-algorithm; one
+can replace the method involved in a specific task without the rest of
+the algorithm to collapse. Finally, we provide extensive documentation
+of all implemented methods and a collection of examples for
+illustrating the main use-cases. We wanted the reader to be able to
+observe and interact in-practice with the functionalities we offer.

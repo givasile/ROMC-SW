@@ -1,0 +1,64 @@
+The ROMC implementation provides two functions for evaluating the inference results,
+
+\begin{enumerate}[label=(\roman*)]
+\item \mintinline{python}{romc.compute_divergence(gt_posterior, bounds=None, step=0.1,}
+
+      \mintinline{python}{                        distance="Jensen-Shannon")}
+
+\item \mintinline{python}{romc.compute_ess()}
+\end{enumerate}
+
+\subsubsection*{Function (i): Compute the divergence between ROMC approximation and a ground-truth posterior}
+
+\pinline{romc.compute_divergence(gt_posterior, bounds=None, step=0.1,}
+
+\pinline{                     distance="Jensen-Shannon")}
+\vspace{5mm}
+
+\noindent
+This function computes the divergence between the ROMC approximation
+and the ground truth posterior. Since the computation is performed
+using the Riemann's approximation, this method can only work in low
+dimensional parameter spaces; it is suggested to be used for up to the
+three-dimensional parameter space. As mentioned in the beginning of
+this chapter, in a real-case scenario it is not expected the
+ground-truth posterior to be available. However, in cases where the
+posterior can be approximated decently well with a numerical approach
+(as in the current example) or with some other inference approach,
+this function can provide a numerical measure of the agreement
+between the two approximations. The argument \pinline{step} defines
+the step used in the Riemann's approximation and the argument
+\pinline{distance} can take either the \pinline{Jensen-Shannon} or the
+\pinline{KL-divergence} value, for computing the appropriate distance.
+
+\subsubsection*{Function (ii): Compute the effective sample size of the weighted samples}
+
+\mintinline{python}{romc.compute_ess()}
+\vspace{5mm}
+
+\noindent
+This function computes the Effective Sample Size (ESS) using the
+following expression~\autocite{Sudman1967},
+
+\begin{equation} \label{eq:ESS}
+  ESS = \frac{(\sum_i w_i)^2}{\sum_i w_i^2}
+\end{equation}
+
+The ESS is a useful measure of the \textbf{actual} sample size, when
+the samples are weighted. For example if in a population of $100$
+samples one has a very large weight (e.g.\ $\approx 100$) whereas the
+rest have small (i.e.\ $\approx 1$), the real sample size is close to
+1; one sample dominates over the rest. Hence, the ESS provides a
+measure of the equivalent uniformly weighted sample population.
+
+\newpage
+
+
+\begin{pythoncode}
+res = romc.compute_divergence(wrapper, distance="Jensen-Shannon")                                 
+print("Jensen-Shannon divergence: %.3f" % res)
+# Jensen-Shannon divergence: 0.025
+
+print("Nof Samples: %d, ESS: %.3f" % (len(romc.result.weights), romc.compute_ess()))
+# Nof Samples: 19950, ESS: 16694.816
+\end{pythoncode}
