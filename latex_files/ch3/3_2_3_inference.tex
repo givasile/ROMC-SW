@@ -1,6 +1,6 @@
 The inference part contains the 4 following functionalities:
 
-\begin{enumerate}[label=(\roman*)]
+\begin{enumerate}
 \item \mintinline{python}{romc.sample(n2, seed=None)}
 \item \mintinline{python}{romc.compute_expectation(h)}  
 \item \mintinline{python}{romc.eval_unnorm_posterior(theta)}
@@ -114,8 +114,8 @@ is close to the ground truth $\mu = 0$ and $\sigma^2 = 1$.
 
 \begin{figure}[h]
     \begin{center}
-      \includegraphics[width=0.48\textwidth]{./Thesis/images/chapter3/example_marginal.png}
-      \includegraphics[width=0.48\textwidth]{./Thesis/images/chapter3/example_region_samples.png}
+      \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter3/example_marginal.png}
+      \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter3/example_region_samples.png}
     \end{center}
   \caption[Histogram of the obtained samples at the 1D example.]{(a) Left: Histogram of the obtained samples. (b) Right: Acceptance region around $\theta_1^*$ with the obtained samples plotted inside.}
   \label{fig:example_sampling}
@@ -135,7 +135,7 @@ approximation is quite close to the ground-truth posterior.
 
 \begin{figure}[ht]
     \begin{center}
-      \includegraphics[width=0.75\textwidth]{./Thesis/images/chapter3/example_posterior.png}
+      \includegraphics[width=0.75\textwidth]{./latex_files/images/chapter3/example_posterior.png}
     \end{center}
   \caption[Approximate posterior evaluation, at the 1D example.]{Approximate posterior evaluation.}
   \label{fig:approx_posterior}

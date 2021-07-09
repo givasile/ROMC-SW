@@ -1,6 +1,6 @@
 The ROMC implementation provides two functions for evaluating the inference results,
 
-\begin{enumerate}[label=(\roman*)]
+\begin{enumerate}
 \item \mintinline{python}{romc.compute_divergence(gt_posterior, bounds=None, step=0.1,}
 
       \mintinline{python}{                        distance="Jensen-Shannon")}
@@ -38,7 +38,7 @@ the step used in the Riemann's approximation and the argument
 
 \noindent
 This function computes the Effective Sample Size (ESS) using the
-following expression~\autocite{Sudman1967},
+following expression~\cite{Sudman1967},
 
 \begin{equation} \label{eq:ESS}
   ESS = \frac{(\sum_i w_i)^2}{\sum_i w_i^2}

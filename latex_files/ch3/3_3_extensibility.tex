@@ -46,12 +46,12 @@ and (c) store it as the \pinline{OptimisationProblem.result}
 attribute. Although they both apply the same sequence of steps, each
 method uses a different optimisation scheme;
 \pinline{_solve_gradients} uses the \pinline{minimize} class of the
-\pinline{scipy.optimize} library \autocite{2020SciPy-NMeth}, whereas
+\pinline{scipy.optimize} library \cite{2020SciPy-NMeth}, whereas
 \pinline{_solve_bo} uses the \pinline{BoDeterministic} class.
 \pinline{BoDeterministic} is a class we implemented for performing
 Bayesian Optimisation and fitting a Gaussian Process surrogate model
 to the objective function. It relies on the Gpy framework
-\autocite{gpy2014} for fitting the Gaussian Process. The only
+\cite{gpy2014} for fitting the Gaussian Process. The only
 difference between \pinline{_solve_gradients} and \pinline{_solve_bo},
 as effect in the state of the \pinline{OptimisationProblem} class, is
 the initialisation of the attribute 
@@ -87,7 +87,7 @@ evaluates them using the \pinline{OptimisationProblem.objective}
 function. Afterwards, based on these points, it fits a quadratic model
 using the \pinline{linear_model.LinearRegression} and
 \pinline{preprocessing.PolynomialFeatures} functions of the
-\pinline{scikit-learn} package \autocite{scikit-learn}. The trained
+\pinline{scikit-learn} package \cite{scikit-learn}. The trained
 model is stored as the attribute
 \pinline{OptimisationProblem.local_surrogate}.
 
@@ -108,7 +108,7 @@ of the classes provide objects which are stored as attributes of
 
 \begin{figure}[ht]
     \begin{center}
-      \includegraphics[width=\textwidth]{./Thesis/graphs/RomcEntityDiagram.png}
+      \includegraphics[width=\textwidth]{./latex_files/graphs/RomcEntityDiagram.png}
     \end{center}
   \caption[Overview of the entities (classes) of the ROMC implementation.]{Overview of the entities (classes) used at the deployment of the ROMC inference method, at the \pinline{ELFI} package.}
   \label{fig:example_training}

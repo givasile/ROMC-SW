@@ -1,3 +1,25 @@
+\subsubsection*{\textit{Robust Optimisation Monte Carlo (ROMC) method}}
+
+The ROMC method~\cite{Ikonomov2019} is very a recent likelihood-free
+approach. Its fundamental idea is the transformation of the stochastic
+data generation process $M_r(\thetab)$ to a deterministic function
+$g_i(\thetab)$, by sampling the variables that produce the randomness
+$\vb_i \sim p(\V)$. Formally, in every stochastic process the
+randomness is influenced by a vector of random variables $\V$, whose
+state is unknown prior to the execution of the simulation; sampling in
+advance this state makes the procedure deterministic, i.e.
+$g_i(\thetab) = M_d(\thetab, \V=\vb_i)$. This approach was initially
+introduced by \cite{Meeds2015} as \textit{Optimisation Monte Carlo
+  (OMC)}. The ROMC extended this approach by resolving a fundamental
+failure-mode of OMC. The ROMC describes a methodology for
+approximating the posterior through a series of steps, without
+explicitly enforcing which algorithms must be utilised for each
+step\footnote{The implementation chooses a specific algorithm for each
+  task, but this choice has just a demonstrative value; any
+  appropriate algorithm can be used instead.}; in this sense, it can
+be perceived as a meta-algorithm.
+
+
 The simplifications introduced by OMC, although quite useful from a
 computational point-of-view, they suffer from some significant failure modes:
 

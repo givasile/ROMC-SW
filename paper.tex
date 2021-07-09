@@ -7,6 +7,11 @@
 
 %% Vasilis packages
 \usepackage{amsmath,amssymb,bbold, xfrac}
+\usepackage{xcolor}
+
+% must be removed
+\usepackage{multirow}
+\usepackage{caption}
 
 %% just to show content -> they should be replaced by the journals packages in the end
 \usepackage{algorithm} 
@@ -214,35 +219,34 @@ frame=single
 
 \section{Background}
 
-\subsection{Likelihood-free inference}
+\subsection{Likelihood-free inference and implicit models}
+\input{latex_files/ch2/2_1_LFI_intro.tex}
 
-%% Material from sec 1.1, 2.1
-\input{latex_files/ch1/1_1_motivation.tex}
-\input{latex_files/ch2/2_1_simulator_based_models.tex}
+\subsection{Background of Likehood-free inference methods}
+\input{latex_files/ch2/2_2_LFI_background.tex}
+
+\subsection{Optimisation Monte Carlo (OMC)}
+\input{latex_files/ch2/2_3_OMC.tex}
 
 \subsection{Robust optimisation Monte Carlo (ROMC)}
-%% section 2.2 and 2.3 (alternatively, we could have 2.3 only in the next section, see below)
-\input{latex_files/ch2/2_2_ROMC.tex}
-\input{latex_files/ch2/2_3_ROMC_algorithmic.tex}
+\input{latex_files/ch2/2_4_ROMC.tex}
 
-\subsection{Engine for likelihood-free inference (ELFI)}
-%% 2.4
-\input{latex_files/ch2/2_4_ELFI.tex}
+\subsection{Algorithmic view of ROMC} % better titl
+\input{latex_files/ch2/2_5_ROMC_algorithmic.tex}
 
 \section{ROMC module in ELFI}  % better title needed
 
-%%  alternatively, we could have here a subsection called "Design principles" with 2.3 and some material from 3.1.1
-\subsection{For the user}
-%% 3.1
+\subsection{Engine for likelihood-free inference (ELFI)}
+\input{latex_files/ch3/3_1_ELFI.tex}
 
-\subsection{For the developer}
-%% 3.2
+\subsection{Design Principles}
+\input{latex_files/ch3/3_2_design_principles.tex}
+
+\subsection{Extensibility} % better title
+\input{latex_files/ch3/3_3_extensibility.tex}
 
 \section{Example}
-% perhaps just the MA example, with a subset of the timing plots
 \input{latex_files/ch4/4_2_ma2.tex}
-
-
 
 %% -- Summary/conclusions/discussion -------------------------------------------
 
@@ -266,7 +270,6 @@ lalala
 % and all packages used are available from the Comprehensive
 % \proglang{R} Archive Network (CRAN) at
 % \url{https://CRAN.R-project.org/}.
-
 
 \section*{Acknowledgments}
 
@@ -347,6 +350,5 @@ information such as relative contributions of the authors may be added here
 % \end{appendix}
 
 %% -----------------------------------------------------------------------------
-
 
 \end{document}
