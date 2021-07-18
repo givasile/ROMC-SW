@@ -9,3 +9,5 @@
 *.pdf
 *.run.xml
 minted_files/
+
+env
