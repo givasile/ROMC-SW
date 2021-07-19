@@ -19,38 +19,23 @@ equation~\eqref{eq:sampling}.
 
 \begin{Code}
 ---------------------------------- python ----------------------------------
->>> romc.compute_expectation(h)
+>>> romc.compute_expectation(h) # E[h(x)|theta]
+>>> romc.eval_unorm_posterior(theta, eps_cutoff=False) # unnorm p(theta)
+>>> romc.eval_posterior(theta, eps_cutoff=False) # normalised p(theta)
 ----------------------------------------------------------------------------
 \end{Code}
 
 \noindent
 This function computes the expectation
 $E_{p(\thetab|\data)}[h(\thetab)]$ using
-expression~\eqref{eq:expectation}. The argument \code{h} can be
-any python \code{Callable}.
-
-\begin{Code}
----------------------------------- python ----------------------------------
->>> romc.eval_unorm_posterior(theta, eps_cutoff=False)
-----------------------------------------------------------------------------
-\end{Code}
-
-\noindent
-This function computes the unnormalised posterior approximation using
-expression~\eqref{eq:approx_posterior}.
-
-\begin{Code}
----------------------------------- python ----------------------------------
->>> romc.eval_posterior(theta, eps_cutoff=False)
-----------------------------------------------------------------------------
-\end{Code}
-
-\noindent
-This function evaluates the normalised posterior estimating the
-partition function $Z = \int p_{d,\epsilon}(\thetab|\data)d\thetab$;
-with Riemann's integral approximation. The approximation is
-computationally feasible only in low-dimensional parametric
-spaces.
+expression~\eqref{eq:expectation}. The argument \code{h} can be any
+python \code{Callable}. \code{eval_unnorm_posterior} computes the
+unnormalised posterior approximation using
+expression~\eqref{eq:approx_posterior}. \code{eval_posterior}
+evaluates the normalised posterior estimating the partition function
+$Z = \int p_{d,\epsilon}(\thetab|\data)d\thetab$; with Riemann's
+integral approximation. The approximation is computationally feasible
+only in low-dimensional parametric spaces.
 
 \subsubsection*{Example - Sampling and compute expectation}
 
@@ -74,10 +59,9 @@ utility can provide a nice plot of the approximate posterior as
 illustrated in figure~\ref{fig:approx_posterior}. We observe that the
 approximation is quite close to the ground-truth posterior.
 
-
-
 \begin{Code}
 ------------------------------ python snippet ------------------------------  
+  # Inference part
   seed = 21
   n2 = 50
   romc.sample(n2=n2, seed=seed)
@@ -86,7 +70,8 @@ approximation is quite close to the ground-truth posterior.
   romc.visualize_region(i=1)
 
   # Visualise marginal (built-in ELFI tool)
-  romc.result.plot_marginals(weights=romc.result.weights, bins=100, range=(-3,3))
+  romc.result.plot_marginals(weights=romc.result.weights,
+                             bins=100, range=(-3,3))
 
   # Summarize the samples (built-in ELFI tool)
   romc.result.summary()
@@ -94,10 +79,12 @@ approximation is quite close to the ground-truth posterior.
   # Sample means: theta: -0.0792
 
   # compute expectation
-  print("Expected value   : %.3f" % romc.compute_expectation(h=lambda x: np.squeeze(x)))
+  exp_val = romc.compute_expectation(h=lambda x: np.squeeze(x))
+  print("Expected value   : %.3f" % exp_val)
   # Expected value   : -0.079
 
-  print("Expected variance: %.3f" % romc.compute_expectation(h=lambda x: np.squeeze(x)**2))
+  exp_var = romc.compute_expectation(h=lambda x: np.squeeze(x)**2)
+  print("Expected variance: %.3f" % exp_var)
   # Expected variance: 1.061
 
   # eval unnorm posterior
@@ -108,19 +95,18 @@ approximation is quite close to the ground-truth posterior.
 ----------------------------------------------------------------------------
 \end{Code}
 
-\begin{figure}[h]
-    \begin{center}
-      \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter3/example_marginal.png}
-      \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter3/example_region_samples.png}
-    \end{center}
-  \caption[Histogram of the obtained samples at the 1D example.]{(a) Left: Histogram of the obtained samples. (b) Right: Acceptance region around $\theta_1^*$ with the obtained samples plotted inside.}
-  \label{fig:example_sampling}
-\end{figure}
+% \begin{figure}[h]
+%     \begin{center}
+%       \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter3/example_marginal.png}
+%     \end{center}
+%   \caption[Histogram of the obtained samples at the 1D example.]{(a) Left: Histogram of the obtained samples. (b) Right: Acceptance region around $\theta_1^*$ with the obtained samples plotted inside.}
+%   \label{fig:example_sampling}
+% \end{figure}
 
-\begin{figure}[h]
-    \begin{center}
-      \includegraphics[width=0.75\textwidth]{./latex_files/images/chapter3/example_posterior.png}
-    \end{center}
-  \caption[Approximate posterior evaluation, at the 1D example.]{Approximate posterior evaluation.}
-  \label{fig:approx_posterior}
-\end{figure}
+% \begin{figure}[h]
+%     \begin{center}
+%       \includegraphics[width=0.6\textwidth]{./latex_files/images/chapter3/example_posterior.png}
+%     \end{center}
+%   \caption[Approximate posterior evaluation, at the 1D example.]{Approximate posterior evaluation.}
+%   \label{fig:approx_posterior}
+% \end{figure}

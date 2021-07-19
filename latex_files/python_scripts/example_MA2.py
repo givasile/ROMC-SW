@@ -6,7 +6,7 @@ import numpy as np
 import scipy.stats
 import matplotlib
 import os
-matplotlib.rcParams['text.usetex'] = False
+matplotlib.rcParams['text.usetex'] = True
 
 logging.basicConfig(level=logging.INFO)
 prepath = './../images/chapter4/'

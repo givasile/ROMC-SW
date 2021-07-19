@@ -1,4 +1,5 @@
-The ROMC implementation provides two functions for evaluating the inference results.
+The ROMC implementation provides two functions for evaluating the
+inference results.
 
 \begin{Code}
 ---------------------------------- python ----------------------------------  
@@ -6,6 +7,7 @@ The ROMC implementation provides two functions for evaluating the inference resu
                             bounds=None,
                             step=0.1,
                             distance="Jensen-Shannon")
+>>> romc.compute_ess()
 ----------------------------------------------------------------------------
 \end{Code}
 
@@ -23,17 +25,9 @@ this function can provide a numerical measure of the agreement between
 the two approximations. The argument \code{step} defines the step used
 in the Riemann's approximation and the argument \code{distance} can
 take either the \code{Jensen-Shannon} or the \code{KL-divergence}
-value, for computing the appropriate distance.
-
-\begin{Code}
----------------------------------- python ----------------------------------  
->>> romc.compute_ess()
-----------------------------------------------------------------------------
-\end{Code}
-
-\noindent
-This function computes the Effective Sample Size (ESS) using the
-following expression~\cite{Sudman1967},
+value, for computing the appropriate distance. \code{compute_ess}
+computes the Effective Sample Size (ESS) using the following
+expression~\cite{Sudman1967},
 
 \begin{equation} \label{eq:ESS}
   ESS = \frac{(\sum_i w_i)^2}{\sum_i w_i^2}
@@ -46,10 +40,9 @@ rest have small (i.e.\ $\approx 1$), the actual sample size is close
 to 1; one sample dominates over the rest. Hence, the ESS provides a
 measure of the equivalent uniformly weighted sample population.
 
-
-
 \begin{Code}
 ------------------------------ python snippet ------------------------------  
+  # Evaluation part
   res = romc.compute_divergence(wrapper, distance="Jensen-Shannon")                                 
   print("Jensen-Shannon divergence: %.3f" % res)
   # Jensen-Shannon divergence: 0.025

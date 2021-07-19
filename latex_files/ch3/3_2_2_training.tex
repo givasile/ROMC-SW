@@ -9,7 +9,6 @@ The training part contains six methods.
 ----------------------------------------------------------------------------                    
 \end{Code}
 
-
 \noindent
 This method (a) draws the nuisance variables, (b) defines the
 optimisation problems and (c) solves them using either a
@@ -72,62 +71,24 @@ $\hat{d}(\thetab)$) along the search directions given by $\hess_i$.
 
 \begin{Code}
 ---------------------------------- python ----------------------------------
->>> romc.fit_posterior(n1,
-                       eps_filter,
-                       use_bo=False,
-                       optimizer_args=None,
-                       seed=None,
-                       use_surrogate=None,
-                       region_args=None,
-                       fit_models=False,
-                       fit_models_args=None,
-                       eps_region=None,
-                       eps_cutoff=None)
+>>> romc.fit_posterior(args*)  # training in a single call
+>>> romc.visualize_region(i)   # acceptance region
+>>> romc.compute_eps(quantile) # estimates ε
 ----------------------------------------------------------------------------
 \end{Code}
 
 \noindent
 The function \code{fit_posterior} is a syntactic sugar for applying
-\code{solve_problems} and \code{estimate_regions} into a single
-step. 
-
-% merges all steps for constructing the bounding box into
-% a single command. If the user doesn't want to manually inspect the
-% histogram of the distances before deciding where to set the threshold
-% $\epsilon$, he may call \code{romc.fit_posterior()} and the whole
-% training part will be done end-to-end. There are two alternatives for
-% setting the threshold $\epsilon$; the first is to set to a specific
-% value blindly, and the second is to set at as a specific quantile of
-% the histogram of distances. In the second scenario the
-% \code{quantile} argument must be set to a floating number in the
-% range $[0,1]$ and \code{eps='auto'}.
-
-
-\begin{Code}
----------------------------------- python ----------------------------------
->>> romc.visualize_region(i)
-----------------------------------------------------------------------------
-\end{Code}
-
-\noindent
-
-It can be used for plotting the bounding box around the optimal point,
-when the parameter space is $1D$ or $2D$. The argument \code{i} is the
-index of the corresponding optimization problem i.e.\ $i<n_1$.
-
-\begin{Code}
----------------------------------- python ----------------------------------  
->>> romc.compute_eps(quantile)
-----------------------------------------------------------------------------
-\end{Code}
-
-\noindent
-This function return the appropriate distance value $d_{i=\kappa}^*$
-where $\kappa = \lfloor \frac{quantile}{n} \rfloor$ from the
-collection $\{ d_i^* \} \forall i = \{1, \ldots, n\}$ where $n$ is the
-number of accepted solutions. It can be used to automate the selection
-of the threshold $\epsilon$, e.g.\
-\code{eps=romc.compute_eps(quantile=0.9)}.
+\code{solve_problems} and \\ \code{estimate_regions} into a single
+step. The function \code{visualize_region} can be used for plotting
+the bounding box around the optimal point, when the parameter space is
+$1D$ or $2D$. The argument \code{i} is the index of the corresponding
+optimization problem i.e.\ $i<n_1$. \code{compute_eps} returns the
+appropriate distance value $d_{i=\kappa}^*$ where
+$\kappa = \lfloor \frac{quantile}{n} \rfloor$ from the collection
+$\{ d_i^* \} \forall i = \{1, \ldots, n\}$ where $n$ is the number of
+accepted solutions. It can be used to automate the selection of the
+threshold $\epsilon$, e.g.\ \code{eps=romc.compute_eps(quantile=0.9)}.
 
 
 \subsubsection*{Example}
@@ -137,7 +98,8 @@ In the following snippet, we put together the routines described above
 to perform the training part at our running example.
 
 \begin{Code}
------------------------------- python snippet ------------------------------  
+------------------------------ python snippet ------------------------------
+  # Trainining (fitting) part
   n1 = 500 # number of optimisation problems
   seed = 21 # seed for solving the optimisation problems
   eps = .75 
@@ -162,12 +124,26 @@ distribution of the distances obtained and the acceptance area of the
 first optimisation problem. We observe that most optimal points
 produce almost zero distance.
 
+% \begin{figure}[h]
+%   \begin{center}
+%     \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter3/example_theta_dist.png}
+%     \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter3/example_region_samples.png}
+%     \end{center}
+%     \caption[Histogram of distances at the 1D example.]{Histogram of
+%       distances and visualisation of a specific region.}
+%     \label{fig:example_training_hist}
+% \end{figure}
+
+
 \begin{figure}[h]
   \begin{center}
-    \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter3/example_theta_dist.png}
-    \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter3/example_region.png}
+    \includegraphics[width=0.32\textwidth]{./latex_files/images/chapter3/example_theta_dist.png}
+    \includegraphics[width=0.32\textwidth]{./latex_files/images/chapter3/example_region_samples.png}
+    \includegraphics[width=0.32\textwidth]{./latex_files/images/chapter3/example_posterior.png}
+
     \end{center}
     \caption[Histogram of distances at the 1D example.]{Histogram of
       distances and visualisation of a specific region.}
     \label{fig:example_training_hist}
 \end{figure}
+
