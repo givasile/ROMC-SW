@@ -12,10 +12,10 @@ import elfi
 import matplotlib
 matplotlib.rcParams['text.usetex'] = True
 
-prepath = '/home/givasile/ORwDS/edinburgh-thesis/Thesis/tmp_images'
+prepath = './../images/'
+savefig = True
+
 np.random.seed(21)
-
-
 class Prior:
     def rvs(self, size=None, random_state=None):
         # size from (BS,) -> (BS,1)
@@ -172,8 +172,9 @@ y = np.squeeze(np.array([gt_posterior_pdf(th) for th in theta]))
 plt.plot(theta, y, 'r-.', label=r'Posterior: $p(\theta|y_0)$')
 
 plt.legend()
-plt.savefig(os.path.join(
-    prepath, "chapter3/example_gt.png"), bbox_inches='tight')
+if savefig:
+    plt.savefig(os.path.join(
+        prepath, "chapter3/example_gt.png"), bbox_inches='tight')
 plt.show(block=False)
 
 
@@ -199,22 +200,33 @@ dim = data.shape[-1]
 romc = elfi.ROMC(dist, bounds)
 
 ############# TRAINING ###################
-n1 = 1000
+n1 = 500
 seed = 21
 romc.solve_problems(n1=n1, seed=seed, use_bo=False, optimizer_args=None)
-romc.distance_hist(bins=100,
-                   savefig=os.path.join(prepath, "chapter3/example_theta_dist.png"))
-eps = 1.
+if savefig:
+    romc.distance_hist(bins=100,
+                       savefig=os.path.join(prepath, "chapter3/example_theta_dist.png"))
+else:
+    romc.distance_hist(bins=100)
+    
+eps = .75
 romc.estimate_regions(eps_filter=eps, use_surrogate=False,
-                      region_args=None, fit_models=True)
-romc.visualize_region(0,
-                      savefig=os.path.join(prepath, "chapter3/example_region.png"))
+                      region_args=None, fit_models=False)
+if savefig:
+    romc.visualize_region(0,
+                         savefig=os.path.join(prepath, "chapter3/example_region.png"))
+else:
+    romc.visualize_region(0)
 
+    
 ############# INFERENCE ##################
 n2 = 50
 tmp = romc.sample(n2=n2)
-romc.visualize_region(i=0, savefig=os.path.join(
-    prepath, "chapter3/example_region_samples.png"))
+if savefig:
+    romc.visualize_region(i=0, savefig=os.path.join(
+        prepath, "chapter3/example_region_samples.png"))
+else:
+    romc.visualize_region(i=0)
 
 romc.result.summary()
 
@@ -237,8 +249,9 @@ plt.plot(theta, y, 'r-.', label="True Posterior")
 plt.xlabel(r'$\theta$')
 plt.ylabel(r'density')
 plt.ylim([0, .6])
-plt.savefig(os.path.join(
-    prepath, "chapter3/example_marginal.png"), bbox_inches='tight')
+if savefig:
+    plt.savefig(os.path.join(
+        prepath, "chapter3/example_marginal.png"), bbox_inches='tight')
 plt.show(block=False)
 
 
@@ -276,8 +289,9 @@ plt.plot(theta, y, 'r-.', label="True Posterior")
 
 
 plt.legend()
-plt.savefig(os.path.join(
-    prepath, "chapter3/example_posterior.png"), bbox_inches='tight')
+if savefig:
+    plt.savefig(os.path.join(
+        prepath, "chapter3/example_posterior.png"), bbox_inches='tight')
 plt.show(block=False)
 
 

@@ -13,7 +13,8 @@ import matplotlib
 matplotlib.rcParams['text.usetex'] = True
 
 np.random.seed(21)
-
+prepath = './../images/chapter4' 
+savefig = True
 
 class Prior:
     def rvs(self, size=None, random_state=None):
@@ -206,7 +207,7 @@ bounds = [(-2.5, 2.5), (-2.5, 2.5)]
 # LINEAR
 seed = 21
 eps = 1
-n1 = np.linspace(1, 501, 10)
+n1 = np.linspace(1, 501, 5)
 solve_grad = []
 estimate_regions = []
 sample = []
@@ -266,52 +267,53 @@ for i, n in enumerate(n1):
     eval_post_parallel.append(toc-tic)
 
 
-prepath = '/home/givasile/ORwDS/edinburgh-thesis/Thesis/tmp_images/chapter4'
-
-
 plt.figure()
-plt.title("Solve optimisation problems: sequential vs parallel")
+plt.title("Optimization problems: Sequential vs Parallel Execution")
 plt.plot(n1, solve_grad, "bo--", label="linear")
-plt.plot(n1, solve_grad_parallel, "ro--", label="parallel")
+plt.plot(n1, solve_grad_parallel, "go--", label="parallel")
 plt.xlabel(r"$n_1$")
 plt.ylabel("time (sec)")
 plt.legend()
-plt.savefig(os.path.join(prepath, "solve_problems_parallel"),
-            bbox_inches="tight")
+if savefig:
+    plt.savefig(os.path.join(prepath, "solve_problems_parallel"),
+                bbox_inches="tight")
 plt.show(block=False)
 
 
 plt.figure()
-plt.title("Construct bounding boxes: sequential vs parallel")
+plt.title("Acceptance Regions: Sequential vs Parallel Execution")
 plt.plot(n1, estimate_regions, "bo--", label="linear")
-plt.plot(n1, estimate_regions_parallel, "ro--", label="parallel")
+plt.plot(n1, estimate_regions_parallel, "go--", label="parallel")
 plt.xlabel(r"$n_1$")
 plt.ylabel("time (sec)")
 plt.legend()
-plt.savefig(os.path.join(prepath, "estimate_regions_parallel"),
-            bbox_inches="tight")
+if savefig:
+    plt.savefig(os.path.join(prepath, "estimate_regions_parallel"),
+                bbox_inches="tight")
 plt.show(block=False)
 
 
 plt.figure()
-plt.title("Sampling: sequential vs parallel")
+plt.title("Sampling: Sequential vs Parallel execution")
 plt.plot(n1, sample, "bo--", label="linear")
-plt.plot(n1, sample_parallel, "ro--", label="parallel")
+plt.plot(n1, sample_parallel, "go--", label="parallel")
 plt.xlabel(r"$n_1$")
 plt.ylabel("time (sec)")
 plt.legend()
-plt.savefig(os.path.join(prepath, "sample_parallel"),
-            bbox_inches="tight")
+if savefig:
+    plt.savefig(os.path.join(prepath, "sample_parallel"),
+                bbox_inches="tight")
 plt.show(block=False)
 
 
 plt.figure()
-plt.title("Evaluate the approximate posterior: sequential vs parallel")
+plt.title("Posterior Evaluation: Sequential vs Parallel execution")
 plt.plot(n1, eval_post, "bo--", label="linear")
-plt.plot(n1, eval_post_parallel, "ro--", label="parallel")
+plt.plot(n1, eval_post_parallel, "go--", label="parallel")
 plt.xlabel(r"$n_1$")
 plt.ylabel("time (sec)")
 plt.legend()
-plt.savefig(os.path.join(prepath, "eval_post_parallel"),
-            bbox_inches="tight")
+if savefig:
+    plt.savefig(os.path.join(prepath, "eval_post_parallel"),
+                bbox_inches="tight")
 plt.show(block=False)
