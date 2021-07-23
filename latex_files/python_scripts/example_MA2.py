@@ -6,6 +6,7 @@ import numpy as np
 import scipy.stats
 import matplotlib
 import os
+import tikzplotlib as tplt
 matplotlib.rcParams['text.usetex'] = True
 
 logging.basicConfig(level=logging.INFO)
@@ -31,8 +32,9 @@ def plot_marginal(samples, weights, mean, std, title, xlabel, ylabel, bins, rang
     plt.legend()
     if savepath:
         plt.savefig(savepath, bbox_inches='tight')
+        # tplt.clean_figure()
+        tplt.save(savepath[:-3] + "tex")
     plt.show(block=False)
-
 
 # Set seed for reproducibility
 seed = 1
@@ -50,6 +52,8 @@ plt.plot(x["t1"], x["t2"], "bo")
 if savefig:
     plt.savefig(os.path.join(prepath, "mae2_prior_samples.png"),
                 bbox_inches="tight")
+    tplt.clean_figure()
+    tplt.save(os.path.join(prepath, "ma2_prior_samples.tex"))
 plt.show(block=False)
 
 ####### ROMC with gradients ################
@@ -155,6 +159,7 @@ def plot_romc_posterior(title, posterior, nof_points, savefig):
     plt.colorbar()
     if savefig:
         plt.savefig(savefig, bbox_inches='tight')
+        tplt.save(savefig[:-3] + "tex")
     plt.show(block=False)
 
     

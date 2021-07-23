@@ -3,6 +3,51 @@ may think of the algorithmic description as the backbone of the
 implementation that will follow. At a high-level, ROMC can be split
 into the training and the inference part.
 
+% \begin{algorithm}[!ht]
+% 	\caption{Computation of the proposal distribution $q_i$; Needs, a model of distance $d$, optimal point $\thetab_i^*$, number of refinements $K$, step size $\eta$ and curvature matrix $\hessian_i$ ($\jac_i^T\jac_i $ or GP Hessian)}\label{alg:region_construction}
+% 	\begin{algorithmic}[1]
+% 	\State Compute eigenvectors $\vb_{d}$ of $\hess_i$ {\scriptsize ($d = 1,\ldots,||\thetab ||)$}
+% 	\For{$d \gets 1 \textrm{ to } ||\thetab||$}
+% 		\State $\Tilde{\thetab} \gets \thetab_i^*$ \label{algstep:box_constr_start}
+% 		\State $k \gets 0$
+% 		\Repeat
+%         	\Repeat
+%                 \State $\Tilde{\thetab} \gets \Tilde{\thetab} + \eta \ \vb_{d}$ \Comment{Large step size $\eta$.}
+%         	\Until{$d(f_i(\Tilde{\thetab}), \data) > \epsilon$}
+%         	\State $\Tilde{\thetab} \gets \Tilde{\thetab} - \eta \ \vb_{d}$
+%         	\State $\eta \gets \eta/2$ \Comment{More accurate region boundary}
+%         	\State $k \gets k + 1$
+%     	\Until $k = K$
+%     	\State Set final $\Tilde{\thetab}$ as region end point. \label{algstep:box_constr_end}
+%     	\State Repeat steps~\ref{algstep:box_constr_start}~-~\ref{algstep:box_constr_end} for $\mathbf{v}_{d} = - \mathbf{v}_{d}$
+% 	\EndFor
+% 	\State Fit a rectangular box around the region end points and define $q_i$ as uniform distribution
+% 	\end{algorithmic}
+% \end{algorithm}
+
+
+\begin{algorithm}[!ht]
+	\caption{ROMC}\label{alg:romc_algorithm}
+	\begin{algorithmic}[1]
+    \Procedure{ROMC}{$M_r(\thetab)$}
+    \For{$i \gets 1 \textrm{ to } n_1$}
+      \State $d_i(\thetab) = M_d(\thetab, \vb=\vb_i)$ \Comment{Define deterministic distance function}
+      \State Obtain $\thetab_i^*, d_i^*$ \Comment{Solve optimization problem}
+    \EndFor
+    \State $\text{L} \gets \{d_{i, i = 1, ..., n_1}: d_i^* < \epsilon \} $ \Comment{List with filtered solutions}
+    \For{$i \gets 1 \textrm{ to } len(L)$}
+      \State Construct $q_i$ \Comment{Compute proposal area}
+      \State Compute $\Tilde{d}_i$ \Comment{Fit surrogate model in $q_i$}
+    \EndFor
+    \\\hrulefill
+    \State Define $p_{d,\epsilon}(\thetab|\data)$ \Comment{Define the approximate (unnormalized) posterior}
+    \State Draw $\{w_{ij}, \thetab_{ij}\}$ \Comment{Draw $n_2$ samples per $q_i$}
+    \EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+
+
 \subsubsection*{Training part}
 \noindent
 At the training (fitting) part, the goal is the estimation of the

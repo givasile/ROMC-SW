@@ -1,20 +1,32 @@
 \documentclass[article]{jss}
 %% -- LaTeX packages and custom commands ---------------------------------------
 
-
 %% recommended packages
 \usepackage{thumbpdf,lmodern}
 
 %% Vasilis packages
 \usepackage{amsmath,amssymb,bbold, xfrac}
-% \usepackage{xcolor}
+
 \usepackage{multirow}
 \usepackage{caption}
+\usepackage{subcaption} % for subfigure
 \usepackage{float}
 
-%% maybe they should be replaced by the journals packages in the end
-\usepackage{algorithm} 
-\usepackage[noend]{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, backgrounds, scopes}
+\usepackage{pgfplots}
+\pgfplotsset{width=7cm} % ,compat=1.9}
+
+\usepackage[utf8]{inputenc}
+\DeclareUnicodeCharacter{2212}{−}
+\usepgfplotslibrary{groupplots,dateplot}
+\usetikzlibrary{patterns,shapes.arrows}
+\pgfplotsset{compat=newest}
+
+%% for algorithms
+\usepackage{algorithm}
+% \usepackage{algorithmic}
+\usepackage{algpseudocode} % algorithmicx package
 
 %% another package (only for this demo article)
 \usepackage{framed}
@@ -32,10 +44,10 @@
 \newcommand{\hess}{\mathbf{H}}
 \newcommand{\Thetab}{\mathbf{\Theta}}
 
-
 \newcommand{\vb}{\mathbf{v}}
 \newcommand{\yb}{\mathbf{y}}
 \newcommand{\xb}{\mathbf{x}}
+
 
 \newcommand{\jac}{\mathbf{J}}
 \newcommand{\hessian}{\mathbf{H}}
@@ -207,7 +219,7 @@
 \section{Background}
 \input{latex_files/ch2/2_1_LFI_intro.tex}
 
-\subsection{Background of Likehood-free inference methods}
+\subsection{Description of Likehood-free inference methods}
 \input{latex_files/ch2/2_2_LFI_background.tex}
 
 \subsection{Optimisation Monte Carlo (OMC)}
@@ -216,11 +228,30 @@
 \subsection{Robust optimisation Monte Carlo (ROMC)}
 \input{latex_files/ch2/2_4_ROMC.tex}
 
+\subsection{Engine for likelihood-free inference (ELFI)}
+\label{subsec:ELFI}
+\input{latex_files/ch3/3_1_ELFI.tex}
+
+%% -- Design Principles -----------------------------------------------------
+\section{Design principles}  % better title needed
+
+For developing an extenbable implementation of ROMC, we initially
+translate ROMC's mathematic description to an algorithmic one. The
+pure algorithmic view serves as the driver for designing the actual
+implementation at \pkg{ELFI}.
+
+\input{latex_files/graphs/romc_graph}
+
 \subsection{Algorithmic view of ROMC} % better titl
 \input{latex_files/ch2/2_5_ROMC_algorithmic.tex}
 
+\subsection{General implementation principles}
+\label{subsec:general_design}
+\input{latex_files/ch3/3_2_1_general_design}
 
-\section{ROMC module in ELFI}  % better title needed
+%% -- ROMC implementation ----------------------------------------------------
+\section{Implemented functionalities}
+
 In this section, we present our implementation. At~\ref{subsec:ELFI}
 we introduce the reader to the \proglang{Python} package \pkg{Engine
   for likelihood-free inference (ELFI)}
@@ -231,16 +262,6 @@ at~\ref{subsec:inference} the inference part and
 at~\ref{subsec:evaluation} the evaluation part. Finally,
 at~\ref{subsec:extensibility} we describe how a user may extend ROMC
 with its custom modules.
-
-
-\subsection{Engine for likelihood-free inference (ELFI)}
-\label{subsec:ELFI}
-\input{latex_files/ch3/3_1_ELFI.tex}
-
-
-\subsection{Design principles} 
-\label{subsec:general_design}
-\input{latex_files/ch3/3_2_1_general_design}
 
 \subsection{Training part} 
 \label{subsec:training}
@@ -258,12 +279,14 @@ with its custom modules.
 \label{subsec:extensibility}
 \input{latex_files/ch3/3_3_extensibility.tex}
 
+%% -- Use-case illustration ----------------------------------------------------
 \section{Use-case illustration}
 \subsection{Moving average example}
 \input{latex_files/ch4/4_2_ma2.tex}
 
 \subsection{Execution time}
 \input{latex_files/ch4/4_3_exec.tex}
+
 
 %% -- Summary/conclusions/discussion -------------------------------------------
 \section{Summary and discussion} \label{sec:summary}

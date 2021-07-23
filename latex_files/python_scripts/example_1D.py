@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import timeit
 import numpy as np
 import elfi
-
+import tikzplotlib as tplt
 import matplotlib
 matplotlib.rcParams['text.usetex'] = True
 
@@ -175,6 +175,8 @@ plt.legend()
 if savefig:
     plt.savefig(os.path.join(
         prepath, "chapter3/example_gt.png"), bbox_inches='tight')
+    tplt.clean_figure()
+    tplt.save(os.path.join(prepath, "chapter3/example_gt.tex"))
 plt.show(block=False)
 
 
@@ -252,6 +254,8 @@ plt.ylim([0, .6])
 if savefig:
     plt.savefig(os.path.join(
         prepath, "chapter3/example_marginal.png"), bbox_inches='tight')
+    tplt.clean_figure()
+    tplt.save(os.path.join(prepath, "chapter3/example_marginal.tex"))
 plt.show(block=False)
 
 
@@ -292,6 +296,8 @@ plt.legend()
 if savefig:
     plt.savefig(os.path.join(
         prepath, "chapter3/example_posterior.png"), bbox_inches='tight')
+    tplt.clean_figure()
+    tplt.save(os.path.join(prepath, "chapter3/example_post.tex"))
 plt.show(block=False)
 
 
