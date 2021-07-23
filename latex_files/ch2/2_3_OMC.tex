@@ -1,5 +1,5 @@
-Before we define the likelihood approximation as introduced in the
-OMC, approach lets define the indicator function based on
+For describing the likelihood approximation introduced in OMC, it is
+convenient to firstly define the indicator function based on
 $\region(\yb)$. The indicator function $\indicator{\region(\yb)}(\xb)$
 returns 1 if $\xb \in \region(\yb)$ and 0 otherwise. If
 $d(\cdot,\cdot)$ is a formal distance, due to symmetry
@@ -14,9 +14,8 @@ the expressions can be used interchangeably.
     \end{array} \right. \end{gather}
 
 \noindent
-Based on equation~\eqref{eq:approx_posterior} and the indicator
-function as defined above~\eqref{eq:indicator}, we can approximate the
-likelihood as:
+Based on equation~\eqref{eq:approx_likelihood} and the indicator
+function~\eqref{eq:indicator}, we can approximate the likelihood as:
 
 \begin{gather} \label{eq:approx_likelihood_omc}
   L_{d, \epsilon}(\thetab) =
@@ -28,17 +27,17 @@ likelihood as:
   \text{ where } \yb_i = M_d(\thetab, \vb_i), \vb_i \sim p(\vb) \label{eq:alt_view}
 \end{gather}
 %
-This approach is quite intuitive; approximating the likelihood of a
+The procedure is quite intuitive; approximating the likelihood of a
 specific $\thetab$ requires sampling from the data generator and count
 the fraction of samples that lie inside the area around the
 observations. Nevertheless, by using the approximation of equation
 \eqref{eq:init_view} we need to draw $N$ new samples for each distinct
 evaluation of $L_{d,\epsilon}(\thetab)$; this makes this approach
 quite inconvenient from a computational point-of-view. For this
-reason, we choose to approximate the integral as in equation
-\eqref{eq:alt_view}; the nuisance variables are sampled once
-$\vb_i \sim p(\vb)$ and we count the fraction of samples that lie
-inside the area using the deterministic simulators
+reason, OMC approximates the integral as in equation
+\eqref{eq:alt_view}; the nuisance variables, $\vb_i \sim p(\vb)$, are
+sampled once and we count the fraction of samples that lie inside the
+area using the deterministic simulators
 $M_d(\thetab, \vb_i) \: \forall i$. Hence, the evaluation
 $L_{d,\epsilon}(\thetab)$ for each different $\thetab$ does not imply
 drawing new samples all over again. Based on this approach, the
@@ -51,26 +50,22 @@ unnormalised approximate posterior can be defined as:
 
 \subsubsection*{Further approximations for sampling and computing expectations}
 
-The posterior approximation in \eqref{eq:approx_posterior_omc} does not
-provide any obvious way for drawing samples. In fact, the set
-$\mathcal{S}_i = \{ \thetab: M_d(\thetab, \vb_i) \in \region(\data) \}$ can
-represent any arbitrary shape in the D-dimensional Euclidean space; it
-can be non-convex, can contain disjoint sets of $\thetab$ etc. We need
-some further simplification of the posterior for being able to draw
-samples from it.
+The posterior approximation in \eqref{eq:approx_posterior_omc} does
+not provide any convenient way for drawing samples.\footnote{Weighted
+  sampling could be performed in a straightforward fashion with
+  importance sampling, using the prior as the proposal distribution
+  $\thetab_i \sim p(\thetab)$. However, this approach has the same
+  drawbacks as ABC rejection sampling; when the prior is wide or the
+  dimensionality $D$ is high, drawing a sample with non-zero weight is
+  rare, leading to either poor Effective Sample Size (ESS) or huge
+  execution time.} In fact, the set
+$\mathcal{S}_i = \{ \thetab: M_d(\thetab, \vb_i) \in \region(\data)
+\}$ can represent any arbitrary shape in the D-dimensional Euclidean
+space; it can be non-convex, can contain disjoint sets of $\thetab$
+etc. We need some further simplification of the posterior for being
+able to draw samples from it.
 
-As a side-note, weighted sampling could be performed in a
-straightforward fashion with importance sampling. Using the prior as
-the proposal distribution $\thetab_i \sim p(\thetab)$ and we can
-compute the weight as
-$w_i = \frac{L_{d,\epsilon}(\thetab_i)}{p(\thetab_i)}$, where
-$L_{d,\epsilon}(\thetab_i)$ is computed with the expression
-\eqref{eq:approx_likelihood_omc}. This approach has the same drawbacks as
-ABC rejection sampling; when the prior is wide or the dimensionality
-$D$ is high, drawing a sample with non-zero weight is rare, leading to
-either poor Effective Sample Size (ESS) or huge execution time.
-
-The OMC proposes a quite drastic simplification of the posterior; it
+OMC proposes a quite drastic simplification of the posterior; it
 squeezes all regions $\mathcal{S}_i$ into a single point
 $\thetab_i^* \in \mathcal{S}_i$ attaching a weight $w_i$ proportional
 to the volume of $\mathcal{S}_i$. For obtaining a

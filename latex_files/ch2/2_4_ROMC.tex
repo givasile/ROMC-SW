@@ -18,7 +18,7 @@ computational point-of-view, they suffer from some drawbacks:
 ROMC resolves the failure-modes of OMC mainly by approaching the
 acceptance regions $\mathcal{S}_i$ in a more sophisticated
 way. Instead of collapsing the acceptance regions into single points,
-we approximate them with a bounding box region. A uniform distribution
+it approximates them with a bounding box region. A uniform distribution
 defined on the bounding box area, is then used as the \emph{proposal
   distribution} for importance sampling. If $q_i$ is the uniform
 distribution defined on the $i-th$ bounding box, weighted sampling is
@@ -39,9 +39,6 @@ as,
 \begin{equation} \label{eq:expectation}
   E_{p(\thetab|\data)}[h(\thetab)] \approx \frac{\sum_{ij} w_{ij} h(\thetab_{ij})}{\sum_{ij} w_{ij}}
 \end{equation}
-
-
-\subsubsection{Proposal region estimation}
 
 
 The constrution of the proposal regions $q_i$ is performed in two

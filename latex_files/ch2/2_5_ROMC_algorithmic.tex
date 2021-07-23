@@ -1,30 +1,13 @@
-Here we present ROMC as a sequence of algorithmic steps. The reader
-may think of the algorithmic description as the backbone of the
-implementation that will follow. At a high-level, ROMC can be split
-into the training and the inference part.
-
-% \begin{algorithm}[!ht]
-% 	\caption{Computation of the proposal distribution $q_i$; Needs, a model of distance $d$, optimal point $\thetab_i^*$, number of refinements $K$, step size $\eta$ and curvature matrix $\hessian_i$ ($\jac_i^T\jac_i $ or GP Hessian)}\label{alg:region_construction}
-% 	\begin{algorithmic}[1]
-% 	\State Compute eigenvectors $\vb_{d}$ of $\hess_i$ {\scriptsize ($d = 1,\ldots,||\thetab ||)$}
-% 	\For{$d \gets 1 \textrm{ to } ||\thetab||$}
-% 		\State $\Tilde{\thetab} \gets \thetab_i^*$ \label{algstep:box_constr_start}
-% 		\State $k \gets 0$
-% 		\Repeat
-%         	\Repeat
-%                 \State $\Tilde{\thetab} \gets \Tilde{\thetab} + \eta \ \vb_{d}$ \Comment{Large step size $\eta$.}
-%         	\Until{$d(f_i(\Tilde{\thetab}), \data) > \epsilon$}
-%         	\State $\Tilde{\thetab} \gets \Tilde{\thetab} - \eta \ \vb_{d}$
-%         	\State $\eta \gets \eta/2$ \Comment{More accurate region boundary}
-%         	\State $k \gets k + 1$
-%     	\Until $k = K$
-%     	\State Set final $\Tilde{\thetab}$ as region end point. \label{algstep:box_constr_end}
-%     	\State Repeat steps~\ref{algstep:box_constr_start}~-~\ref{algstep:box_constr_end} for $\mathbf{v}_{d} = - \mathbf{v}_{d}$
-% 	\EndFor
-% 	\State Fit a rectangular box around the region end points and define $q_i$ as uniform distribution
-% 	\end{algorithmic}
-% \end{algorithm}
-
+For designing an extendable implementation of ROMC, we firstly define
+ROMC as a sequence of algorithmic steps. The algorithmic view of ROMC
+serves as the driver for the implementation at \pkg{ELFI} that
+follows. At a high level, ROMC can be split into the training and the
+inference part. In general terms, the training part covers all the
+appropriate steps for estimating the proposal regions and the
+inference part for getting weighted
+samples. Algorithm~\ref{alg:romc_algorithm} defines formally ROMC;
+Steps 2-10 (before the vertical line) form the training part, while
+steps 12 and 13 the inference part.
 
 \begin{algorithm}[!ht]
 	\caption{ROMC}\label{alg:romc_algorithm}
@@ -38,43 +21,45 @@ into the training and the inference part.
     \For{$i \gets 1 \textrm{ to } len(L)$}
       \State Construct $q_i$ \Comment{Compute proposal area}
       \State Compute $\Tilde{d}_i$ \Comment{Fit surrogate model in $q_i$}
-    \EndFor
+      \EndFor
     \\\hrulefill
-    \State Define $p_{d,\epsilon}(\thetab|\data)$ \Comment{Define the approximate (unnormalized) posterior}
     \State Draw $\{w_{ij}, \thetab_{ij}\}$ \Comment{Draw $n_2$ samples per $q_i$}
+    \State Draw $p_{d,\epsilon}(\thetab)$ \Comment{Evaluate the unnormalized posterior}    
     \EndProcedure
 	\end{algorithmic}
 \end{algorithm}
 
-
-
 \subsubsection*{Training part}
 \noindent
 At the training (fitting) part, the goal is the estimation of the
-proposal regions $q_i$. The tasks are (a) sampling the nuisance
-variables $\vb_i \sim p(\vb)$ (b) defining the optimisation problems
-$\min_{\thetab} \: g_i(\thetab)$ (c) obtaining $\thetab_i^*$ (d)
-checking whether $d_i^* \leq \epsilon$ and (e) building the bounding
-box for obtaining the proposal region $q_i$. If gradients are
-available, using a gradient-based method is advised for obtaining
-$\thetab_i^*$ much faster. Providing $\nabla_{\thetab} g_i$ in
-closed-form provides an upgrade in both accuracy and efficiency; If
-closed-form description is not available, approximate gradients with
-finite-differences requires two evaluations of $g_i$ for \emph{every}
-parameter $\theta_d$, which can only work in low-dimensional
-problems. When gradients are not available, the Bayesian optimisation
-paradigm exists as an alternative solution. In this scenario, the
-training part becomes slower due to fitting of the surrogate model and
-the blind optimisation steps. Nevertheless, the subsequent task of
-computing the proposal region $q_i$ becomes faster since $\hat{d}_i$
-can be used instead of $g_i$. The algorithms~\ref{alg:training_GB}
-and~\ref{alg:training_GP} present the above procedure.
+proposal regions $q_i$. The tasks are; (a) sampling the nuisance
+variables $\vb_i \sim p(\vb)$ for obtaining the deterministic
+functions $g_i(\thetab)$, (b) defining the optimisation problems
+$\min_{\thetab} \: g_i(\thetab)$, (c) obtaining $\thetab_i^*$ and
+$d_i^*$ (d) checking whether $d_i^* \leq \epsilon$ and (e) building
+the bounding box for obtaining the proposal region $q_i$. If gradients
+are available, using a gradient-based method is advised for obtaining
+$\thetab_i^*$ much faster. In case $\nabla_{\thetab} g_i$ is available
+in closed-form, the procedure is upgraded in terms of both accuracy
+and efficiency; If closed-form description is not available, gradients
+approximation with finite-differences requires two evaluations of
+$g_i$ for \emph{each} parameter $\theta_d$, which can only work in
+low-dimensional problems. If $g_i(\thetab)$ is not differentiable, the
+Bayesian Optimisation can be used as an alternative solution. In this
+scenario, the training part becomes slower due to fitting of the
+surrogate model and the blind optimisation
+steps. Algorithm~\ref{alg:training_GB} defines formally the steps of a
+gradient-based optimiser and algorithm~\ref{alg:training_GP} the steps
+of the Bayesian Optimisation. After obtaning the optimal points
+$\thetab^*$, the training part gets completed by estimating the
+proposal regions. Algorithm~\ref{alg:region_construction} describes
+the line search approach for finding the region's boundaries.
 
 \subsubsection*{Inference Part}
 Performing the inference includes one or more of the following three
 tasks; (a) sampling from the posterior
 $ \thetab_i \sim p_{d, \epsilon}(\thetab|\data)$, (b) computing an
-expectation $E_{\thetab|\data}[h(\thetab)]$ and (c) evaluating the
+expectation $E_{\thetab|\data}[h(\thetab)]$ or (c) evaluating the
 unnormalised posterior $p_{d, \epsilon}(\thetab|\data)$. Computing an
 expectation can be done easily after weighted samples are obtained
 using the equation~\ref{eq:expectation}, so we do not discuss it
@@ -84,34 +69,17 @@ separately.
 Sampling is performed by getting $n_2$ samples from each proposal
 distribution $q_i$. For each sample $\thetab_{ij}$, the indicator
 function is evaluated $\indicator{\regioni(\data)}(\thetab_{ij})$ for
-checking if it lies inside the acceptance region. If so the
-corresponding weight is computed as in \eqref{eq:sampling}. As before,
-if a surrogate model $\hat{d}$ is available, it can be utilised for
-evaluating the indicator function. At the sampling task, the
-computational benefit of using the surrogate model is more valuable
-compared to the evaluation of the posterior, because the indicator
-function must be evaluated for a total of $n_1 \times n_2$ points.
+checking if it lies inside the acceptance region. If this is the case,
+the corresponding weight is computed as in \eqref{eq:sampling}. As
+before, if a surrogate model $\hat{d}$ is available, it can be
+utilised for evaluating the indicator function.
 
 \noindent
-Evaluating the unnormalised posterior requires only the
-deterministic functions $g_i$ and the prior distribution $p(\thetab)$;
-there is no need for solving the optimisation problems and building
-the proposal regions. The evaluation requires iterating over all $g_i$
-and evaluating the distance from the observed data. In contrast, using
-the GP approach, the optimisation part should be performed first for
-fitting the surrogate models $\hat{d}_i(\thetab)$ and evaluate the
-indicator function on them. This provides an important speed-up,
-especially when running the simulator is computationally
-expensive.
-
-\noindent
-In summary, we can state that the choice of using a Bayesian
-optimisation approach provides a significant speed-up in the inference
-part with the cost of making the training part slower and a possible
-approximation error. It is typical in many Machine-Learning use cases,
-being able to provide enough time and computational resources for the
-training phase, but asking for efficiency in the inference
-part.
+Evaluating the unnormalised posterior requires the deterministic
+functions $g_i$ and the prior distribution $p(\thetab)$\footnote{There
+  is no need for solving the optimisation problems and building the
+  proposal regions.}. The evaluation requires iterating over all $g_i$
+and evaluating the distance from the observed data.
 
 \begin{minipage}{0.46\textwidth}
 \begin{algorithm}[H]
@@ -173,40 +141,6 @@ part.
 	\end{algorithmic}
 \end{algorithm}
 
-% \begin{minipage}{0.46\textwidth}
-% \begin{algorithm}[H]
-%     \centering
-%     \caption{Evaluate unnormalised posterior - Gradient approach. Requires $g_i(\theta), p(\theta)$}\label{alg:posterior_GB}
-%     \begin{algorithmic}[1]
-%       \State $k \leftarrow 0$
-%         \For {$i \gets 1 \textrm{ to } n_1$}
-%           \If {$g_i(\theta) > \epsilon$}
-%             \State $k \leftarrow k + 1$
-%           \EndIf
-%           \EndFor
-%       \Return{$kp(\theta)$}
-%     \end{algorithmic}
-% \end{algorithm}
-% \end{minipage}
-% \hfill
-% \begin{minipage}{0.46\textwidth}
-% \begin{algorithm}[H]
-%     \centering
-%     \caption{Evaluate unnormalised posterior - GP approach. Requires $\hat{d}_i(\theta), p(\theta)$}\label{alg:posterior_GP}
-%     \begin{algorithmic}[1]
-%       \State $k \leftarrow 0$
-%         \For {$i \gets 1 \textrm{ to } n_1$}
-%           \If {$d_i(\theta) > \epsilon$}
-%             \State $k \leftarrow k + 1$
-%           \EndIf
-%           \EndFor
-%       \Return{$kp(\theta)$}
-%     \end{algorithmic}
-% \end{algorithm}
-% \end{minipage}
-
-
-% \begin{minipage}{0.46\textwidth}
 \begin{algorithm}[H]
     \centering
     \caption{Sampling. Requires a function of distance $(g_i(\theta)$ or $\hat{d}_i$ or $\hat{g}_i), p(\theta), q_i$}\label{alg:sampling_GB}
@@ -224,24 +158,3 @@ part.
       \EndFor
     \end{algorithmic}
 \end{algorithm}
-% \end{minipage}
-% \hfill
-% \begin{minipage}{0.46\textwidth}
-% \begin{algorithm}[H]
-%     \centering
-%     \caption{Sampling - GP approach. Requires $\hat{d}_i(\theta), p(\theta), q_i$}\label{alg:sampling_GP}
-%     \begin{algorithmic}[1]
-%       \For {$i \gets 1 \textrm{ to } n_1$}
-%       \For {$j \gets 1 \textrm{ to } n_2$}
-%           \State $\theta_{ij} \sim q_i$
-%           \If {$\hat{d}_i(\theta_{ij}) > \epsilon$}
-%             \State Reject $\theta_{ij}$
-%           \Else {}
-%             \State $w_{ij} = \frac{p(\theta_{ij})}{q(\theta_{ij})}$
-%             \State Accept $\theta_{ij}$, with weight $w_{ij}$
-%           \EndIf
-%       \EndFor
-%       \EndFor
-%     \end{algorithmic}
-% \end{algorithm}
-% \end{minipage}

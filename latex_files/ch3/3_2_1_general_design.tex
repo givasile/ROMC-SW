@@ -1,16 +1,20 @@
 The overview of our implementation is illustrated in
-figure~\ref{fig:romc_overview}; one may interpret
-figure~\ref{fig:romc_overview} as a depiction of the main class and
+figure~\ref{graph:romc_overview}; one may interpret
+figure~\ref{graph:romc_overview} as a depiction of the main class and
 the ellipses are the main routines of the class. Following
 \proglang{Python}'s naming principles, the methods starting with an
 underscore (green ellipses) represent internal (private) functions,
 whereas the rest (blue ellipses) are the public methods that the user
 interacts with.
 
-Figure~\ref{fig:romc_overview} splits ROMC into the training, the
-inference and the evaluation part. The training part includes all the
-steps until the computation of the proposal regions i.e. sampling the
-nuisance variables, defining the optimization problems, solving them,
+\input{latex_files/graphs/romc_graph}
+
+In figure~\ref{graph:romc_overview}, it can be easily observed that the
+implementation follows consistently the algorithmic description
+described above, which follows the partition into training, inference
+and evaluation. The training part includes all the steps until the
+computation of the proposal regions i.e. sampling the nuisance
+variables, defining the optimization problems, solving them,
 constructing the regions and fitting local surrogate models. The
 inference part comprises of evaluating the unnormalized posterior (and
 the normalized when is possible), sampling and computing an
@@ -27,19 +31,6 @@ available.\footnote{Normally, the ground-truth posterior is not
   posterior can be computed numerically or with an alternative method
   (i.e.\ ABC Rejection Sampling), and we would like to measure the
   discrepancy between the two approximations.}
-
-% \begin{figure}[h]
-%     \begin{center}
-% \includegraphics[width=0.5\textwidth]{./latex_files/graphs/ROMC.png}
-%     \end{center}
-%     \caption[Overview of the ROMC implementation.]{Overview of the
-%       ROMC implementation. The training part follows a sequential
-%       pattern; the functions in the green ellipses must be called in a
-%       sequential fashion for completing the training part and define
-%       the posterior distribution. The functions in blue ellipses are
-%       the functionalities provided to the user.}
-%     \label{fig:romc_overview}
-% \end{figure}
 
 \subsubsection*{Parallelizing ROMC method}
 
@@ -82,16 +73,6 @@ observation $y_0 = 0$. The inference in this particular example can be
 performed quite easily without using a likelihood-free inference
 approach. We can exploit this fact for validating the accuracy of our
 implementation.
-
-% \begin{figure}[!h]
-%     \begin{center}
-% \includegraphics[width=0.7\textwidth]{./latex_files/images/chapter3/example_gt.png}
-%     \end{center}
-%   \caption[Ground-truth posterior distribution of the simple 1D
-% example.]{Ground-truth posterior distribution of the simple 1D
-% example.}
-%   \label{fig:example_gt}
-% \end{figure}
 
 In the following code snippet, we code the model at \pkg{ELFI}.
 

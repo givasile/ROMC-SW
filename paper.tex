@@ -48,7 +48,6 @@
 \newcommand{\yb}{\mathbf{y}}
 \newcommand{\xb}{\mathbf{x}}
 
-
 \newcommand{\jac}{\mathbf{J}}
 \newcommand{\hessian}{\mathbf{H}}
 \newcommand{\thetab}{\boldsymbol{\theta}}
@@ -77,9 +76,9 @@
 %% - \title{} in title case
 %% - \Plaintitle{} without LaTeX markup (if any)
 %% - \Shorttitle{} with LaTeX markup (if any), used as running title
-\title{A Parallelized and Extendable \proglang{Python} Implementation of Robust Optimisation Monte Carlo}
-\Plaintitle{A Parallelized and Extendable Python Implementation of ROMC}
-\Shorttitle{A Parallelized and Extendable \proglang{Python} Implementation of ROMC}
+\title{An Extendable \proglang{Python} Implementation of Robust Optimisation Monte Carlo}
+\Plaintitle{An Extendable Python Implementation of ROMC}
+\Shorttitle{An Extendable \proglang{Python} Implementation of ROMC}
 
 %% - \Abstract{} almost as usual
 \Abstract{
@@ -228,6 +227,7 @@
 \subsection{Robust optimisation Monte Carlo (ROMC)}
 \input{latex_files/ch2/2_4_ROMC.tex}
 
+
 \subsection{Engine for likelihood-free inference (ELFI)}
 \label{subsec:ELFI}
 \input{latex_files/ch3/3_1_ELFI.tex}
@@ -235,14 +235,6 @@
 %% -- Design Principles -----------------------------------------------------
 \section{Design principles}  % better title needed
 
-For developing an extenbable implementation of ROMC, we initially
-translate ROMC's mathematic description to an algorithmic one. The
-pure algorithmic view serves as the driver for designing the actual
-implementation at \pkg{ELFI}.
-
-\input{latex_files/graphs/romc_graph}
-
-\subsection{Algorithmic view of ROMC} % better titl
 \input{latex_files/ch2/2_5_ROMC_algorithmic.tex}
 
 \subsection{General implementation principles}
