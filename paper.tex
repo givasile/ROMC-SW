@@ -1,6 +1,9 @@
 \documentclass[article]{jss}
 %% -- LaTeX packages and custom commands ---------------------------------------
 
+
+\usepackage[usenames,dvipsnames]{xcolor}
+
 %% recommended packages
 \usepackage{thumbpdf,lmodern}
 
@@ -12,20 +15,19 @@
 \usepackage{subcaption} % for subfigure
 \usepackage{float}
 
+%% TikZ packages
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows, backgrounds, scopes}
 \usepackage{pgfplots}
-\pgfplotsset{width=7cm} % ,compat=1.9}
-
+\pgfplotsset{width=6.75cm, compat=newest}
 \usepackage[utf8]{inputenc}
 \DeclareUnicodeCharacter{2212}{−}
 \usepgfplotslibrary{groupplots,dateplot}
 \usetikzlibrary{patterns,shapes.arrows}
-\pgfplotsset{compat=newest}
+
 
 %% for algorithms
 \usepackage{algorithm}
-% \usepackage{algorithmic}
 \usepackage{algpseudocode} % algorithmicx package
 
 %% another package (only for this demo article)

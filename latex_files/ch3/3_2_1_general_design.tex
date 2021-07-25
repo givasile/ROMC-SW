@@ -1,15 +1,17 @@
+\input{latex_files/graphs/romc_graph}
+
 The overview of our implementation is illustrated in
-figure~\ref{graph:romc_overview}; one may interpret
-figure~\ref{graph:romc_overview} as a depiction of the main class and
+figure~\ref{fig:romc_overview}; one may interpret
+figure~\ref{fig:romc_overview} as a depiction of the main class and
 the ellipses are the main routines of the class. Following
 \proglang{Python}'s naming principles, the methods starting with an
 underscore (green ellipses) represent internal (private) functions,
 whereas the rest (blue ellipses) are the public methods that the user
 interacts with.
 
-\input{latex_files/graphs/romc_graph}
 
-In figure~\ref{graph:romc_overview}, it can be easily observed that the
+
+In figure~\ref{fig:romc_overview}, it can be easily observed that the
 implementation follows consistently the algorithmic description
 described above, which follows the partition into training, inference
 and evaluation. The training part includes all the steps until the
@@ -102,5 +104,5 @@ In the following code snippet, we code the model at \pkg{ELFI}.
   bounds = [(-2.5, 2.5)] # limits of the prior
   parallelize = True # activate parallel execution
   romc = elfi.ROMC(d, bounds=bounds, parallelize=parallelize)
-----------------------------------------------------------------------------    
+----------------------------------------------------------------------------
 \end{Code}
