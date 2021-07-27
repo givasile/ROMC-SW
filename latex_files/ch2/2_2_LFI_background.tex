@@ -1,35 +1,61 @@
-In simulator-based models it is infeasible to evaluate the posterior
-$p(\thetab|\data) \propto L(\thetab)p(\thetab)$, due to the
-intractability of the likelihood $L(\thetab) = p(\data|\thetab)$. The
-following equation allows incorporating the simulator in the place of
-the likelihood,
+An implicit or simulator-based model is a parameterised stochastic
+data generating mechanism. The key characteristic
+of these models is that we can sample (simulate) data points,
+but that we cannot evaluate the likelihood of a specific set of observations
+$\data$. Formally, a simulator-based model is described as a
+parameterised family of probability density functions
+$\{ p(\yb|\thetab) \}_{\thetab}$, whose closed-form is either
+unknown or computationally intractable to evaluate. Whereas evaluating
+$p(\yb|\thetab)$ is intractable, sampling is
+feasible. Practically, a simulator can be understood as a black-box
+data generating machine $M_r$\footnote{The subscript $r$ in $M_r$ indicates the
+  \textit{random} simulator. In the next chapters we will introduce
+  $M_d$ witch stands for the \textit{deterministic} simulator.} that
+produces samples $\yb$ in a stochastic manner for any given a set of parameters $\thetab$.% i.e.\ $M_r(\thetab) \rightarrow \yb$.
 
+Simulator-based models provide considerable modelling freedom; any physical process that can be
+conceptualised as a computer program of finite steps can be modelled
+as a simulator-based model without any compromise. The modelling
+freedom allows for any amount of hidden (unobserved) internal variables
+or rule-based decisions. Hence, implicit models are often used to
+model physical phenomena in the natural sciences such as genetics, epidemiology, or neuroscience, to name a few examples.
+The modelling freedom, however, makes parameter inference difficult.
+
+The main difficulty in parameter inference with implicit models is that the likelihood function
+$L(\thetab) = p(\data|\thetab)$ is intractable. The methods that we consider below resort to the basic definition of the likelihood as the (rescaled) probability for a parameter of the model to generate data $\yb$ that is similar to the observed data $\data$. More formally, the likelihood $L(\thetab)$ equals
 \begin{equation} \label{eq:likelihood}
-  L(\thetab) =
-  \lim_{\epsilon \to 0} c_\epsilon \int_{\yb \in B_{d,\epsilon}(\data)} p(\yb|\thetab)d\yb =
-  \lim_{\epsilon \to 0} c_\epsilon \Pr(M_r(\thetab) \in B_{d,\epsilon}(\data))
+  L(\thetab) = \lim_{\epsilon \to 0} c_\epsilon \int_{\yb \in B_{d,\epsilon}(\data)} p(\yb|\thetab)d\yb =
+  \lim_{\epsilon \to 0} c_\epsilon \Pr(M_r(\thetab) \in \region(\data))
 \end{equation}
 %
-where $c_\epsilon$ is a proportionality factor dependend on $\epsilon$
-and $B_{d,\epsilon}(\data)$ is a region around $\data$. Intuitively,
-equation~\ref{eq:likelihood} describes that the likelihood of a
-specific parameter configuration $\thetab$ is equal to the probability
-that the simulator will produce outputs infinitively close to the
-observations $\data$, using this configuration. For continuous cases,
-the probability of perfectly replicating the observed data becomes
-zero. In this scenario a relaxation must be introduced by accepting
-simulated data that fall close to the data i.e. in a region
-$B_{d,\epsilon}(\data)$ around $\data$, where $\epsilon > 0$. The
-region can be defined as
-$\region (\data) := \{\yb: d(\yb, \data) \leq \epsilon \}$ where
-$d(\cdot, \cdot)$ can represent any valid distance. This relaxation
-introduces the approximate likelihood~\eqref{eq:approx_likelihood} and
-the approximate posterior~\eqref{eq:approx_posterior}.
 
+where $c_\epsilon$ is a proportionality factor that depends on
+$\epsilon$ and $\region(\data)$ is an $\epsilon$ region around $\data$ that is defined via a distance function $d$, i.e.\ $\region(\data) := \{\yb: d(\yb, \data) \leq \epsilon \}$. 
+
+
+The basic characterisation of the likelihood in \eqref{eq:likelihood} highlights two sources of intractability: The first is the computation of the probability $\Pr(M_r(\thetab) \in \region(\data))$, the second is the limit of $\epsilon \to 0$.
+Whilst the probability can be approximated with samples, this becomes computationally infeasible if $\epsilon$ is too small. Hence, a large class of inference methods for implicit models work with $\epsilon >0$, which leads to the approximate likelihood function  $L_{d, \epsilon}(\thetab)$,
 \begin{equation} \label{eq:approx_likelihood}
-  L_{d, \epsilon}(\thetab) = Pr(\yb \in \region(\data)), \text{where  } \epsilon > 0
+  L_{d, \epsilon}(\thetab) = \Pr(\yb \in \region(\data)), \quad \text{where  } \epsilon > 0.
+\end{equation}
+Most often in likelihood-free inference, we are interested in the posterior distribution of the parameters $\thetab$ given some observed data. The approximate likelihood function in \eqref{eq:approx_likelihood} implies the approximate posterior  $p_{d,\epsilon}(\thetab|\data)$, 
+\begin{equation} \label{eq:approx_posterior}
+  p_{d,\epsilon}(\thetab|\data) \propto L_{d, \epsilon}(\thetab) p(\thetab).
 \end{equation}
 
-\begin{equation} \label{eq:approx_posterior}
-  p_{d,\epsilon}(\thetab|\data) \propto L_{d, \epsilon}(\thetab) p(\thetab)
-\end{equation}
+% likelihood of a specific parameter configuration $\thetab$ is equal to
+% the probability that the simulator will produce outputs infinitively
+% close to the observations $\data$, using this configuration. For
+% continuous cases, the probability of perfectly replicating the
+% observed data becomes zero. In this scenario a relaxation must be
+% introduced by accepting simulated data that fall close to the data
+% i.e. in a region $B_{d,\epsilon}(\data)$ around $\data$, where
+% $\epsilon > 0$. The region can be defined as
+% $\region (\data) := \{\yb: d(\yb, \data) \leq \epsilon \}$ where
+% $d(\cdot, \cdot)$ can represent any valid distance.
+
+% This relaxation introduces the approximate likelihood,
+
+
+% and the approximate posterior,
+
