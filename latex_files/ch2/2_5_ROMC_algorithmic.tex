@@ -1,13 +1,12 @@
 For designing an extendable implementation of ROMC, we firstly define
 ROMC as a sequence of algorithmic steps. The algorithmic view of ROMC
-serves as the driver for the implementation at \pkg{ELFI} that
-follows. At a high level, ROMC can be split into the training and the
-inference part. In general terms, the training part covers all the
-appropriate steps for estimating the proposal regions and the
-inference part for getting weighted
-samples. Algorithm~\ref{alg:romc_algorithm} defines formally ROMC;
-Steps 2-10 (before the vertical line) form the training part, while
-steps 12 and 13 the inference part.
+serves as the driver for the implementation at \pkg{ELFI}. At a high
+level, ROMC can be split into the training and the inference part. In
+general terms, the training part covers all the appropriate steps for
+estimating the proposal regions and the inference part for getting
+weighted samples. Algorithm~\ref{alg:romc_algorithm} defines formally
+ROMC; Steps 2-10 (before the vertical line) form the training part,
+while steps 12 and 13 the inference part.
 
 \begin{algorithm}[!ht]
 	\caption{ROMC}\label{alg:romc_algorithm}

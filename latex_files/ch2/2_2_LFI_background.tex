@@ -10,28 +10,25 @@ the likelihood,
   \lim_{\epsilon \to 0} c_\epsilon \Pr(M_r(\thetab) \in B_{d,\epsilon}(\data))
 \end{equation}
 %
-where $c_\epsilon$ is a proportionality factor dependend on
-$\epsilon$ and $B_{d,\epsilon}(\data)$ is a region around $\data$.
-
-Intuitively, equation~\ref{eq:likelihood} describes that the
-likelihood of a specific parameter configuration $\thetab$ is equal to
-the probability that the simulator will produce outputs infinitively
-close to the observations $\data$, using this configuration. For
-continuous cases, the probability of perfectly replicating the
-observed data becomes zero. In this scenario a relaxation must be
-introduced by accepting simulated data that fall close to the data
-i.e. in a region $B_{d,\epsilon}(\data)$ around $\data$, where
-$\epsilon > 0$. The region can be defined as
+where $c_\epsilon$ is a proportionality factor dependend on $\epsilon$
+and $B_{d,\epsilon}(\data)$ is a region around $\data$. Intuitively,
+equation~\ref{eq:likelihood} describes that the likelihood of a
+specific parameter configuration $\thetab$ is equal to the probability
+that the simulator will produce outputs infinitively close to the
+observations $\data$, using this configuration. For continuous cases,
+the probability of perfectly replicating the observed data becomes
+zero. In this scenario a relaxation must be introduced by accepting
+simulated data that fall close to the data i.e. in a region
+$B_{d,\epsilon}(\data)$ around $\data$, where $\epsilon > 0$. The
+region can be defined as
 $\region (\data) := \{\yb: d(\yb, \data) \leq \epsilon \}$ where
-$d(\cdot, \cdot)$ can represent any valid distance.
-
-This relaxation introduces the approximate likelihood,
+$d(\cdot, \cdot)$ can represent any valid distance. This relaxation
+introduces the approximate likelihood~\eqref{eq:approx_likelihood} and
+the approximate posterior~\eqref{eq:approx_posterior}.
 
 \begin{equation} \label{eq:approx_likelihood}
   L_{d, \epsilon}(\thetab) = Pr(\yb \in \region(\data)), \text{where  } \epsilon > 0
 \end{equation}
-
-and the approximate posterior,
 
 \begin{equation} \label{eq:approx_posterior}
   p_{d,\epsilon}(\thetab|\data) \propto L_{d, \epsilon}(\thetab) p(\thetab)
