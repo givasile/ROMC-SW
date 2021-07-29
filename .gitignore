@@ -8,6 +8,8 @@
 *.out
 *.pdf
 *.run.xml
+*.bak
+*.sav
 minted_files/
 
 env
