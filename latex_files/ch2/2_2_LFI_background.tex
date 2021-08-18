@@ -6,13 +6,9 @@ $\data$. Formally, a simulator-based model is a parameterised family
 of probability density functions $\{ p(\yb|\thetab) \}_{\thetab}$,
 whose closed-form is either unknown or computationally intractable to
 evaluate. Whereas evaluating $p(\yb|\thetab)$ is intractable, sampling
-is feasible. Practically, a simulator can be understood as a black-box
-data generating machine $M_r$\footnote{The subscript $r$ in $M_r$
-indicates the \textit{random} simulator. In the next chapters we will
-introduce $M_d$ which stands for the \textit{deterministic}
-simulator.} that generates samples $\yb$ in a stochastic manner for
-any given a set of parameters $\thetab$.% i.e.\
-$M_r(\thetab) \rightarrow \yb$.
+is feasible. Practically, a simulator can be understood as a random black-box
+machine (computer code) $M_r$ that generates samples $\yb$ in a stochastic manner for
+any given a set of parameters $\thetab$. We can isolate the randomness by introducing the stochastic nuisance variables $\vb \sim p(\vb)$ so that the simulator becomes a deterministic mapping $M_d$ that maps $(\thetab, \vb)$ to the data $\yb$. The distribution $p(\vb)$ is determined by the random draws performed when running $M_r$. Importantly, we can fix the value of $\vb$ while changing $\thetab$ by fixing the random seed used with $M_r$.
 
 Simulator-based models provide considerable modelling freedom; any
 physical process that can be conceptualised as a computer program of
@@ -67,7 +63,7 @@ function in \eqref{eq:likelihood}. Other strategies include modelling
 the (stochastic) relationship between $\thetab$ and $\yb$, and its
 reverse, or framing likelihood-free inference as a ratio estimation
 problem \citep[see e.g.\ ][]{Blum2010, Wood2010, Papamakarios2016,
-Thomas2016, Papamakarios2019, Chen2019, Thomas2020, Hermans2020}. However, both OMC and robust OMC that we introduce next
+Thomas2016, Papamakarios2019, Chen2019, Thomas2020, Hermans2020}. However, both OMC and robust OMC, which we introduce next,
 are based on the approximation in \eqref{eq:approx_likelihood}.
 
 % likelihood of a specific parameter configuration $\thetab$ is equal to

@@ -1,51 +1,29 @@
-For describing the likelihood approximation introduced in OMC, it is
-convenient to firstly define the indicator function
-$\indicator{\region(\yb)}(\xb)$, that returns 1 if
-$\xb \in \region(\yb)$ and 0 otherwise. If $d(\cdot,\cdot)$ is a
-formal distance, due to symmetry
-$\indicator{\region(\yb)}(\xb) = \indicator{\region(\xb)}(\yb)$, so
-the expressions can be used interchangeably.
-
-\begin{gather} \label{eq:indicator} \indicator{\region(\yb)}(\xb)=
+Our description of OMC follows \citet{Ikonomov2019} who base their explanation of OMC on the approximate likelihood function in \eqref{eq:approx_likelihood}. With the indicator function
+%
+\begin{equation} \label{eq:indicator} \indicator{\region(\yb)}(\xb)=
   \left\{
     \begin{array}{ll}
       1 & \mbox{if } \xb \in \region(\yb) \\
       0 & \mbox{otherwise} 
-    \end{array} \right. \end{gather}
-
-\noindent
-Based on equation~\eqref{eq:approx_likelihood} and the indicator
-function~\eqref{eq:indicator}, we can approximate the likelihood as:
-
-\begin{gather} \label{eq:approx_likelihood_omc}
-  L_{d, \epsilon}(\thetab) =
-  \int_{\yb \in B_\epsilon(\data)}p(\yb|\thetab)d\yb =
-  \int_{\yb \in \R^D} \indicator{\region(\data)}(\yb)p(\yb|\thetab)d\yb\\
-  \approx \frac{1}{N} \sum_i^N \indicator{\region(\data)}(\yb_i),\text{ where }
-  \yb_i \sim M_r(\thetab) \label{eq:init_view}\\
-  \approx \frac{1}{N} \sum_i^N \indicator{\region (\data)} (\yb_i)
-  \text{ where } \yb_i = M_d(\thetab, \vb_i), \vb_i \sim p(\vb) \label{eq:alt_view}
-\end{gather}
+    \end{array} \right. \end{equation}
 %
-The procedure is quite intuitive; approximating the likelihood of a
-specific $\thetab$ requires sampling from the data generator and count
-the fraction of samples that lie inside the area around the
-observations. Nevertheless, by using the approximation of equation
-\eqref{eq:init_view} we need to draw $N$ new samples for each distinct
-evaluation of $L_{d,\epsilon}(\thetab)$; this makes this approach
-quite inconvenient from a computational point-of-view. For this
-reason, OMC approximates the integral as in equation
-\eqref{eq:alt_view}; the nuisance variables, $\vb_i \sim p(\vb)$, are
-sampled once and we count the fraction of samples that lie inside the
-area using the deterministic simulators
-$M_d(\thetab, \vb_i) \: \forall i$. Hence, the evaluation
-$L_{d,\epsilon}(\thetab)$ for each different $\thetab$ does not imply
-drawing new samples all over again. Based on this approach, the
-unnormalised approximate posterior can be defined as:
-
+we can write the approximate likelihood function $L_{d, \epsilon}(\thetab)$ in \eqref{eq:approx_likelihood} as
+\begin{gather} \label{eq:approx_likelihood_omc}
+  L_{d, \epsilon}(\thetab) = \Pr(\yb \in \region(\data)) =
+  \int_{\yb \in B_\epsilon(\data)}p(\yb|\thetab)d\yb =
+  \int_{\yb \in \R^D} \indicator{\region(\data)}(\yb)p(\yb|\thetab)d\yb
+\end{gather}
+which we can approximate as a sample average
+\begin{equation}
+L_{d, \epsilon}(\thetab) \approx \frac{1}{N} \sum_{i=1}^N \indicator{\region (\data)} (\yb_i)
+  \text{ where } \yb_i = M_d(\thetab, \vb_i), \quad \vb_i \sim p(\vb). \label{eq:alt_view}
+\end{equation}
+We thus approximate the likelihood of a
+specific $\thetab$ by counting the fraction of samples that lie inside the area around the
+observations. The crucial point in \eqref{eq:alt_view} is that we may only sample the nuisance variables $\vb_i \sim p(\vb)$ once and use the sample set of samples to approximate $L_{d,\epsilon}(\thetab)$ for different values of $\thetab$. Based on this approach, we introduce the approximate posterior
 \begin{equation} \label{eq:approx_posterior_omc}
   p_{d,\epsilon}(\thetab|\data)
-  \propto p(\thetab) \sum_i^N \indicator{ \region(\data)} (\yb_i)
+  \propto p(\thetab) \sum_i^N \indicator{ \region(\data)} (\yb_i) \text{ where } \yb_i = M_d(\thetab, \vb_i), \quad \vb_i \sim p(\vb).
 \end{equation}
 
 \subsubsection*{Further approximations for sampling and computing expectations}
