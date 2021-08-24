@@ -12,4 +12,4 @@
 *.sav
 minted_files/
 
-env
+env*

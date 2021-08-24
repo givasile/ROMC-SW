@@ -47,46 +47,45 @@ and (b) constructing the bounding box regions.
 
 \subsubsection*{Solving the deterministic optimisation problems}
 
-For each set of nuisance variables $\vb_i, i = \{1,2,\ldots,n_1 \}$ a
-deterministic function is defined as
-$f_i(\thetab) = M_d(\thetab,\vb_i)$. We look for a point
-$\thetab_* : d(f_i(\thetab_*), \data) < \epsilon$. This point can be
-obtained by solving the the following optimisation problem:
+For each set of nuisance variables $\vb_i, i = \{1,2,\ldots,n_1 \}$,
+we search for a point $\thetab^*$ such that
+$d(M_d(\thetab^*,\vb_i), \data) < \epsilon$. For notation convenience,
+we name the function $d(M_d(\thetab^*,\vb_i)$ as $d_i(\thetab)$.  Obtaining
+this point involves solving the following optimisation problem:
 
 \begin{subequations}
 \begin{alignat}{2}
-&\!\min_{\thetab}        &\qquad& g_i(\thetab) = d(\data,  f_i(\thetab))\label{eq:optProb}\\
-&\text{subject to} &      & g_i(\thetab) \leq \epsilon
+  &\!\min_{\thetab}        &\qquad& d_i(\thetab) = d(M_d(\thetab^*,\vb_i), \data)\label{eq:optProb}\\
+  &\text{subject to} & & d_i(\thetab) \leq \epsilon
 \end{alignat}
 \end{subequations}
 %
 The optimisation problem can be treated as unconstrained, accepting
-the optimal point $\thetab_i^* = \text{argmin}_{\thetab} g_i(\thetab)$
-only if $g_i(\thetab_i^*) < \epsilon$. The nature of the generative
+the optimal point $\thetab_i^* = \text{argmin}_{\thetab} d_i(\thetab)$
+only if $d_i(\thetab_i^*) < \epsilon$. The nature of the generative
 model $M_r(\thetab)$, specifies the properties of the objective
-function $g_i$. If $g_i$ is differentiable any gradient-based
+function $d_i$. If $d_i$ is differentiable any gradient-based
 iterative algorithm can be used for~\ref{eq:optProb}. The gradients
 $\nabla_{\thetab} g_i$ can be either provided in closed form or
-approximated by finite differences. Alternatively, if $g_i$ is not
+approximated by finite differences. Alternatively, if $d_i$ is not
 differentiable, the Bayesian Optimisation approach provides an
 alternative choice~\cite{Shahriari2016}. In this case, apart from
 obtaining an optimal $\thetab_i^* $, a surrogate model $\hat{d}_i$ of
-the distance $g_i$ is also fitted; the approximate model can then
-substitute the actual model in the following steps, e.g. construction
-of bounding box, sampling, for accelerating the method.
+the distance $d_i$ is also fitted; the approximate model can then
+substitute the actual model in the following steps.
 
 \subsubsection*{Proposal region computation}
 
-After obtaining a $\thetab_i^*$ such that
-$g_i(\thetab_i^*) < \epsilon$, we need to construct a bounding box
-area $\mathcal{\hat{S}}_i$ around it. The bounding box must contain
-the acceptance region around $\thetab_i^*$, formally
-$\{ \thetab : g_i(\thetab) < \epsilon$,
+After obtaining $\thetab_i^*$, we approximate the acceptance region
+$\mathcal{S}_i$ by constructing a bounding box $\mathcal{\hat{S}}_i$
+around it. The bounding must the part of the acceptance region
+$\mathcal{S}_i$ around $\thetab_i^*$, formally
+$\{ \thetab : d_i(\thetab) < \epsilon$,
 $d(\thetab, \thetab_i^*) < M \}$. The second condition
 $d(\thetab, \thetab_i^*) < M$ describes that if
-$\mathcal{S}_i := \{ \thetab : g_i(\thetab) < \epsilon \} $ contains a
+$\mathcal{S}_i := \{ \thetab : d_i(\thetab) < \epsilon \} $ contains a
 number of disjoint sets of $\thetab$ that they fulfill
-$g_i(\thetab) < \epsilon$, we want the bounding box to match only the
+$d_i(\thetab) < \epsilon$, we want the bounding box to match only the
 set that contains $\thetab_i^*$. We seek for a bounding box that is as
 tight as possible to the local acceptance region for ensuring high
 acceptance rate in the importance sampling.
@@ -95,7 +94,7 @@ Bounding boxes are built in two steps. Firstly, the search directions
 $\mathbf{v}_d$ are computed as the eigenvectors of the curvature at
 $\thetab_i^*$ and then the limits are obtained with a line-search
 method looking for the smallest
-$\kappa: g_i(\thetab_i^* + \kappa \vb_d) \geq
+$\kappa: d_i(\thetab_i^* + \kappa \vb_d) \geq
 \epsilon$\footnote{$-\kappa$ is used as well for the opposite
   direction along the search line}. The
 Algorithm~\ref{alg:region_construction} describes the method

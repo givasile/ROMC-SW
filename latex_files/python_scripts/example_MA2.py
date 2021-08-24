@@ -98,7 +98,6 @@ else:
 print(romc.result.summary())
 print(romc.result.samples_cov())
 
-
 name = "t1"
 if savefig:
     plot_marginal(romc.result.samples["t1"], romc.result.weights,
