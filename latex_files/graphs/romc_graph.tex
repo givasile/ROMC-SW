@@ -22,13 +22,13 @@
         % private functions
         \node (n1) [train_process, xshift=-.8cm] { $\_sample\_nuisance()$  };
         \node (n2) [train_process, below of=n1] { $\_define\_objectives()$  };
-        \node (n3) [decision, below of=n2, yshift=-.5cm] { $grads$  };
+        \node (n3) [decision, below of=n2, yshift=-.5cm] { $grads?$  };
         \node (n4) [train_process, left of=n3, yshift=-1cm, xshift=-1.5cm] { $\_solve\_gradients()$  };
         \node (n5) [train_process, right of=n3, yshift=-1cm, xshift=1.5cm] { $\_solve\_bo()$  };
         \node (n6) [train_process, below of=n3, yshift=-1.5cm] { $\_filter\_solutions()$  };
         \node (n7) [train_process, below of=n6] { $\_build\_boxes()$  };
-        \node (n8) [decision, below of=n7] { $h?$  };
-        \node (n9) [train_process, right of=n8, yshift=-.5cm, xshift=1cm] { $\_fit\_models()$  };
+        \node (n8) [decision, below of=n7] { $fit?$  };
+        \node (n9) [train_process, right of=n8, yshift=-1cm, xshift=1cm] { $\_fit\_models()$  };
 
         \node (n10) [train_process, below of=n8, yshift=-1cm] { $\_define\_posterior()$  };
 
@@ -88,8 +88,8 @@
         \node (pro2) [train_process, below of=pro1, yshift=-1cm, minimum width=4cm, minimum height=1cm] { Solve $\thetab_i^*, d_i^*, \forall i$  };
         \node (filter) [train_process, below of=pro2, yshift=-1.5cm, minimum width=4cm, minimum height=1cm] { Filter solutions  };
         \node (proposal_region) [train_process, below of=filter, yshift=-0.15cm, minimum width=4cm, minimum height=1cm] {Construct $q_i \forall i$};
-        \node (surrogate) [train_process, below of=proposal_region, yshift=-0.15cm, minimum width=4cm, minimum height=1cm] {Construct $\Tilde{d}_i \forall i$};
-        \node (posterior) [train_process, below of=surrogate, yshift=-0.15cm, minimum width=4cm, minimum height=1cm] {Define $p_{d,\epsilon}(\thetab)$};
+        \node (surrogate) [train_process, below of=proposal_region, yshift=-0.15cm, minimum width=4cm, minimum height=1cm] {Fit $\Tilde{d}_i \forall i$};
+        \node (posterior) [train_process, below of=surrogate, yshift=-0.15cm, minimum width=4cm, minimum height=1cm] {Define $p_{d,\epsilon|\data}(\thetab)$};
         
         \node (sample) [infer_process, below of=posterior, yshift=-1.2cm, minimum width=4cm, minimum height=1cm] {Draw $\{w_{ij}, \thetab_{ij} \}$ };
 

@@ -2,28 +2,32 @@ For designing an extendable implementation of ROMC, we firstly define
 ROMC as a sequence of algorithmic steps. The algorithmic view of ROMC
 serves as the driver for the implementation at \pkg{ELFI}. At a high
 level, ROMC can be split into the training and the inference part. In
-general terms, the training part covers all the appropriate steps for
-estimating the proposal regions and the inference part for getting
-weighted samples. Algorithm~\ref{alg:romc_algorithm} defines formally
-ROMC; Steps 2-10 (before the vertical line) form the training part,
-while steps 12 and 13 the inference part.
+general terms, the training part covers all steps for estimating the
+proposal regions and the inference part for getting weighted
+samples. Algorithm~\ref{alg:romc_algorithm} defines ROMC formally;
+Steps 2-10 (before the vertical line) form the training part, while
+steps 12-17 the inference part.
 
 \begin{algorithm}[!ht]
 	\caption{ROMC}\label{alg:romc_algorithm}
 	\begin{algorithmic}[1]
-    \Procedure{ROMC}{$M_r(\thetab)$}
+    \Procedure{ROMC}{$M_r(\thetab), n_1, n_2, \epsilon$}
     \For{$i \gets 1 \textrm{ to } n_1$}
-      \State $d_i(\thetab) = M_d(\thetab, \vb=\vb_i)$ \Comment{Define deterministic distance function}
-      \State Obtain $\thetab_i^*, d_i^*$ \Comment{Solve optimization problem}
-    \EndFor
-    \State $\text{L} \gets \{d_{i, i = 1, ..., n_1}: d_i^* < \epsilon \} $ \Comment{List with filtered solutions}
-    \For{$i \gets 1 \textrm{ to } len(L)$}
-      \State Construct $q_i$ \Comment{Compute proposal area}
-      \State Compute $\Tilde{d}_i$ \Comment{Fit surrogate model in $q_i$}
+      \State $\vb_i \sim p(\vb)$ \Comment{Draw nuisance variables}
+      \State $d_i(\thetab) = M_d(\thetab, \vb=\vb_i)$ \Comment{Define distance function}
+      \State $\thetab_i^* = \text{argmin}_{\thetab} d_i$, $d_i^*=d_i(\thetab_i^*)$ \Comment{Solve optimization problem}
+      \If{$d^*_i > \epsilon$}
+        \State Go to 2 \Comment{Filter solution}
+      \EndIf
+      \State Define $q_i$ over $\mathcal{\hat{S}}$ \Comment{Estimate proposal area}
+      \State (Optional) Fit $\Tilde{d}_i$ on $\mathcal{\hat{S}}$ \Comment{Fit surrogate model}
+      \\\hrulefill
+      \For{$j \gets 1 \textrm{ to } n_2$}      
+        \State $\thetab_{ij} \sim q_i$, compute $w_{ij}$ \Comment{Sample}
       \EndFor
-    \\\hrulefill
-    \State Draw $\{w_{ij}, \thetab_{ij}\}$ \Comment{Draw $n_2$ samples per $q_i$}
-    \State Draw $p_{d,\epsilon}(\thetab)$ \Comment{Evaluate the unnormalized posterior}    
+    \EndFor
+    \State $E_{p(\thetab|\data)}[h(\thetab)]$ \Comment{Estimate an expectation}
+    \State $p_{d,\epsilon}(\thetab)$ \Comment{Evaluate the unnormalized posterior}
     \EndProcedure
 	\end{algorithmic}
 \end{algorithm}
@@ -31,13 +35,13 @@ while steps 12 and 13 the inference part.
 \subsubsection*{Training part}
 \noindent
 At the training (fitting) part, the goal is the estimation of the
-proposal regions $q_i$. The tasks are; (a) sampling the nuisance
-variables $\vb_i \sim p(\vb)$ for obtaining the deterministic
-functions $g_i(\thetab)$, (b) defining the optimisation problems
-$\min_{\thetab} \: g_i(\thetab)$, (c) obtaining $\thetab_i^*$ and
-$d_i^*$ (d) checking whether $d_i^* \leq \epsilon$ and (e) building
-the bounding box for obtaining the proposal region $q_i$. If gradients
-are available, using a gradient-based method is advised for obtaining
+proposal regions $\mathcal{\hat{S}}_i$. The tasks are; (a) sampling
+the nuisance variables $\vb_i \sim p(\vb)$ for obtaining the
+deterministic functions $d_i(\thetab)$, (b) defining the optimisation
+problems $\min_{\thetab} \: g_i(\thetab)$, (c) obtaining
+$\thetab_i^*$, $d_i^*$ (d) checking whether $d_i^* \leq \epsilon$ and
+(e) computing the proposal distribution $q_i$. If gradients are
+available, using a gradient-based method is advised for obtaining
 $\thetab_i^*$ much faster. In case $\nabla_{\thetab} g_i$ is available
 in closed-form, the procedure is upgraded in terms of both accuracy
 and efficiency; If closed-form description is not available, gradients
@@ -46,93 +50,93 @@ $g_i$ for \emph{each} parameter $\theta_d$, which can only work in
 low-dimensional problems. If $g_i(\thetab)$ is not differentiable, the
 Bayesian Optimisation can be used as an alternative solution. In this
 scenario, the training part becomes slower due to fitting of the
-surrogate model and the blind optimisation
-steps. Algorithm~\ref{alg:training_GB} defines formally the steps of a
-gradient-based optimiser and algorithm~\ref{alg:training_GP} the steps
-of the Bayesian Optimisation. After obtaning the optimal points
-$\thetab^*$, the training part gets completed by estimating the
-proposal regions. Algorithm~\ref{alg:region_construction} describes
-the line search approach for finding the region's boundaries.
+surrogate model and the blind optimisation steps. After obtaning the
+optimal points $\thetab^*$, the training part gets completed by
+estimating the proposal regions;
+Algorithm~\ref{alg:region_construction} describes the line search
+approach for finding the region's boundaries.
 
 \subsubsection*{Inference Part}
 Performing the inference includes one or more of the following three
 tasks; (a) sampling from the posterior
 $ \thetab_i \sim p_{d, \epsilon}(\thetab|\data)$, (b) computing an
 expectation $E_{\thetab|\data}[h(\thetab)]$ or (c) evaluating the
-unnormalised posterior $p_{d, \epsilon}(\thetab|\data)$. Computing an
-expectation can be done easily after weighted samples are obtained
-using the equation~\ref{eq:expectation}, so we do not discuss it
-separately.
+unnormalised posterior $p_{d, \epsilon}(\thetab|\data)$. Sampling is
+performed by getting $n_2$ samples from each proposal distribution
+$q_i$. For each sample $\thetab_{ij}$, the distance
+function\footnote{As before, if a surrogate model $\hat{d}$ is
+  available, it can be utilised as the distance function.} is
+evaluated for checking if it lies inside the acceptance
+region. Algorithm~\ref{alg:sampling_GB} defines the steps for
+computing a weighted sample. Computing an expectation can be done
+easily after weighted samples are obtained using the
+equation~\ref{eq:expectation}, so we do not discuss it
+separately. Evaluating the unnormalised posterior requires the
+deterministic functions $g_i$ and the prior distribution
+$p(\thetab)$\footnote{There is no need for solving the optimisation
+  problems and building the proposal regions.}. The evaluation
+requires iterating over all $g_i$ and evaluating the distance from the
+observed data.
 
-\noindent
-Sampling is performed by getting $n_2$ samples from each proposal
-distribution $q_i$. For each sample $\thetab_{ij}$, the indicator
-function is evaluated $\indicator{\regioni(\data)}(\thetab_{ij})$ for
-checking if it lies inside the acceptance region. If this is the case,
-the corresponding weight is computed as in \eqref{eq:sampling}. As
-before, if a surrogate model $\hat{d}$ is available, it can be
-utilised for evaluating the indicator function.
-
-\noindent
-Evaluating the unnormalised posterior requires the deterministic
-functions $g_i$ and the prior distribution $p(\thetab)$\footnote{There
-  is no need for solving the optimisation problems and building the
-  proposal regions.}. The evaluation requires iterating over all $g_i$
-and evaluating the distance from the observed data.
-
-\begin{minipage}{0.46\textwidth}
-\begin{algorithm}[H]
-    \centering
-    \caption{Training Part - Gradient-based. Requires $g_i(\thetab), p(\thetab)$}\label{alg:training_GB}
-    \begin{algorithmic}[1]
-      \For{$i \gets 1 \textrm{ to } n$}
-        \State Obtain $\thetab_i^*$ using a Gradient Optimiser
-        \If{$g_i(\thetab_i^*) > \epsilon$}
-        \State{go to} 1
-        \Else
-        \State Approximate $\jac_i^* = \nabla g_i(\theta)$ and $H_i \approx \jac^T_i\jac_i$
-        \State Use Algorithm~\ref{alg:region_construction} to obtain $q_i$
-        \EndIf      
-      \EndFor
-      \Return{$q_i, p(\theta), g_i(\theta)$}
-    \end{algorithmic}
-\end{algorithm}
-\end{minipage}
-\hfill
-\begin{minipage}{0.46\textwidth}
-\begin{algorithm}[H]
-    \centering
-    \caption{Training Part - Bayesian optimisation. Requires $g_i(\thetab), p(\thetab)$}\label{alg:training_GP}
-    \begin{algorithmic}[1]
-      \For{$i \gets 1 \textrm{ to } n$}
-        \State Obtain $\thetab_i^*, \hat{d}_i(\thetab)$ using a GP approach
-        \If{$g_i(\thetab_i^*) > \epsilon$}
-        \State{go to} 1
-        \Else
-        \State Approximate $H_i \approx \jac^T_i \jac_i$
-        \State Use Algorithm~\ref{alg:region_construction} to obtain $q_i$
-        \EndIf      
-      \EndFor
-      \Return{$q_i, p(\theta), \hat{d}_i(\theta)$}
-    \end{algorithmic}
-\end{algorithm}
-\end{minipage}
+% \begin{minipage}{0.46\textwidth}
+% \begin{algorithm}[H]
+%     \centering
+%     \caption{Training Part - Gradient-based. Requires $g_i(\thetab), p(\thetab)$}\label{alg:training_GB}
+%     \begin{algorithmic}[1]
+%       \For{$i \gets 1 \textrm{ to } n$}
+%         \State Obtain $\thetab_i^*$ using a Gradient Optimiser
+%         \If{$g_i(\thetab_i^*) > \epsilon$}
+%         \State{go to} 1
+%         \Else
+%         \State Approximate $\jac_i^* = \nabla g_i(\theta)$ and $H_i \approx \jac^T_i\jac_i$
+%         \State Use Algorithm~\ref{alg:region_construction} to obtain $q_i$
+%         \EndIf      
+%       \EndFor
+%       \Return{$q_i, p(\theta), g_i(\theta)$}
+%     \end{algorithmic}
+% \end{algorithm}
+% \end{minipage}
+% \hfill
+% \begin{minipage}{0.46\textwidth}
+% \begin{algorithm}[H]
+%     \centering
+%     \caption{Training Part - Bayesian optimisation. Requires $g_i(\thetab), p(\thetab)$}\label{alg:training_GP}
+%     \begin{algorithmic}[1]
+%       \For{$i \gets 1 \textrm{ to } n$}
+%         \State Obtain $\thetab_i^*, \hat{d}_i(\thetab)$ using a GP approach
+%         \If{$g_i(\thetab_i^*) > \epsilon$}
+%         \State{go to} 1
+%         \Else
+%         \State Approximate $H_i \approx \jac^T_i \jac_i$
+%         \State Use Algorithm~\ref{alg:region_construction} to obtain $q_i$
+%         \EndIf      
+%       \EndFor
+%       \Return{$q_i, p(\theta), \hat{d}_i(\theta)$}
+%     \end{algorithmic}
+% \end{algorithm}
+% \end{minipage}
 
 \begin{algorithm}[!ht]
-	\caption{Computation of the proposal distribution $q_i$; Needs, a model of distance $d$, optimal point $\thetab_i^*$, number of refinements $K$, step size $\eta$ and curvature matrix $\hessian_i$ ($\jac_i^T\jac_i $ or GP Hessian)}\label{alg:region_construction}
+	\caption{Approximation of $\mathcal{\hat{S}}_i$ with a bounding box; Requires, a model of distance $d_i(\thetab)$, optimal point $\thetab_i^*$, number of refinements $K$, step size $\eta\_\text{start}$, maximum iterations $M$ and curvature matrix $\hessian_i$ ($\jac_i^T\jac_i $ or GP Hessian)}\label{alg:region_construction}
 	\begin{algorithmic}[1]
 	\State Compute eigenvectors $\vb_{d}$ of $\hess_i$ {\scriptsize ($d = 1,\ldots,||\thetab ||)$}
 	\For{$d \gets 1 \textrm{ to } ||\thetab||$}
 		\State $\Tilde{\thetab} \gets \thetab_i^*$ \label{algstep:box_constr_start}
 		\State $k \gets 0$
+		\State $\eta \gets \eta\_\text{start}$ \Comment{Initialize $\eta$}
 		\Repeat
+          \State $j \gets 0$
         	\Repeat
-                \State $\Tilde{\thetab} \gets \Tilde{\thetab} + \eta \ \vb_{d}$ \Comment{Large step size $\eta$.}
-        	\Until{$d(f_i(\Tilde{\thetab}), \data) > \epsilon$}
+            \State $\Tilde{\thetab} \gets \Tilde{\thetab} + \eta \ \vb_{d}$ \Comment{Large step size $\eta$.}
+            \State $j \gets j + 1$
+        	\Until{$d(f_i(\Tilde{\thetab}), \data) > \epsilon$ or $j \geq M$} \Comment{Check distance or maximum iterations}
         	\State $\Tilde{\thetab} \gets \Tilde{\thetab} - \eta \ \vb_{d}$
         	\State $\eta \gets \eta/2$ \Comment{More accurate region boundary}
         	\State $k \gets k + 1$
-    	\Until $k = K$
+      \Until $k = K$
+      \If{$\Tilde{\thetab} = \thetab_i^*$} \Comment{Check if no step has been done}
+        \State $\Tilde{\thetab} \gets \Tilde{\thetab} + \dfrac{\eta\_{\text{start}}}{2^K} \vb_d$ \Comment{Then, make the minimum step}
+      \EndIf
     	\State Set final $\Tilde{\thetab}$ as region end point. \label{algstep:box_constr_end}
     	\State Repeat steps~\ref{algstep:box_constr_start}~-~\ref{algstep:box_constr_end} for $\mathbf{v}_{d} = - \mathbf{v}_{d}$
 	\EndFor
@@ -140,20 +144,18 @@ and evaluating the distance from the observed data.
 	\end{algorithmic}
 \end{algorithm}
 
+
+
 \begin{algorithm}[H]
     \centering
-    \caption{Sampling. Requires a function of distance $(g_i(\theta)$ or $\hat{d}_i$ or $\hat{g}_i), p(\theta), q_i$}\label{alg:sampling_GB}
+    \caption{Sampling. Requires a function of distance $d_i$, the prior distribution $p(\thetab)$, the proposal distribution $q_i$}\label{alg:sampling_GB}
     \begin{algorithmic}[1]
-      \For {$i \gets 1 \textrm{ to } n_1$}
-      \For {$j \gets 1 \textrm{ to } n_2$}
-          \State $\thetab_{ij} \sim q_i$
-          \If {$g_i(\thetab_{ij}) > \epsilon$}
-            \State Reject $\theta_{ij}$
+      \State $\thetab_{ij} \sim q_i$
+          \If {$d_i(\thetab_{ij}) > \epsilon$}
+            \State Go to 2 \Comment{Reject sample}
           \Else {}
-            \State $w_{ij} = \frac{p(\thetab_{ij})}{q(\thetab_{ij})}$
-            \State Accept $\thetab_{ij}$, with weight $w_{ij}$
+            \State $w_{ij} = \frac{p(\thetab_{ij})}{q(\thetab_{ij})}$ \Comment{Compute weight}
+            \State Store $(w_{ij}, \thetab_{ij})$ \Comment{Store weighted sample}
           \EndIf
-      \EndFor
-      \EndFor
     \end{algorithmic}
 \end{algorithm}

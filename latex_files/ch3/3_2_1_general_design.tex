@@ -7,21 +7,17 @@ the ellipses are the main routines of the class. Following
 \proglang{Python}'s naming principles, the methods starting with an
 underscore (green ellipses) represent internal (private) functions,
 whereas the rest (blue ellipses) are the public methods that the user
-interacts with.
-
-In figure~\ref{fig:romc_overview}, it can be easily observed that the
-implementation follows consistently the algorithmic description
-described above, which follows the partition into training, inference
-and evaluation. The training part includes all the steps until the
-computation of the proposal regions i.e. sampling the nuisance
-variables, defining the optimization problems, solving them,
-constructing the regions and fitting local surrogate models. The
-inference part comprises of evaluating the unnormalized posterior (and
-the normalized when is possible), sampling and computing an
-expectation. From an algorithmic point of view, the training and the
-inference parts are \emph{isolated}. We also provide some utilities
-for inspecting the training process, such as plotting the histogram of
-the final distances or visualizing the constructed bounding
+interacts with. In figure~\ref{fig:romc_overview}, it can be easily
+observed that the implementation follows consistently the algorithmic
+view presented in~\ref{alg:romc_algorithm}. The training part includes
+all the steps until the computation of the proposal regions
+i.e. sampling the nuisance variables, defining the optimization
+problems, solving them, constructing the regions and fitting local
+surrogate models. The inference part comprises of evaluating the
+unnormalized posterior (and the normalized when is possible), sampling
+and computing an expectation. We also provide some utilities for
+inspecting the training process, such as plotting the histogram of the
+final distances or visualizing the constructed bounding
 boxes. Finally, in the evaluation part, we provide two methods for
 evaluating the inference; (a) computing the Effective Sample Size
 (ESS) of the samples and (b) measuring the divergence between the

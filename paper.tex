@@ -6,7 +6,6 @@
 %% recommended packages
 \usepackage{thumbpdf,lmodern}
 
-
 %% Vasilis packages
 \usepackage{amsmath,amssymb,bbold, xfrac}
 
@@ -255,16 +254,17 @@ end of this background section.
 %% -- ROMC implementation ----------------------------------------------------
 \section{Implemented functionalities}
 
-In this section, we present our implementation. At~\ref{subsec:ELFI}
+In this section, we present the implementation. At~\ref{subsec:ELFI}
 we introduce the reader to the \proglang{Python} package \pkg{Engine
-  for likelihood-free inference (ELFI)}
-package. At~\ref{subsec:general_design} we explain the general design
-that we follow. Then, we divide the implementation into three parts;
-at~\ref{subsec:training} we present the training (fitting) part,
-at~\ref{subsec:inference} the inference part and
+  for likelihood-free inference
+  (ELFI)}. At~\ref{subsec:general_design} we explain the general
+design that we follow. Then, we divide the implementation into three
+parts; at~\ref{subsec:training} we present the training (fitting)
+part, at~\ref{subsec:inference} the inference part and
 at~\ref{subsec:evaluation} the evaluation part. Finally,
 at~\ref{subsec:extensibility} we describe how a user may extend ROMC
 with its custom modules.
+
 
 \subsection{Training part} 
 \label{subsec:training}
@@ -285,12 +285,20 @@ with its custom modules.
 
 %% -- Use-case illustration ----------------------------------------------------
 \section{Use-case illustration}
+
+In this section, we illustrate the implementation performing two
+experiments; In chapter~\ref{subsec:ma2} we perform the inference at
+the second-order moving average (MA2) model, which is a standard model
+of \pkg{ELFI}, and in chapter~\ref{subsec:exec_time} we measure the
+execution speed-up achieved by the parallelization of ROMC.
+
 \subsection{Moving average example}
+\label{subsec:ma2}
 \input{latex_files/ch4/4_2_ma2.tex}
 
 \subsection{Execution time}
+\label{subsec:exec_time}
 \input{latex_files/ch4/4_3_exec.tex}
-
 
 %% -- Summary/conclusions/discussion -------------------------------------------
 \section{Summary and discussion} \label{sec:summary}
