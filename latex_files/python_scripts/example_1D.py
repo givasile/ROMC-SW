@@ -14,7 +14,7 @@ import matplotlib
 matplotlib.rcParams['text.usetex'] = True
 
 prepath = './../images/'
-savefig = True
+savefig = False
 
 np.random.seed(21)
 class Prior:

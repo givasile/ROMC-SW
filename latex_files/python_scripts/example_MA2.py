@@ -11,7 +11,7 @@ matplotlib.rcParams['text.usetex'] = True
 
 logging.basicConfig(level=logging.INFO)
 prepath = './../images/chapter4/'
-savefig = True
+savefig = False
 
 def plot_marginal(samples, weights, mean, std, title, xlabel, ylabel, bins, range, ylim, savepath):
     plt.figure()

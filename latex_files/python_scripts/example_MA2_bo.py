@@ -11,7 +11,7 @@ matplotlib.rcParams['text.usetex'] = True
 
 logging.basicConfig(level=logging.INFO)
 prepath = './../images/chapter4/'
-savefig = True
+savefig = False
 
 def plot_marginal(samples, weights, mean, std, title, xlabel, ylabel, bins, range, ylim, savepath):
     plt.figure()
@@ -103,7 +103,7 @@ if savefig:
     plot_marginal(romc1.result.samples["t1"], romc1.result.weights,
                   romc1.result.sample_means_array[0],
                   np.sqrt(romc1.result.samples_cov()[0, 0]),
-                  r"ROMC (Bayesian Optimisation) - $\theta_1$",
+                  r"ROMC (BO) - $\theta_1$",
                   r"$\theta_1$",
                   r"density",
                   60,
@@ -112,7 +112,7 @@ else:
     plot_marginal(romc1.result.samples["t1"], romc1.result.weights,
                   romc1.result.sample_means_array[0],
                   np.sqrt(romc1.result.samples_cov()[0, 0]),
-                  r"ROMC (Bayesian Optimisation) - $\theta_1$",
+                  r"ROMC (BO) - $\theta_1$",
                   r"$\theta_1$",
                   r"density",
                   60,
@@ -123,7 +123,7 @@ if savefig:
     plot_marginal(romc1.result.samples["t2"], romc1.result.weights,
                   romc1.result.sample_means_array[1],
                   np.sqrt(romc1.result.samples_cov()[1, 1]),
-                  r"ROMC (Bayesian Optimisation) - $\theta_2$",
+                  r"ROMC (BO) - $\theta_2$",
                   r"$\theta_2$",
                   r"density",
                   60,
@@ -132,7 +132,7 @@ else:
     plot_marginal(romc1.result.samples["t2"], romc1.result.weights,
                   romc1.result.sample_means_array[1],
                   np.sqrt(romc1.result.samples_cov()[1, 1]),
-                  r"ROMC (Bayesian Optimisation) - $\theta_2$",
+                  r"ROMC (BO) - $\theta_2$",
                   r"$\theta_2$",
                   r"density",
                   60,
@@ -213,12 +213,12 @@ def plot_romc_posterior(title, posterior, nof_points, savefig):
 
 
 if savefig:
-    plot_romc_posterior('MAE2, ROMC Unnorm Posterior (Bayesian optimisation)',
+    plot_romc_posterior('MAE2, ROMC Unnorm Posterior (BO)',
                         romc1.eval_unnorm_posterior,
                         nof_points=50,
                         savefig=os.path.join(prepath, "mae2_romc_posterior_bo.png"))
 else:
-    plot_romc_posterior('MAE2, ROMC Unnorm Posterior (Bayesian optimisation)',
+    plot_romc_posterior('MAE2, ROMC Unnorm Posterior (BO)',
                         romc1.eval_unnorm_posterior,
                         nof_points=50,
                         savefig=False)

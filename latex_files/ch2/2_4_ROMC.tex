@@ -4,20 +4,23 @@ computational point-of-view, they suffer from some drawbacks:
 \begin{itemize}
 \item The whole acceptable region $\mathcal{S}_i$
   shrinks to a single point $\thetab_i^*$. This simplification adds
-  significant apprimation error when then the area $\mathcal{S}_i$ is relatively big.
+  significant approximation error when then the area $\mathcal{S}_i$ is relatively big.
 \item The weight $w_i$ is computed based only at the curvature at the
-  point $\thetab_i^*$. Using only local information for estimating the weight can also be misleading. For example, if $g_i$ is almost flat at $\thetab_i^*$, i.e. $\text{det}(\jac_i^{*T}\jac_i^*) \rightarrow 0, then \Rightarrow w_i
-  \rightarrow \infty$ dominating the posterior.
+  point $\thetab_i^*$. Using only local information for estimating the
+  weight can also be misleading. For example, if $g_i$ is almost flat
+  at $\thetab_i^*$, i.e.
+  $\text{det}(\jac_i^{*T}\jac_i^*) \rightarrow 0, then w_i \rightarrow
+  \infty$, dominating the posterior.
 \item There is no way to solve the optimisation problem
-  $\thetab_i^* = \text{argmin}_{\thetab} \: g_i(\thetab)$ when $g_i$
-  is not differentiable.
+  of~\eqref{eq:omc_opt_prob} when
+  $||\Phi(\data)-\Phi(M_d(\thetab, \vb_i))||_2$ is not differentiable.
 \end{itemize}
 
 \subsubsection{Sampling and computing expectation in ROMC}
 
-ROMC resolves the failure-modes of OMC mainly by approaching the
-acceptance regions $\mathcal{S}_i$ in a more sophisticated way.
-Instead of collapsing the regions into single points, it approximates
+ROMC resolves the failure-modes of OMC, mainly, by approaching the
+acceptance regions $\mathcal{S}_i$ in a more sophisticated way;
+instead of collapsing the regions into single points, it approximates
 them with a bounding box. Afterwards, a uniform distribution defined
 on the bounding box area, is used as the \emph{proposal distribution}
 for importance sampling. Defining as $q_i$ the uniform distribution
@@ -40,17 +43,17 @@ as,
   E_{p(\thetab|\data)}[h(\thetab)] \approx \frac{\sum_{ij} w_{ij} h(\thetab_{ij})}{\sum_{ij} w_{ij}}
 \end{equation}
 
-The constrution of the proposal regions $q_i$ is performed in two
-steps; (a) solving the deterministic optimisation problems as in OMC
-and (b) constructing the bounding box regions.
+The constrution of the proposal regions is performed in two steps; (a)
+solving the optimisation problems as in OMC and (b) constructing the
+bounding box regions.
 
 \subsubsection*{Solving the deterministic optimisation problems}
 
 For each set of nuisance variables $\vb_i, i = \{1,2,\ldots,n_1 \}$,
 we search for a point $\thetab^*_i$ such that
 $d(M_d(\thetab^*_i,\vb_i), \data) < \epsilon$. For notation
-convenience, we name the distance function $d(M_d(\thetab,\vb_i), \data)$ as
-$d_i(\thetab)$.  Obtaining this point involves solving the following
+convenience, we name the distance $d(M_d(\thetab,\vb_i), \data)$ as
+$d_i(\thetab)$.  Obtaining $\theta_i^*$ involves solving the following
 optimisation problem:
 
 \begin{subequations}
@@ -65,27 +68,24 @@ the optimal point $\thetab_i^* = \text{argmin}_{\thetab} d_i(\thetab)$
 only if $d_i(\thetab_i^*) < \epsilon$. The nature of the generative
 model $M_r(\thetab)$, specifies the properties of the objective
 function $d_i$. If $d_i$ is differentiable any gradient-based
-iterative algorithm can be used for~\ref{eq:optProb}. The gradients
+optimizer can be used for~\ref{eq:optProb}. The gradients
 $\nabla_{\thetab} d_i$ can be either provided in closed form or
-approximated by finite differences. Alternatively, if $d_i$ is not
-differentiable, the Bayesian Optimisation
-approach~\cite{Shahriari2016} provides an alternative choice. In this
-case, apart from obtaining an optimal $\thetab_i^* $, a surrogate
-model $\hat{d}_i$ of the distance $d_i$ is also fitted; the
-approximate model can then substitute the actual model in the
-following steps.
+approximated by finite differences. In case $d_i$ is not
+differentiable, Bayesian Optimisation~\cite{Shahriari2016} provides an
+alternative choice. In this scenario, apart from obtaining an optimal
+$\thetab_i^* $, a surrogate model $\hat{d}_i$ of the distance $d_i$ is
+also fitted; $\hat{d}_i$ can then substitute the actual model in the
+following steps\footnote{Such as proposal region construction, sampling etc}.
 
-\subsubsection*{Proposal region computation}
+\subsubsection*{Proposal region estimation}
 
-After obtaining $\thetab_i^*$, we initially approximate the acceptance
-region $\mathcal{S}_i$ by constructing a bounding box
-$\mathcal{\hat{S}}_i$ around it. The bounding must the part of the
-acceptance region $\mathcal{S}_i$ \emph{around} $\thetab_i^*$;
-formally $\{ \thetab : d_i(\thetab) < \epsilon$,
-$d(\thetab, \thetab_i^*) < M \}$. The condition
-$d(\thetab, \thetab_i^*) < M$ describes that if
-$\mathcal{S}_i := \{ \thetab : d_i(\thetab) < \epsilon \} $ contains
-many \emph{disjoint} sets of $\thetab$ that they fulfill
+The acceptance region $\mathcal{S}_i$ is approximated with a bounding
+box $\mathcal{\hat{S}}_i$ around it. The bounding box must contain the
+part of the acceptance region \emph{around} $\thetab_i^*$; formally
+$\{ \thetab : \thetab \in \mathcal{S}_i \quad \text{and} \quad
+||\thetab - \thetab_i^*||_2 < M \}$. The condition
+$||\thetab - \thetab_i^*||_2 < M$ restricts that if $\mathcal{S}_i$
+contains many \emph{disjoint} sets of $\thetab$ that they fulfill
 $d_i(\thetab) < \epsilon$, we want the bounding box to match only the
 set that contains $\thetab_i^*$. Ideally, we want the bounding box to
 be as tight as possible to $\mathcal{S}_i$, to ensure high acceptance
@@ -94,13 +94,14 @@ valid parts of $\mathcal{S}_i$.
 
 The bounding boxes are built in two steps; firstly, we define their
 axes $\mathbf{v}_d$ in the $d$-dimensional space and, then, the limits
-are obtained with a line-search method looking for the smallest
+along the axes are obtained with a line-search method looking for the
+smallest
 $\kappa: d_i(\thetab_i^* + \kappa \vb_d) \geq
 \epsilon$\footnote{$-\kappa$ is used as well for the opposite
   direction along the search
   line}. Algorithm~\ref{alg:region_construction} describes the method
-in-depth. After limits are found along all directions, the uniform
-distribution $q_i$ is defined on the bounding box, and is used as the
+in-depth. After the bounding boxes construction, a uniform
+distribution $q_i$ is defined on each bounding box, and is used as the
 proposal region for importance sampling.
 
 \subsubsection*{Fitting a local surrogate model $\hat{g}_i$}

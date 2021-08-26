@@ -13,7 +13,7 @@ the indicator function
 we can write the approximate likelihood function $L_{d, \epsilon}(\thetab)$ in \eqref{eq:approx_likelihood} as
 \begin{gather} \label{eq:approx_likelihood_omc}
   L_{d, \epsilon}(\thetab) = \Pr(\yb \in \region(\data)) =
-  \int_{\yb \in B_\epsilon(\data)}p(\yb|\thetab)d\yb =
+  \int_{\yb \in B_{d,\epsilon}(\data)}p(\yb|\thetab)d\yb =
   \int_{\yb \in \R^D} \indicator{\region(\data)}(\yb)p(\yb|\thetab)d\yb
 \end{gather}
 which we can approximate as a sample average
@@ -60,7 +60,7 @@ $\thetab_i^*$ which are those parameter configurations that achieve
 the smallest distance between observed and simulated data for each
 realisation $\vb_i \sim p(\vb)$, i.e.\ they are solutions to the
 deterministic optimisation problems
-\begin{equation}
+\begin{equation} \label{eq:omc_opt_prob}
 \thetab_i^* = \argmin_{\thetab} ||\Phi(\data)-\Phi(M_d(\thetab, \vb_i))||_2  , \quad \vb_i \sim p(\vb).
 \end{equation}
 The weighting for each $\thetab_i^*$ is proportional to the prior

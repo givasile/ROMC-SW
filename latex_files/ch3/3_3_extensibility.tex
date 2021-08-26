@@ -8,16 +8,18 @@ step. Considering this particularity, we designed the implementation
 to support such \emph{extensibility} capability.
 
 We have specified four specific points where a user may intervene with
-their custom modules; (a) the gradient-based solver, (b) the Bayesian
-Optimisation solver, (c) the bounding box region construction and (d)
-the fitting of the local surrogate models. Each of the tasks above may
-be approached with completely different algorithms than the ones we
-propose, without the rest of the method to change.
+their custom modules; (a) the gradient-based optimization, (b) the
+Bayesian Optimization, (c) the proposal region construction and (d)
+the surrogate model fitting. These are the four critical parts of the
+ROMC procedure, whereas the rest of the code is the backbone of the
+algorithm; each of them may be approached with a completely different
+algorithm than the one we propose, without the rest of the method to
+collapse.
 
 The four replacable parts described above, are solved using the four
-methods of the \linebreak \code{OptimisatioProblem} class;
-\code{solve_gradients(**kwargs)}, \code{solve_bo(**kwargs)},
-\linebreak \code{build_region(**kwargs)},
+methods of the \linebreak \code{OptimisatioProblem} class; (a)
+\code{solve_gradients(**kwargs)}, (b) \code{solve_bo(**kwargs)},
+\linebreak (c) \code{build_region(**kwargs)}, (d)
 \code{fit_local_surrogate(**kwargs)}. Therefore, the user should
 create a custom class that inherits the basic
 \code{OptimisatioProblem} class and overwrites one or more of the
@@ -58,9 +60,12 @@ romc = elfi.ROMC(dist, bounds, custom_optim_class=customOptim)
 ----------------------------------------------------------------------------    
 \end{Code}
 
-In the same way, the user may replace the other three functionalities,
-respecting the side-effects of each one. In the following four
-snippets we present the signature of each method. 
+In the same way, the user may replace each of the other three
+functionalities. The only restriction that must be respected, concerns
+the side-effects each method has at the \code{OptimisatioProblem}
+class level. In the following four snippets we present the signature
+of each method, pointing out with a left arrow the side-effects that
+must be included in the custom routine that will replace them.
 
 
 \begin{Code}
@@ -73,9 +78,9 @@ def solve_gradients(self, **kwargs):
   if success:
     self.result = RomcOpimisationResult(res.x, res.y, jac, hess_inv)
     self.state["solved"] = True
-    return True
+    return True 
   else:
-    return False
+    return False 
 ----------------------------------------------------------------------------    
 def solve_bo(self, **kwargs):
   self.state["attempted"] = True
@@ -112,17 +117,19 @@ def fit_local_surrogate(self, **kwargs):
 ----------------------------------------------------------------------------    
 \end{Code}
 
+The two classes that may be needed for creating the custom routines
+are \\ (a) \code{RomcOpimisationResult} and (b)
+\code{NDimBoundingBox}. We present their signatures below.
 
 \begin{Code}
 ---------------------------------- python ----------------------------------
 class RomcOpimisationResult:
-    def __init__(self, x_min, f_min, jac=None, hess=None, hess_inv=None):
+    def __init__(self, x_min, f_min, hess_appr):
         Parameters
         ----------
         x_min: np.ndarray (D,) or float, the minimum point
         f_min: float, distance at the minimum point
-        jac: np.ndarray (D,), gradients at the minimum point
-        hess_inv: np.ndarray (DxD), inverse Hessian at the minimum point
+        hess_appr: np.ndarray (DxD), Hessian approximation at x_min
         """
 ----------------------------------------------------------------------------    
 class NDimBoundingBox:
@@ -132,6 +139,7 @@ class NDimBoundingBox:
         rotation: np.array (D,D),  rotation matrix for the bounding box
         center: np.array (D,) center of the bounding box
         limits: np.ndarray, shape: (D,2), the limits of the bounding box
+        eps_region: float, distance threshold 
 ----------------------------------------------------------------------------    
 \end{Code}
 

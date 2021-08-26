@@ -38,16 +38,16 @@ At the training (fitting) part, the goal is the estimation of the
 proposal regions $\mathcal{\hat{S}}_i$. The tasks are; (a) sampling
 the nuisance variables $\vb_i \sim p(\vb)$ for obtaining the
 deterministic functions $d_i(\thetab)$, (b) defining the optimisation
-problems $\min_{\thetab} \: g_i(\thetab)$, (c) obtaining
+problems $\min_{\thetab} \: d_i(\thetab)$, (c) obtaining
 $\thetab_i^*$, $d_i^*$ (d) checking whether $d_i^* \leq \epsilon$ and
-(e) computing the proposal distribution $q_i$. If gradients are
-available, using a gradient-based method is advised for obtaining
-$\thetab_i^*$ much faster. In case $\nabla_{\thetab} g_i$ is available
-in closed-form, the procedure is upgraded in terms of both accuracy
-and efficiency; If closed-form description is not available, gradients
+(e) computing the proposal distribution $q_i$. If $d_i(\thetab)$ is
+differentiable, using a gradient-based method is advised for obtaining
+$\thetab_i^*$ faster. In case $\nabla_{\thetab} d_i$ is available in
+closed-form, the procedure is upgraded in terms of both accuracy and
+efficiency. If closed-form description is not available, gradients
 approximation with finite-differences requires two evaluations of
-$g_i$ for \emph{each} parameter $\theta_d$, which can only work in
-low-dimensional problems. If $g_i(\thetab)$ is not differentiable, the
+$d_i$ for \emph{each} parameter $\theta_d$, which can only work in
+low-dimensional problems. If $d_i(\thetab)$ is not differentiable, the
 Bayesian Optimisation can be used as an alternative solution. In this
 scenario, the training part becomes slower due to fitting of the
 surrogate model and the blind optimisation steps. After obtaning the
