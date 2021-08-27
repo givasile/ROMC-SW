@@ -16,47 +16,50 @@ algorithm; each of them may be approached with a completely different
 algorithm than the one we propose, without the rest of the method to
 collapse.
 
-The four replacable parts described above, are solved using the four
+The four replaceable parts described above, are solved using the four
 methods of the \linebreak \code{OptimisatioProblem} class; (a)
 \code{solve_gradients(**kwargs)}, (b) \code{solve_bo(**kwargs)},
 \linebreak (c) \code{build_region(**kwargs)}, (d)
 \code{fit_local_surrogate(**kwargs)}. Therefore, the user should
 create a custom class that inherits the basic
 \code{OptimisatioProblem} class and overwrites one or more of the
-above four functions with custom ones. We illustrate that in the
+above four functions with custom ones.
+
+We illustrate that in the
 following example; suppose we want to blindly set the proposal region
 as a predefined n-dimensional bounding box around the optimal
 point. The following snippet illustrates how:
 
 \begin{Code}
 ---------------------------------- python ----------------------------------
-from elfi.methods.inference.romc import OptimisationProblem
-from elfi.methods.utils import NDimBoundingBox
-
-bounds = [(-2.5, 2.5)]
-dim = data.shape[-1]
-
 class customOptim(OptimisationProblem):
     def __init__(self, **kwargs):
         super(customOptim, self).__init__(**kwargs)
         
-    def build_region(self, **kwargs):
-        # compute bounding box
-        rotation = np.eye(1)
-        theta_0 = self.result.x_min
-        
-        bounding_box = np.array([[theta_0[0]-1, theta_0[0]+1]])
-        eps = kwargs["eps_region"]
-        
-        self.regions = [NDimBoundingBox(rotation, theta_0, bounding_box, eps)]
-        
-        # update state
-        self.eps_region = kwargs["eps_region"]
-        self.state["region"] = True
-        return True
+    def fit_local_surrogate(self, **kwargs):
+        nof_samples = 500
+        objective = self.objective
 
-# Defines the ROMC inference method
-romc = elfi.ROMC(dist, bounds, custom_optim_class=customOptim)
+        local_surrogates = []
+        for i in range(len(self.regions)):
+            # prepare dataset
+            x = self.regions[i].sample(nof_samples)
+            y = np.array([objective(ii) for ii in x])
+
+            # train Neural Network
+            mlp = MLPRegressor(hidden_layer_sizes=(10,10), solver='adam')
+            model = Pipeline([('linear', mlp)])
+            model = model.fit(x, y)
+            local_surrogates.append(self.create_local_surrogate(model))
+
+        self.local_surrogates = local_surrogates
+        self.state["local_surrogates"] = True
+
+    def create_local_surrogate(self, model):
+        def _local_surrogate(th):
+            th = np.expand_dims(th, 0)
+            return float(model.predict(th))
+        return _local_surrogate
 ----------------------------------------------------------------------------    
 \end{Code}
 
