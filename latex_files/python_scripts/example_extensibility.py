@@ -50,13 +50,21 @@ plt.xlabel(r"$\theta_1$")
 plt.ylabel(r"$\theta_2$")
 plt.plot(x["t1"], x["t2"], "bo")
 if savefig:
-    plt.savefig(os.path.join(prepath, "mae2_prior_samples.png"),
+    plt.savefig(os.path.join(prepath, "mae2_prior_samples_nn.png"),
                 bbox_inches="tight")
     tplt.clean_figure()
-    tplt.save(os.path.join(prepath, "ma2_prior_samples.tex"))
+    tplt.save(os.path.join(prepath, "ma2_prior_samples_nn.tex"))
 plt.show(block=False)
 
+
 ####### ROMC with gradients ################
+from elfi.methods.inference.romc import OptimisationProblem
+from elfi.methods.utils import NDimBoundingBox
+from sklearn.pipeline import Pipeline
+from sklearn.neural_network import MLPRegressor
+from functools import partial
+
+dim = 2
 n1 = 100
 n2 = 200
 bounds = [(-2, 2), (-1.25, 1.25)]
@@ -65,11 +73,42 @@ vis_ind_1 = 1
 vis_ind_2 = 3
 vis_ind_3 = 12
 
-romc = elfi.ROMC(model, bounds=bounds, discrepancy_name="d")
+class customOptim(OptimisationProblem):
+    def __init__(self, **kwargs):
+        super(customOptim, self).__init__(**kwargs)
+        
+    def fit_local_surrogate(self, **kwargs):
+        nof_samples = 500
+        objective = self.objective
+
+        local_surrogates = []
+        for i in range(len(self.regions)):
+            # prepare dataset
+            x = self.regions[i].sample(nof_samples)
+            y = np.array([objective(ii) for ii in x])
+
+            # train Neural Network
+            mlp = MLPRegressor(hidden_layer_sizes=(10,10), solver='adam')
+            model = Pipeline([('linear', mlp)])
+            model = model.fit(x, y)
+            local_surrogates.append(self.create_local_surrogate(model))
+
+        self.local_surrogates = local_surrogates
+        self.state["local_surrogates"] = True
+
+    def create_local_surrogate(self, model):
+        def _local_surrogate(th):
+            th = np.expand_dims(th, 0)
+            return float(model.predict(th))
+        return _local_surrogate
+
+
+romc = elfi.ROMC(model, bounds=bounds, discrepancy_name="d",
+                 custom_optim_class=customOptim)
 romc.solve_problems(n1=n1, seed=seed)
 if savefig:
     romc.distance_hist(savefig=os.path.join(
-        prepath, "ma2_distance_hist.png"))
+        prepath, "ma2_distance_hist_nn.png"))
 else:
     romc.distance_hist()
     
@@ -79,19 +118,19 @@ romc.estimate_regions(eps_filter=eps, fit_models=True)
 tmp = romc.sample(n2=n2, seed=seed)
 if savefig:
     romc.visualize_region(vis_ind_1, savefig=os.path.join(
-        prepath, "ma2_region_1.png"))
+        prepath, "ma2_region_1_nn.png"))
 else:
     romc.visualize_region(vis_ind_1)
 
 if savefig:
     romc.visualize_region(vis_ind_2, savefig=os.path.join(
-        prepath, "ma2_region_2.png"))
+        prepath, "ma2_region_2_nn.png"))
 else:
     romc.visualize_region(vis_ind_2)
 
 if savefig:
     romc.visualize_region(vis_ind_3, savefig=os.path.join(
-        prepath, "ma2_region_3.png"))
+        prepath, "ma2_region_3_nn.png"))
 else:
     romc.visualize_region(vis_ind_3)
 
@@ -103,16 +142,16 @@ if savefig:
     plot_marginal(romc.result.samples["t1"], romc.result.weights,
                   romc.result.sample_means_array[0],
                   np.sqrt(romc.result.samples_cov()[0, 0]),
-                  r"ROMC (gradient-based) - $\theta_1$",
+                  r"ROMC (Neural Network) - $\theta_1$",
                   r"$\theta_1$",
                   r"density",
                   60,
-                  (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_romc.png"))
+                  (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_romc_nn.png"))
 else:
     plot_marginal(romc.result.samples["t1"], romc.result.weights,
                   romc.result.sample_means_array[0],
                   np.sqrt(romc.result.samples_cov()[0, 0]),
-                  r"ROMC (gradient-based) - $\theta_1$",
+                  r"ROMC (Neural Network) - $\theta_1$",
                   r"$\theta_1$",
                   r"density",
                   60,
@@ -123,16 +162,16 @@ if savefig:
     plot_marginal(romc.result.samples["t2"], romc.result.weights,
                   romc.result.sample_means_array[1],
                   np.sqrt(romc.result.samples_cov()[1, 1]),
-                  r"ROMC (gradient-based) - $\theta_2$",
+                  r"ROMC (Neural Network) - $\theta_2$",
                   r"$\theta_2$",
                   r"density",
                   60,
-                  (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc.png"))
+                  (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc_nn.png"))
 else:
     plot_marginal(romc.result.samples["t2"], romc.result.weights,
                   romc.result.sample_means_array[1],
                   np.sqrt(romc.result.samples_cov()[1, 1]),
-                  r"ROMC (gradient-based) - $\theta_2$",
+                  r"ROMC (Neural Network) - $\theta_2$",
                   r"$\theta_2$",
                   r"density",
                   60,
@@ -164,12 +203,12 @@ def plot_romc_posterior(title, posterior, nof_points, savefig):
     
 # from elfi.methods.parameter_inference import ROMC
 if savefig:
-    plot_romc_posterior('ROMC (gradient-based)',
+    plot_romc_posterior('ROMC (Neural Network)',
                         romc.eval_unnorm_posterior,
                         nof_points=50,
-                        savefig=os.path.join(prepath, "mae2_romc_posterior.png"))
+                        savefig=os.path.join(prepath, "mae2_romc_posterior_nn.png"))
 else:
-    plot_romc_posterior('ROMC (gradient-based)',
+    plot_romc_posterior('ROMC (Neural Network)',
                         romc.eval_unnorm_posterior,
                         nof_points=50,
                         savefig=False)

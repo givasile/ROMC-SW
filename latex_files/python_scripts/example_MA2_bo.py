@@ -11,7 +11,7 @@ matplotlib.rcParams['text.usetex'] = True
 
 logging.basicConfig(level=logging.INFO)
 prepath = './../images/chapter4/'
-savefig = False
+savefig = True
 
 def plot_marginal(samples, weights, mean, std, title, xlabel, ylabel, bins, range, ylim, savepath):
     plt.figure()
@@ -213,12 +213,12 @@ def plot_romc_posterior(title, posterior, nof_points, savefig):
 
 
 if savefig:
-    plot_romc_posterior('MAE2, ROMC Unnorm Posterior (BO)',
+    plot_romc_posterior('ROMC (BO)',
                         romc1.eval_unnorm_posterior,
                         nof_points=50,
                         savefig=os.path.join(prepath, "mae2_romc_posterior_bo.png"))
 else:
-    plot_romc_posterior('MAE2, ROMC Unnorm Posterior (BO)',
+    plot_romc_posterior('ROMC (BO)',
                         romc1.eval_unnorm_posterior,
                         nof_points=50,
                         savefig=False)

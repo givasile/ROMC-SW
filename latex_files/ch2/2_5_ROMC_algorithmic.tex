@@ -1,7 +1,7 @@
 For designing an extendable implementation of ROMC, we firstly define
 ROMC as a sequence of algorithmic steps. The algorithmic view of ROMC
 serves as the driver for the implementation at \pkg{ELFI}. At a high
-level, ROMC can be split into the training and the inference part. In
+level, ROMC can be split into the trainind the inference part. In
 general terms, the training part covers all steps for estimating the
 proposal regions and the inference part for getting weighted
 samples. Algorithm~\ref{alg:romc_algorithm} defines ROMC formally;
@@ -40,21 +40,36 @@ the nuisance variables $\vb_i \sim p(\vb)$ for obtaining the
 deterministic functions $d_i(\thetab)$, (b) defining the optimisation
 problems $\min_{\thetab} \: d_i(\thetab)$, (c) obtaining
 $\thetab_i^*$, $d_i^*$ (d) checking whether $d_i^* \leq \epsilon$ and
-(e) computing the proposal distribution $q_i$. If $d_i(\thetab)$ is
-differentiable, using a gradient-based method is advised for obtaining
-$\thetab_i^*$ faster. In case $\nabla_{\thetab} d_i$ is available in
-closed-form, the procedure is upgraded in terms of both accuracy and
-efficiency. If closed-form description is not available, gradients
-approximation with finite-differences requires two evaluations of
-$d_i$ for \emph{each} parameter $\theta_d$, which can only work in
-low-dimensional problems. If $d_i(\thetab)$ is not differentiable, the
-Bayesian Optimisation can be used as an alternative solution. In this
-scenario, the training part becomes slower due to fitting of the
-surrogate model and the blind optimisation steps. After obtaning the
-optimal points $\thetab^*$, the training part gets completed by
-estimating the proposal regions;
-Algorithm~\ref{alg:region_construction} describes the line search
-approach for finding the region's boundaries.
+(e) computing the proposal distribution $q_i$.
+
+If $d_i(\thetab)$ is differentiable, using a gradient-based method is
+advised for obtaining $\thetab_i^*$ faster. In this case, the
+gradients $\nabla_{\thetab} d_i$ gradients are approximated
+automatically with finite-differences. This procedure requires about
+two evaluations of $d_i$ for \emph{each} parameter $\theta_d$, which
+can only work in low-dimensional problems. If $d_i(\thetab)$ is not
+differentiable, the Bayesian Optimisation can be used as an
+alternative solution. In this scenario, the training part becomes
+slower due to fitting of the surrogate model and the blind
+optimisation steps.
+
+After obtaining the optimal points $\thetab^*$, the training part gets
+completed by estimating the proposal
+regions. Algorithm~\ref{alg:region_construction} describes the line
+search approach for finding the region's boundaries. An important step
+for the proposal region estimation is deciding the axes of the
+bounding box i.e. the directions $\vb_d$ we follow for reaching the
+boundaries. We approximate them as the direction of the highest
+curvature of $d_i$ at $\thetab_i^*$. This estimation is given by the
+eigenvalues of the Hessian matrix $\hessian_i$ of
+$d_i$\footnote{Either the real distance $d_i$ or the Gaussian Process
+  approximation $\hat{d}_i$} at $\thetab_i$. The Hessian matrix is
+approximated numerically. In case where the distance function is the
+Euclidean, the Hessian matrix can be also computed as
+$\hessian_i = \jac_i^T\jac_i$, where $\jac_i$ is the Jacobian matrix
+of the summary statistics $\Phi(M_d(\thetab, \vb=\vb_i))$ at
+$\thetab_i^*$. The approximation through the Jacobian matrix has the
+computational advantage of using only first-order derivatives.
 
 \subsubsection*{Inference Part}
 Performing the inference includes one or more of the following three

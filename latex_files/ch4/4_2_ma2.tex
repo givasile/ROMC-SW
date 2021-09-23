@@ -52,31 +52,46 @@ distance \eqref{eq:ma2_summary_4}.
 
 As in the previous example, we perform the inference using both
 optimisation alternatives (gradient-based and Bayesian optimisation)
-and we compare the results at each step. In the end, we use the
-Rejection ABC algorithm for evaluating both approximations. Rejection
-ABC is a robust method in terms of accuracy and can be used for
-baseline comparison.
+and, in the end, by extending the implementation with a Neural Network
+surrogate model. In the end, we use the Rejection ABC algorithm for
+evaluating our approaches; Rejection ABC is a robust method in terms
+of accuracy and can be used for baseline comparison.
+
+
+The implementation's extension is performed using a multi-layer
+perceptron as local surrogate function, as illustrated in chapter
+... This intervention can be done easily by coding a custom
+optimisation function with the surrogate model of our own
+preference. The surrogate model substitutes the real distance function
+$d_i$ inside the proposal region $q_i \quad \forall i$ at the
+inference phase i.e. sampling, computing an expectation and evaluating
+the posterior. In our example we use a neural network of two hidden
+layers of 10 neurons each and we train it in 500 examples for each
+proposal region. 
+
 
 In figure \ref{fig:ma2_5}, we illustrate the acceptance region of the
-same deterministic simulator, i.e. with \code{seed=799981517}, in the
-gradient-based and the Bayesian optimisation case. The acceptance
-regions are similar in both cases. The optimal points are close and
-the search directions are similar. This indicates that both
-optimization scemes work robustly. Therefore, we observe that as we
-move away from the optimal pint, the surrogate model fitted by the
-Bayesian Optimisation tends to deviate from the real distance. This
-divergence affects the bounding box approximation and explains some
-small differences between the posterior approximations, as shown in
-figure \ref{fig:ma2_3}. In figure \ref{fig:ma2_3}, we demonstrate the
-histograms of the marginal posteriors, using the three different
-methods; (a) Rejection ABC (first line), (b) ROMC with gradient-based
-optimisation (second line) and (c) ROMC with Bayesian optimisation
-(third line). Undoubtedly, we observe that there is a significant
-similarity between the three approaches. The Rejection ABC inference
-has been set to infer 10000 accepted samples, with threshold
-$\epsilon=0.1$. At table \ref{tab:ma2} we present the empirical mean
-$\mu$ and standard deviation $\sigma$ for each inference approach, for
-verifying their agreement.
+same deterministic simulator, in the gradient-based and the Bayesian
+optimisation case. The acceptance regions are similar even though the
+optimal points differ significantly due to the different optimisation
+schemens.
+
+In figure \ref{fig:ma2_3}, we demonstrate the histograms of the
+marginal posteriors, using all four approaches; (a) Rejection ABC
+(first column), (b) ROMC with gradient-based optimisation (second
+column) (c) ROMC with Bayesian optimisation (third column) and (d)
+ROMC with the Neural Network extendion. We observe that there is a
+significant aggreement between the different approaches. The Rejection
+ABC inference has been set to infer 10000 accepted samples, with
+threshold $\epsilon=0.1$. At table \ref{tab:ma2} we present the
+empirical mean $\mu$ and standard deviation $\sigma$ for each
+inference approach. In figure \ref{fig:ma2_4}, we illustrate the
+unnormalized posterior for the three different variations of the ROMC
+method.
+
+\subsubsection*{Extending the implementation}
+
+
 
 \begin{center} \label{tab:ma2}
 \begin{tabular}{ c|c|c|c|c }
@@ -85,9 +100,11 @@ verifying their agreement.
 \hline \hline
 Rejection ABC & 0.516 & 0.142 & 0.07 & 0.172 \\
 \hline
-ROMC (gradient-based) & 0.504 & 0.143 & 0.033 & 0.171 \\
+ROMC (gradient-based) & 0.503 & 0.143 & 0.032 & 0.17 \\
 \hline
-ROMC (Bayesian optimisation) & 0.502 & 0.166 & 0.079 & 0.168 \\
+ROMC (Bayesian optimisation) & 0.494 & 0.16 & 0.086 & 0.167 \\
+\hline
+ROMC (Neural Network) & 0.503 & 0.140 & 0.03 & 0.171 \\
 \hline
 \end{tabular}
 \end{center}
@@ -116,36 +133,32 @@ ROMC (Bayesian optimisation) & 0.502 & 0.166 & 0.079 & 0.168 \\
 \end{figure}
 
 
-% \begin{figure}[h]
-%     \begin{center}
-%       \includegraphics[width=0.35\textwidth]{./latex_files/images/chapter4/mae2_hist_t1_rejection.png}
-%       \includegraphics[width=0.35\textwidth]{./latex_files/images/chapter4/mae2_hist_t2_rejection.png}\\
-%       \includegraphics[width=0.35\textwidth]{./latex_files/images/chapter4/mae2_hist_t1_romc.png}
-%       \includegraphics[width=0.35\textwidth]{./latex_files/images/chapter4/mae2_hist_t2_romc.png}\\
-%       \includegraphics[width=0.35\textwidth]{./latex_files/images/chapter4/mae2_hist_t1_romc_bo.png}
-%       \includegraphics[width=0.35\textwidth]{./latex_files/images/chapter4/mae2_hist_t2_romc_bo.png}\\
-%     \end{center}
-%     \caption[MA2 example, evaluation of the marginal
-%     distributions.]{Histogram of the marginal posterior distributions
-%       using three different inference approaches; (a) in the first
-%       row, the samples are obtained using Rejection ABC sampling (b)
-%       in the second row, using ROMC with a gradient-based optimiser
-%       and (c) in the third row, using ROMC with Bayesian optimization
-%       approach. The vertical (red) line represents the samples mean
-%       $\mu$ and the horizontal (black) the standard deviation
-%       $\sigma$.}
-%   \label{fig:ma2_3}
-% \end{figure}
-
-
 \begin{figure}[ht]
   \begin{center}
-    \input{./latex_files/images/chapter4/mae2_hist_t1_rejection.tex}
-    \input{./latex_files/images/chapter4/mae2_hist_t2_rejection.tex}\\
-    \input{./latex_files/images/chapter4/mae2_hist_t1_romc.tex}
-    \input{./latex_files/images/chapter4/mae2_hist_t2_romc.tex}\\
-    \input{./latex_files/images/chapter4/mae2_hist_t1_romc_bo.tex}
-    \input{./latex_files/images/chapter4/mae2_hist_t2_romc_bo.tex}\\
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t1_rejection.tex}
+    }
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t1_romc.tex}
+    }
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t1_romc_bo.tex}
+    }
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t1_romc_nn.tex}
+    }\\
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t2_rejection.tex}
+    }
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t2_romc.tex}
+    }
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t2_romc_bo.tex}
+    }
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t2_romc_nn.tex}
+    }
     \end{center}
     \caption[MA2 example, evaluation of the marginal
     distributions.]{Histogram of the marginal posterior distributions
@@ -159,15 +172,18 @@ ROMC (Bayesian optimisation) & 0.502 & 0.166 & 0.079 & 0.168 \\
   \label{fig:ma2_3}
 \end{figure}
 
-
-
-% \begin{figure}[H]
-%     \begin{center}
-%       \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter4/mae2_romc_posterior.png}
-%       \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter4/mae2_romc_posterior_bo.png}
-%     \end{center}
-%     \caption[MA2 example, approximate posterior.]{ROMC approximate posteriors using gradient-based approach
-%       (left) and Bayesian optimisation approach (right).}
-%   \label{fig:ma2_4}
-% \end{figure}
-
+\begin{figure}[ht]
+  \begin{center}
+    \resizebox{.32\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_romc_posterior.tex}
+    }
+    \resizebox{.32\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_romc_posterior_bo.tex}
+    }
+    \resizebox{.32\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_romc_posterior_nn.tex}
+    }
+    \end{center}
+    \caption[MA2 example, posterior distribution.]{The unnormalized posterior distribution using the ROMC method with (a) a gradient-based optimization (b) Bayesian Optimization (c) gradient-based with a Neural Network as a surrogate model.}
+  \label{fig:ma2_4}
+\end{figure}
