@@ -31,6 +31,7 @@
 
 %% another package (only for this demo article)
 \usepackage{framed}
+\usepackage{marginnote}
 
 %% new custom commands
 \newcommand{\class}[1]{`\code{#1}'}
@@ -55,12 +56,21 @@
 \newcommand{\thetabij}{\thetab_{ij}}
 \newcommand{\thetabi}{\thetab_i}
 
+\newcommand{\simulator}{g}
 \newcommand{\region}{B_{d,\epsilon}}
 \newcommand{\indicator}[1]{\mathbb{1}_{#1}}
 \newcommand{\regioni}{B_{d,\epsilon}^i}
 \newcommand{\data}{\mathbf{y_0}}
+\newcommand{\accregioni}{C^i_{\epsilon}}
+\newcommand{\accregionihat}{\hat{C}^i_{\epsilon}}
+
+\newcommand{\danger}{\fontencoding{U}\fontfamily{futs}\selectfont\char 66\relax}
+\newcommand{\TODO}[1]{\textcolor{red}{TODO #1}\marginpar{\textcolor{red}{\Large \danger}}}
+
 
 \newcommand{\R}{\mathbb{R}}
+
+\newcommand{\Ex}{\mathbb{E}}
 
 \DeclareMathOperator*{\argmax}{argmax}
 \DeclareMathOperator*{\argmin}{argmin}

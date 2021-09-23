@@ -19,7 +19,7 @@ we can write the approximate likelihood function $L_{d, \epsilon}(\thetab)$ in \
 which we can approximate as a sample average
 \begin{equation}
 L_{d, \epsilon}(\thetab) \approx \frac{1}{N} \sum_{i=1}^N \indicator{\region (\data)} (\yb_i)
-  \text{ where } \yb_i = M_d(\thetab, \vb_i), \quad \vb_i \sim p(\vb). \label{eq:alt_view}
+ \quad \text{ where } \yb_i = \simulator(\thetab, \vb_i),\; \vb_i \sim p(\vb). \label{eq:alt_view}
 \end{equation}
 We thus approximate the likelihood of a specific $\thetab$ by counting
 the fraction of samples that lie inside the area around the
@@ -28,40 +28,35 @@ simulator via the $\vb_i$ has two crucial consequences: First, we can
 sample the nuisance variables $\vb_i \sim p(\vb)$ only once and use
 the same set of samples to approximate $L_{d,\epsilon}(\thetab)$ for
 different values of $\thetab$. Secondly, since
-$\yb_i=M_d(\thetab, \vb_i)$ is a function of $\thetab$, checking
-whether $\yb_i$ is contained in region $\region (\data)$ for a
-particular value of $\thetab$ is the same as checking whether
-$\thetab$ is in the acceptance region $\mathcal{S}_i = \{ \thetab:
-M_d(\thetab, \vb_i) \in \region(\data) \}$. This leads to the
-likelihood approximation
+$\yb_i=\simulator(\thetab, \vb_i)$ is a function of $\thetab$,
+checking whether $\yb_i$ is contained in region $\region (\data)$ for
+a particular value of $\thetab$ is the same as checking whether
+$\thetab$ is in the acceptance region $\accregioni
+= \{ \thetab: \simulator(\thetab, \vb_i) \in \region(\data) \}$. This
+leads to the likelihood approximation
 \begin{equation}
-L_{d, \epsilon}(\thetab) \approx \frac{1}{N} \sum_{i=1}^N \indicator{\mathcal{S}_i}(\thetab) \label{eq:alt_view_theta}
+L_{d, \epsilon}(\thetab) \approx \frac{1}{N} \sum_{i=1}^N \indicator{\accregioni}(\thetab) \label{eq:alt_view_theta}
 \end{equation}
 and the corresponding approximate posterior
 \begin{equation} \label{eq:approx_posterior_omc}
   p_{d,\epsilon}(\thetab|\data) \propto
-  p(\thetab) \sum_i^N  \indicator{\mathcal{S}_i}(\thetab).
+  p(\thetab) \sum_i^N  \indicator{\accregioni}(\thetab).
 \end{equation}
-As argued by \citet{Ikonomov2019}, this derivations provide a unique
+As argued by \citet{Ikonomov2019}, these derivations provide a unique
 perspective for likelihood-free inference by shifting the focus onto
-the geometry of the acceptance regions $\mathcal{S}_i = \{ \thetab:
-M_d(\thetab, \vb_i) \in \region(\data)\}$. Indeed, the task of
-approximating the likelihood and/or posterior becomes a task of
-characterising the sets $\mathcal{S}_i$.
+the geometry of the acceptance regions $\accregioni$. Indeed, the task
+of approximating the likelihood and/or posterior becomes a task of
+characterising the sets $\accregioni$.
 
 OMC by \citet{Meeds2015} assumes that the distance $d$ is the
 Euclidean distance between summary statistics $\Phi$ of the observed
-and generated data, and that the $\mathcal{S}_i$ can be well
-approximated by infinitesimally small ellipses. These assumptions
-leads to an approximation of the posterior in terms of weighted
-samples $\thetab_i^*$. In more detail, OMC considers the limit of
-$\epsilon \to 0$ and represents the sets $\mathcal{S}_i$ by points
-$\thetab_i^*$ which are those parameter configurations that achieve
-the smallest distance between observed and simulated data for each
-realisation $\vb_i \sim p(\vb)$, i.e.\ they are solutions to the
-deterministic optimisation problems
+and generated data, and that the $\accregioni$ can be well
+approximated by infinitesimally small ellipses. These assumptions leads to an approximation of the posterior in
+terms of weighted samples $\thetab_i^*$ that achieve the smallest
+distance between observed and simulated data for each realisation
+$\vb_i \sim p(\vb)$, i.e.\
 \begin{equation} \label{eq:omc_opt_prob}
-\thetab_i^* = \argmin_{\thetab} ||\Phi(\data)-\Phi(M_d(\thetab, \vb_i))||_2  , \quad \vb_i \sim p(\vb).
+\thetab_i^* = \argmin_{\thetab} ||\Phi(\data)-\Phi(\simulator(\thetab, \vb_i))||_2  , \quad \vb_i \sim p(\vb).
 \end{equation}
 The weighting for each $\thetab_i^*$ is proportional to the prior
 density at $\thetab_i^*$ and inversely proportional to the determinant

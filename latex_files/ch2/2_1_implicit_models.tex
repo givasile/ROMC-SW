@@ -1,19 +1,20 @@
 %% Not used; Michael combined the text with the LFI intro
 
 An implicit or simulator-based model is a parameterised stochastic
-data generating mechanism. The key characteristic
-of these models is that we can sample (simulate) data points,
-but that we cannot evaluate the likelihood of a specific set of observations
-$\data$. Formally, a simulator-based model is described as a
-parameterised family of probability density functions
-$\{ p_{\yb|\thetab}(\yb) \}_{\thetab}$, whose closed-form is either
+data generating mechanism. The key characteristic of these models is
+that we can sample (simulate) data points, but that we cannot evaluate
+the likelihood. Formally, a simulator-based model is described as a
+parameterised family of probability density functions $\{
+p_{\yb|\thetab}(\yb) \}_{\thetab}$, whose closed-form is either
 unknown or intractable to evaluate. Whereas evaluating
 $p_{\yb|\thetab}(\yb)$ is intractable, sampling is
 feasible. Practically, a simulator can be understood as a black-box
-data generating machine $M_r$\footnote{The subscript $r$ in $M_r$ indicates the
-  \textit{random} simulator. In the next chapters we will introduce
-  $M_d$ witch stands for the \textit{deterministic} simulator.} that
-produces samples $\yb$ in a stochastic manner for any given a set of parameters $\thetab$.% i.e.\ $M_r(\thetab) \rightarrow \yb$.
+data generating machine $\simulator$\footnote{The subscript $r$ in $M_r$
+indicates the \textit{random} simulator. In the next chapters we will
+introduce $M_d$ witch stands for the \textit{deterministic}
+simulator.} that produces samples $\yb$ in a stochastic manner for any
+given a set of parameters $\thetab$.% i.e.\
+$M_r(\thetab) \rightarrow \yb$.
 
 Simulator-based models provide considerable modelling freedom; any physical process that can be
 conceptualised as a computer program of finite steps can be modelled
