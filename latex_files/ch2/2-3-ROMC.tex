@@ -1,14 +1,14 @@
-\citet{Ikonomov2019} showed that considering infinitesimally small ellipses can lead
-to highly overconfident posteriors. We refer the reader to their paper
-for the technical details and conditions for this issue to
-occur. Intuitively, it happens because the weights in OMC are only
-computed from information at $\thetab_i^*$. And using only local
-information can be misleading. For example if the curvature of
-$||\Phi(\data)-\Phi(\simulator(\thetab, \vb_i))||_2$ at $\thetab_i^*$
-is nearly flat, the curvature alone may wrongly indicate that
-$\accregioni$ is much larger than it actually is. We implement in our
-software package the robust generalisation of OMC
-by \citet{Ikonomov2019} that resolves this issue.
+\citet{Ikonomov2019} showed that considering infinitesimally small
+ellipses can lead to highly overconfident posteriors. We refer the
+reader to their paper for the technical details and conditions for
+this issue to occur. Intuitively, it happens because the weights in
+OMC are only computed from information at $\thetab_i^*$. And using
+only local information can be misleading. For example if the curvature
+of $||\Phi(\data)-\Phi(\simulator(\thetab, \vb_i))||_2$ at
+$\thetab_i^*$ is nearly flat, the curvature alone may wrongly indicate
+that $\accregioni$ is much larger than it actually is. We implement in
+our software package the robust generalisation of OMC by
+\citet{Ikonomov2019} that resolves this issue.
 
 ROMC approximates the acceptance regions $\accregioni$ and defines
 local proposal distributions $q_i(\thetab)$ on them from which the
@@ -27,11 +27,12 @@ $\Ex_{p(\thetab|\data)}[h(\thetab)]$ of some function $h(\thetab)$, can be appro
 \end{equation}
 \citet{Ikonomov2019} considered uniform distributions as proposal
 distributions so that the main work is to approximate the acceptance
-regions $\accregioni$ and to represent them such that uniform sampling is
-easy. The approximation of the acceptance regions contains two compulsory
-and one optional step: (1) solving the optimisation problems as in OMC, (2)
-constructing bounding boxes around $\accregioni$ and optionally, (3)
-refining the approximation via a probabilistic surrogate model of the distance.
+regions $\accregioni$ and to represent them such that uniform sampling
+is easy. The approximation of the acceptance regions contains two
+compulsory and one optional step: (1) solving the optimisation
+problems as in OMC, (2) constructing bounding boxes around
+$\accregioni$ and optionally, (3) refining the approximation via a
+probabilistic surrogate model of the distance.
 \subsubsection*{Solving the deterministic optimisation problems}
 For each set of nuisance variables $\vb_i, i = \{1,2,\ldots,n_1 \}$, we
 search for a point $\thetab^*_i$ such that
@@ -67,19 +68,14 @@ The acceptance region $\accregioni$ is approximated by a bounding box
 $\accregionihat$ around it. Ideally, we want the bounding box to be as
 tight as possible to $\mathcal{S}_i$, to ensure high acceptance rate
 in the importance sampling, and big enough for not discarding valid
-parts of $\mathcal{S}_i$. \TODO{did remove the issue of disconnected
-sets; which needed to be handled by multiple restarts with the same
-seed. Is this something that the code would support? It's expensive
-because we don't know when we need it! I think it's an open research
-question, not related to this software paper, so I omitted it.} The
-bounding boxes are built in two steps. First, we define their axes
-$\mathbf{v}_d$ based on the (estimated) curvature of the distance
-$\thetab_i^*$, second, we determine the size of the box via a
-one-dimensional line-search method along each axix, see
-Algorithm~\ref{alg:region_construction} for the details. After the
-bounding boxes construction, a uniform distribution $q_i$ is defined
-on each bounding box, and is used as the proposal region for
-importance sampling.
+parts of $\mathcal{S}_i$. The bounding boxes are built in two
+steps. First, we define their axes $\mathbf{v}_d$ based on the
+(estimated) curvature of the distance $\thetab_i^*$, second, we
+determine the size of the box via a one-dimensional line-search method
+along each axix, see Algorithm~\ref{alg:region_construction} for the
+details. After the bounding boxes construction, a uniform distribution
+$q_i$ is defined on each bounding box, and is used as the proposal
+region for importance sampling.
 
 \subsubsection*{Refining the estimate via a local surrogate model (optional)}
 When computing the weight $w_{ij}$ in \eqref{eq:sampling}, we need to
@@ -114,6 +110,3 @@ surrogate model was used to obtain $\thetab_i^*$ in the first place
 function instead of $d_i(\thetab)$ to generate the training data. This
 essentially replaces the global GP model with a simpler local
 quadratic model which is typically more robust.
-
-
-

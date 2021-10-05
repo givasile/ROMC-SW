@@ -50,16 +50,20 @@ that is defined via a distance function $d$, i.e.\ $\region(\data)
 
 The basic characterisation of the likelihood in \eqref{eq:likelihood}
 highlights two sources of intractability: The first is the computation
-of the probability $\Pr(\simulator(\thetab,\vb) \in \region(\data))$, the second
-is the limit of $\epsilon \to 0$.  Whilst the probability can be
-approximated with samples, this becomes computationally infeasible if
-$\epsilon$ is too small. Hence, a large class of inference methods
-work with $\epsilon >0$, which leads to the approximate likelihood
-function $L_{d, \epsilon}(\thetab)$,
+of the probability $\Pr(\simulator(\thetab,\vb) \in \region(\data))$,
+the second is the limit of $\epsilon \to 0$.  Whilst the probability
+can be approximated with samples, this becomes computationally
+infeasible if $\epsilon$ is too small. Hence, a large class of
+inference methods work with $\epsilon >0$, which leads to the
+approximate likelihood function $L_{d, \epsilon}(\thetab)$,
 \begin{equation} \label{eq:approx_likelihood}
   L_{d, \epsilon}(\thetab) = \Pr(\yb \in \region(\data)), \quad \text{where  } \epsilon > 0.
 \end{equation}
-Most often in likelihood-free inference, we are interested in the posterior distribution of the parameters $\thetab$ given some observed data. The approximate likelihood function in \eqref{eq:approx_likelihood} implies the approximate posterior  $p_{d,\epsilon}(\thetab|\data)$, 
+Most often in likelihood-free inference, we are interested in the
+posterior distribution of the parameters $\thetab$ given some observed
+data. The approximate likelihood function in
+\eqref{eq:approx_likelihood} implies the approximate posterior
+$p_{d,\epsilon}(\thetab|\data)$,
 \begin{equation} \label{eq:approx_posterior}
   p_{d,\epsilon}(\thetab|\data) \propto L_{d, \epsilon}(\thetab) p(\thetab).
 \end{equation}
@@ -70,8 +74,9 @@ function in \eqref{eq:likelihood}. Other strategies include modelling
 the (stochastic) relationship between $\thetab$ and $\yb$, and its
 reverse, or framing likelihood-free inference as a ratio estimation
 problem \citep[see e.g.\ ][]{Blum2010, Wood2010, Papamakarios2016,
-Thomas2016, Papamakarios2019, Chen2019, Thomas2020, Hermans2020}. However, both OMC and robust OMC, which we introduce next,
-are based on the approximation in \eqref{eq:approx_likelihood}.
+  Thomas2016, Papamakarios2019, Chen2019, Thomas2020,
+  Hermans2020}. However, both OMC and robust OMC, which we introduce
+next, are based on the approximation in \eqref{eq:approx_likelihood}.
 
 % likelihood of a specific parameter configuration $\thetab$ is equal to
 % the probability that the simulator will produce outputs infinitively
