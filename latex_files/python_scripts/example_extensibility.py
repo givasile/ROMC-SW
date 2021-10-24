@@ -11,7 +11,7 @@ matplotlib.rcParams['text.usetex'] = True
 
 logging.basicConfig(level=logging.INFO)
 prepath = './../images/chapter4/'
-savefig = True
+savefig = False
 
 def plot_marginal(samples, weights, mean, std, title, xlabel, ylabel, bins, range, ylim, savepath):
     plt.figure()
@@ -58,8 +58,8 @@ plt.show(block=False)
 
 
 ####### ROMC with gradients ################
-from elfi.methods.inference.romc import OptimisationProblem
-from elfi.methods.utils import NDimBoundingBox
+from elfi.methods.inference.romc import OptimisationProblem, NDimBoundingBox
+# from elfi.methods.utils import NDimBoundingBox
 from sklearn.pipeline import Pipeline
 from sklearn.neural_network import MLPRegressor
 from functools import partial
@@ -81,6 +81,14 @@ class customOptim(OptimisationProblem):
         nof_samples = 500
         objective = self.objective
 
+        def local_surrogate(theta, model_scikit):
+            assert theta.ndim == 1
+            theta = np.expand_dims(theta, 0)
+            return float(model_scikit.predict(theta))
+
+        def create_local_surrogate(model):
+            return partial(local_surrogate, model_scikit=model)
+
         local_surrogates = []
         for i in range(len(self.regions)):
             # prepare dataset
@@ -91,7 +99,7 @@ class customOptim(OptimisationProblem):
             mlp = MLPRegressor(hidden_layer_sizes=(10,10), solver='adam')
             model = Pipeline([('linear', mlp)])
             model = model.fit(x, y)
-            local_surrogates.append(self.create_local_surrogate(model))
+            local_surrogates.append(create_local_surrogate(model))
 
         self.local_surrogates = local_surrogates
         self.state["local_surrogates"] = True

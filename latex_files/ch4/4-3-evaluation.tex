@@ -45,11 +45,11 @@ measure of the equivalent uniformly weighted sample population.
   # Evaluation part
   res = romc.compute_divergence(wrapper, distance="Jensen-Shannon")                                 
   print("Jensen-Shannon divergence: %.3f" % res)
-  # Jensen-Shannon divergence: 0.025
+  # Jensen-Shannon divergence: 0.035
 
   nof_samples = len(romc.result.weights)
   ess = romc.compute_ess()
   print("Nof Samples: %d, ESS: %.3f" % (nof_samples, ess))
-  # Nof Samples: 19300, ESS: 16138.825
+  # Nof Samples: 19300, ESS: 16196.214
 ----------------------------------------------------------------------------  
 \end{Code}

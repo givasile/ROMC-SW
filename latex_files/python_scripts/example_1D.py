@@ -14,7 +14,7 @@ import matplotlib
 matplotlib.rcParams['text.usetex'] = True
 
 prepath = './../images/'
-savefig = True
+savefig = False
 
 np.random.seed(21)
 class Prior:
@@ -255,7 +255,7 @@ plt.ylim([0, .6])
 if savefig:
     plt.savefig(os.path.join(
         prepath, "chapter3/example_marginal.png"), bbox_inches='tight')
-    tplt.clean_figure()
+    # tplt.clean_figure()
     tplt.save(os.path.join(prepath, "chapter3/example_marginal.tex"))
 plt.show(block=False)
 
@@ -297,7 +297,7 @@ plt.legend()
 if savefig:
     plt.savefig(os.path.join(
         prepath, "chapter3/example_posterior.png"), bbox_inches='tight')
-    tplt.clean_figure()
+    # tplt.clean_figure()
     tplt.save(os.path.join(prepath, "chapter3/example_post.tex"))
 plt.show(block=False)
 
@@ -312,7 +312,6 @@ def wrapper(x):
         tmp = x[i]
         res.append(gt_posterior_pdf(float(tmp)))
     return np.array(res)
-
 
 print(romc.compute_divergence(wrapper, distance="Jensen-Shannon"))
 

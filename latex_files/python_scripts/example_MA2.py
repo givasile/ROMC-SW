@@ -11,7 +11,7 @@ matplotlib.rcParams['text.usetex'] = True
 
 logging.basicConfig(level=logging.INFO)
 prepath = './../images/chapter4/'
-savefig = True
+savefig = False
 
 def plot_marginal(samples, weights, mean, std, title, xlabel, ylabel, bins, range, ylim, savepath):
     plt.figure()
@@ -161,7 +161,7 @@ def plot_romc_posterior(title, posterior, nof_points, savefig):
         tplt.save(savefig[:-3] + "tex")
     plt.show(block=False)
 
-    
+breakpoint()
 # from elfi.methods.parameter_inference import ROMC
 if savefig:
     plot_romc_posterior('ROMC (gradient-based)',
