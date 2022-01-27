@@ -80,9 +80,11 @@
 %% - \Plainauthor{} without affiliations
 %% - Separate authors by \And or \AND (in \author) or by comma (in \Plainauthor).
 %% - \AND starts a new line, \And does not.
-\author{Achim Zeileis\\Universit\"at Innsbruck
-   \And Second Author\\Plus Affiliation}
-\Plainauthor{Achim Zeileis, Second Author}
+\author{Vasilis Gkolemis\\ATHENA RC
+  \And Michael Gutmann\\University of Edinburgh
+   \And Henri Pesonen \\University of Oslo
+}
+\Plainauthor{Vasilis Gkolemis, Michael Gutmann}
 
 
 %% - \title{} in title case
@@ -94,22 +96,24 @@
 
 %% - \Abstract{} almost as usual
 \Abstract{
-  This short article illustrates how to write a manuscript for the
-  \emph{Journal of Statistical Software} (JSS) using its {\LaTeX} style files.
-  Generally, we ask to follow JSS's style guide and FAQs precisely. Also,
-  it is recommended to keep the {\LaTeX} code as simple as possible,
-  i.e., avoid inclusion of packages/commands that are not necessary.
-  For outlining the typical structure of a JSS article some brief text snippets
-  are employed that have been inspired by \cite{Zeileis+Kleiber+Jackman:2008},
-  discussing count data regression in \proglang{R}. Editorial comments and
-  instructions are marked by vertical bars.
+  Likelihood-free inference (LFI) or Approximate Bayesian Computation (ABC) is the general framework for performing the inference in statistical models with intractable likelihood. In general, the intractability of the likelihood makes the inference problem quite challenging, therefore, many LFI methods either lack accuracy or are pretty inefficient. Robust Optimisation Monte Carlo (ROMC) is a highly-parallelizable approximate Bayesian computation (ABC) technique. In this paper, we present the implementation of ROMC in the \proglang{Python} package ELFI. Our implementation can be exploited in two directions. A scientist may use it as an out-of-the-box ABC algorithm for performing the inference in an LFI problem; we provide an easy-to-use API harmonized with the rest of the ELFI framework. Therefore, it is directly comparable with the rest of the methods included in ELFI. On the other direction, we have carefully designed ROMC in isolated algorithmic steps. Therefore, we allow the researcher to experiment with ROMC, altering or replacing parts of the algorithm with custom-created functionalities. In both scenarios, the algorithmic steps of ROMC can run in a fully-parallelizable manner, exploiting all CPU cores. We also provide some functionalities for visualization and evaluation needs. Finally, we test the robustness of our implementation on some typical LFI models that ship.
+  
+  % This short article illustrates how to write a manuscript for the
+  % \emph{Journal of Statistical Software} (JSS) using its {\LaTeX} style files.
+  % Generally, we ask to follow JSS's style guide and FAQs precisely. Also,
+  % it is recommended to keep the {\LaTeX} code as simple as possible,
+  % i.e., avoid inclusion of packages/commands that are not necessary.
+  % For outlining the typical structure of a JSS article some brief text snippets
+  % are employed that have been inspired by \cite{Zeileis+Kleiber+Jackman:2008},
+  % discussing count data regression in \proglang{R}. Editorial comments and
+  % instructions are marked by vertical bars.
 }
 
 %% - \Keywords{} with LaTeX markup, at least one required
 %% - \Plainkeywords{} without LaTeX markup (if necessary)
 %% - Should be comma-separated and in sentence case.
-\Keywords{JSS, style guide, comma-separated, not capitalized, \proglang{R}}
-\Plainkeywords{JSS, style guide, comma-separated, not capitalized, R}
+\Keywords{Bayesian Inference, Simulator-based models, Likelihood-free, \proglang{Python}, \proglang{ELFI}}
+\Plainkeywords{Bayesian Inference, Simulator-based models, Likelihood-free, Python, ELFI}
 
 %% - \Address{} of at least one author
 %% - May contain multiple affiliations for each author
@@ -117,16 +121,12 @@
 %% - May contain multiple authors for the same affiliation
 %%   (in the same first line, separated by comma).
 \Address{
-  Achim Zeileis\\
-  Journal of Statistical Software\\
-  \emph{and}\\
-  Department of Statistics\\
-  Faculty of Economics and Statistics\\
-  Universit\"at Innsbruck\\
-  Universit\"atsstr.~15\\
-  6020 Innsbruck, Austria\\
-  E-mail: \email{Achim.Zeileis@R-project.org}\\
-  URL: \url{https://eeecon.uibk.ac.at/~zeileis/}
+  Vasilis Gkolemis\\
+  Information Management Systems Institute (IMSI)\\
+  ATHENA Research and Innovation Center\\
+  Athens, Greece\\
+  E-mail: \email{vgkolemis@athenarc.gr}\\
+  URL: \url{https://givasile.github.io}
 }
 
 \begin{document}
@@ -150,7 +150,11 @@
 % \section[Introduction: Count data regression in R]{Introduction: Count data regression in \proglang{R}} \label{sec:intro}
 \section{Introduction} \label{sec:intro}
 
-% @Vasilis: we can work on the intro when we have the basic structure of the article in place.
+Simulator-based models are particularly captivating due to the modeling freedom they provide. In essence, a simulator-based model can describe any data generating mechanism that can be written as a finite set of algorithmic steps. This modeling freedom comes at a cost; performing the inference, i.e., sample or evaluate the posterior distribution, is challenging. 
+
+Optimization Monte Carlo (OMC) proposed by [..] was a novel ABC approach approximating the posterior distribution. Afterward, Forneron and Ng provided a similar method under "reverse sampler ". The key idea is turning the stochastic data-generating mechanism into a set of fully-parallelizable deterministic optimization processes. Robust OMC (ROCM) provided an upgrade in OMC by locating and resolving some fundamental failure modes of the latter.
+
+In this paper, we present an extendable and parallelizable implementation of ROMC at the Python package 'Engine for Likelihood-Free inference (ELFI) .' We have followed specific design principles for making the implementation extendible. Each step of the method is designed as a fully-isolated and parallelizable step; The user may easily replace parts of the technique with custom components without the backbone method collapse. Therefore, our implementation is a friendly tool for the research community to experiment with alterations of ROMC. Apart from the main functionalities, we also provide essential visualization and evaluation tools for gaining insights while fitting data. Finally, we verify the robustness of the implementation on the LFI examples supplied by the ELFI package.
 
 % \begin{leftbar}
 % The introduction is in principle ``as usual''. However, it should usually embed
@@ -226,7 +230,7 @@
 % before and after code input/output should be avoided (see above).
 % \end{leftbar}
 
-\clearpage
+% \clearpage
 \section{Background}
 We first give a short introduction to implicit parametric models and
 likelihood-free inference. We then focus on the methods relevant for
@@ -330,7 +334,7 @@ execution speed-up achieved by the parallelization of ROMC.
 % \proglang{R} Archive Network (CRAN) at
 % \url{https://CRAN.R-project.org/}.
 
-\section*{Acknowledgments}
+% \section*{Acknowledgments}
 
 % \begin{leftbar}
 % All acknowledgments (note the AE spelling) should be collected in this

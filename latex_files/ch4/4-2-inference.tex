@@ -76,16 +76,16 @@ approximation is quite close to the ground-truth posterior.
   # Summarize the samples (built-in ELFI tool)
   romc.result.summary()
   # Number of samples: 19300
-  # Sample means: theta: -0.0132
+  # Sample means: theta: -0.0116
 
   # compute expectation
   exp_val = romc.compute_expectation(h=lambda x: np.squeeze(x))
   print("Expected value   : %.3f" % exp_val)
-  # Expected value   : -0.013
+  # Expected value   : -0.012
 
   exp_var = romc.compute_expectation(h=lambda x: np.squeeze(x)**2)
   print("Expected variance: %.3f" % exp_var)
-  # Expected variance: 1.116
+  # Expected variance: 1.120
 
   # eval unnorm posterior
   romc.eval_unnorm_posterior(theta=0)
