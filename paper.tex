@@ -342,23 +342,47 @@ with its custom modules.
 %% -- Use-case illustration ----------------------------------------------------
 \section{Use-case illustration}
 
-In this section, we illustrate the implementation performing two
-experiments; In chapter~\ref{subsec:ma2} we perform the inference at
-the second-order moving average (MA2) model, which is a standard model
-of \pkg{ELFI}, and in chapter~\ref{subsec:exec_time} we measure the
-execution speed-up achieved by the parallelization of ROMC.
+In this section, we test the implementation using the second-order
+moving average (MA2) example, which is a standard model of
+\pkg{ELFI}. We perform the inference using three different versions of
+ROMC; (i) using a gradient-based optimizer, (ii) using the Bayesian
+Optimization scheme and (iii) fitting a Neural Network as a surrogate
+model. The later illustrates how to extend the implementation,
+replacing part of ROMC with a user-defined component. Finally, we
+measure the execution speed-up achieved by the parallelized version of
+ROMC.
 
-\subsection{Moving average example}
-\label{subsec:ma2}
+% \subsection{Moving average example}
+% \label{subsec:ma2}
 \input{latex_files/ch5/5-1-ma2.tex}
 
-\subsection{Execution time}
-\label{subsec:exec_time}
-\input{latex_files/ch5/5-2-execution-time.tex}
+% \subsection{Execution time}
+% \label{subsec:exec_time}
+% \input{latex_files/ch5/5-2-execution-time.tex}
 
 
 %% -- Summary/conclusions/discussion -------------------------------------------
 \section{Summary and discussion} \label{sec:summary}
+
+In this paper, we presented the implementation details we followed for
+developing the LFI method ROMC at the \proglang{ELFI} package. We paid
+thorough attention to two specific use-case scenarios. Firstly, we
+illustrate how a user may take advantage of our ready-to-use API for
+solving its LFI problem. Secondly, we focus on the scenario where a
+researcher wants to intervene and alter parts of the method. Our
+implementation is designed to support this as well.
+
+By all means, there are still open challenges for the future. Two
+directions may enable ROMC to solve high-dimensional problems
+efficiently. The first one is enabling ROMC's execution into a cluster
+of computers. ROMC can be characterized as an \textit{embarrassingly
+  parallel} workload; each optimization problem is an entirely
+independent task. Therefore, supporting inference into a cluster of
+computers can radically speed up the inference. The second one refers
+to implementing the method in a framework that supports automatic
+differentiation. Automatic differentiation is necessary for
+efficiently solving optimization problems, especially in
+high-dimensional parametric models.
 
 %% -- Optional special unnumbered sections -------------------------------------
 

@@ -1,6 +1,6 @@
 As already stated, it is straightforward for the two basic parts of
-the training part to be parallelised. There is a batch of $n_1$
-independent objectives functions to be optimised and $n_1$ bounding
+the training part to be parallelised. There is a batch of \(n_1\)
+independent objectives functions to be optimised and \(n_1\) bounding
 boxes to be built. Both tasks can be applied in a parallel utilizing
 all the available CPU cores. Our implementation supports
 parallelization using the built-in \proglang{Python} package
@@ -18,7 +18,7 @@ posterior and constructing the bounding boxes almost 2.5 times faster.
       \begin{tikzpicture}
         \begin{axis}[
           title={Solve optimization problems},
-          xlabel={$n_1$},
+          xlabel={\(n_1\)},
           ylabel={seconds},
           xmin=1, xmax=500,
           ymin=0, ymax=7,
@@ -43,7 +43,7 @@ posterior and constructing the bounding boxes almost 2.5 times faster.
       \begin{tikzpicture}
         \begin{axis}[
           title={Proposal regions},
-          xlabel={$n_1$},
+          xlabel={\(n_1\)},
           ylabel={seconds},
           xmin=1, xmax=500,
           ymin=0, ymax=7,
@@ -68,7 +68,7 @@ posterior and constructing the bounding boxes almost 2.5 times faster.
       \begin{tikzpicture}
         \begin{axis}[
           title={Sample},
-          xlabel={$n_1$},
+          xlabel={\(n_1\)},
           ylabel={seconds},
           xmin=1, xmax=500,
           ymin=0, ymax=7,
@@ -93,7 +93,7 @@ posterior and constructing the bounding boxes almost 2.5 times faster.
       \begin{tikzpicture}
         \begin{axis}[
           title={Evaluate posterior},
-          xlabel={$n_1$},
+          xlabel={\(n_1\)},
           ylabel={seconds},
           xmin=1, xmax=500,
           ymin=0, ymax=7,
@@ -117,8 +117,8 @@ posterior and constructing the bounding boxes almost 2.5 times faster.
     \caption[Execution time exploiting parallelization]{In the first
       line, we compare the parallel and sequential execution of the
       training part and at the second line the inference part. At the
-      left figure, we measure the execution time for sampling $n_2=50$
+      left figure, we measure the execution time for sampling \(n_2=50\)
       points per region. At the right figure we measure the execution
-      time for evaluating the posterior at a batch of $50$ points.}
+      time for evaluating the posterior at a batch of \(50\) points.}
       \label{fig:exec_parallel}
 \end{figure}

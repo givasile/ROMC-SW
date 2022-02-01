@@ -1,6 +1,7 @@
-Second-order moving average (MA2) is a probabilistic model commonly
-used for time series analysis. The observation at time $t$ is given
-by:
+\subsubsection*{Model Definition}
+
+MA2 is a probabilistic model for time series analysis. The observation
+at time \(t\) is given by,
 
 \begin{gather} \label{eq:ma2}
 y_t = w_t + \theta_1 w_{t-1} + \theta_2 w_{t-2}\\
@@ -8,14 +9,12 @@ y_t = w_t + \theta_1 w_{t-1} + \theta_2 w_{t-2}\\
 \end{gather}
 
 \noindent
-The random variable $w_{k} \sim \mathcal{N}(0,1), k \in \mathbb{Z}$
-represent white noise and $\theta_1, \theta_2$, the two parameters of
-interest, the dependence from the previous observations. The number of
-consecutive observations $T$ is a hyper-parameter of the model that in
-our case is set at $T=100$. For guaranteeing that the inference
-problem is identifiable, i.e.\ the likelihood has only one mode, we
-use the prior proposed by \cite{Marin2012} given in the equation
-\eqref{eq:ma2_prior}:
+The r.v. \(w_{k} \sim \mathcal{N}(0,1) \) is white noise and the two
+parameters of interest, \(\theta_1, \theta_2\), model the dependence
+from the previous observations. The number of sequential observations
+\(T\) is a hyper-parameter, in our case set to \(T=100\). For securing
+that the inference problem is identifiable, i.e.\ the likelihood has
+only one mode, we use the prior proposed by~\cite{Marin2012},
 
 \begin{equation} \label{eq:ma2_prior}
 p(\thetab) = p(\theta_1)p(\theta_2|\theta_1)
@@ -32,14 +31,14 @@ p(\thetab) = p(\theta_1)p(\theta_2|\theta_1)
 % \end{figure}
 
 \noindent
-The observation vector $\yb_0 = (y_1, \ldots, y_{100})$ is generated
-with $\thetab^*=(0.6, 0.2)$. The dimensionality of the output $\yb$ is
-high, therefore we use summary statistics. Considering that the
-ouptput vector represents a time-series signal, we choose as summary
-statistics the autocovariances with $lag=1$ and $lag=2$, as shown in
-equations \eqref{eq:ma2_summary_1} and \eqref{eq:ma2_summary_2}. The
-final distance node is the squared euclidean
-distance \eqref{eq:ma2_summary_4}.
+The observation vector \(\yb_0 = (y_1, \ldots, y_{100})\) is generated
+with \(\thetab^*=(0.6, 0.2)\). The dimensionality of the output
+\(\yb\) is high, therefore we use summary statistics. Considering that
+the ouptput vector represents a time-series signal, we select the
+autocovariances with \(\mathrm{lag}=1\) and \(\mathrm{lag}=2\), as shown in equations
+\eqref{eq:ma2_summary_1} and \eqref{eq:ma2_summary_2}. The final
+distance node is the squared euclidean distance
+\eqref{eq:ma2_summary_4}.
 
 \begin{gather} \label{eq:ma2_summary_1}
   s_1(\yb) = \frac{1}{T-1} \sum_{t=2}^T y_ty_{t-1}\\ \label{eq:ma2_summary_2}
@@ -48,55 +47,47 @@ distance \eqref{eq:ma2_summary_4}.
   d = ||s(\yb) - s(\yb_0)||_2^2 
 \end{gather}
 
-\subsubsection*{Perform the inference}
+\subsubsection*{Inference}
 
-As in the previous example, we perform the inference using both
-optimisation alternatives (gradient-based and Bayesian optimisation)
-and, in the end, by extending the implementation with a Neural Network
-surrogate model. In the end, we use the Rejection ABC algorithm for
-evaluating our approaches; Rejection ABC is a robust method in terms
-of accuracy and can be used for baseline comparison.
-
-
-The implementation's extension is performed using a multi-layer
-perceptron as local surrogate function, as illustrated in chapter
-... This intervention can be done easily by coding a custom
-optimisation function with the surrogate model of our own
-preference. The surrogate model substitutes the real distance function
-$d_i$ inside the proposal region $q_i \quad \forall i$ at the
-inference phase i.e. sampling, computing an expectation and evaluating
-the posterior. In our example we use a neural network of two hidden
-layers of 10 neurons each and we train it in 500 examples for each
-proposal region. 
-
+In order to show all the capabilities of the implementation, we
+perform the inference (i) using the gradient-based optimizer, (ii)
+using the Bayesian Optimization scheme and (iii) fitting a Neural
+Network (NN) as a surrogate model. We use the Rejection ABC algorithm
+for evaluating all approaches. Replacing the typical quadratic
+surrogate model with a NN serves as an illustrator of the
+extensibility of our implementation. The replacement is done by coding
+a custom optimisation function with a surrogate model of our own
+preference, as shown in Chapter~\ref{subsec:extensibility}. For the
+definition of the NN, we use the \pkg{MLPRegressor} class of the
+\pkg{scikit-learn} package. Therefore, the NN substitutes the real
+distance function \(d_i\) inside the proposal region
+\(q_i \quad \forall i\) at the inference phase i.e. sampling,
+computing an expectation and evaluating the posterior. In our example
+we use a neural network of two hidden layers of 10 neurons each and we
+train it sampling 500 examples from each proposal region.
 
 In figure \ref{fig:ma2_5}, we illustrate the acceptance region of the
 same deterministic simulator, in the gradient-based and the Bayesian
-optimisation case. The acceptance regions are similar even though the
-optimal points differ significantly due to the different optimisation
-schemens.
+optimisation case. The acceptance regions are quite similar even though the
+different optimisation schemes lead to different optimal points.
 
 In figure \ref{fig:ma2_3}, we demonstrate the histograms of the
-marginal posteriors, using all four approaches; (a) Rejection ABC
-(first column), (b) ROMC with gradient-based optimisation (second
-column) (c) ROMC with Bayesian optimisation (third column) and (d)
-ROMC with the Neural Network extendion. We observe that there is a
-significant aggreement between the different approaches. The Rejection
-ABC inference has been set to infer 10000 accepted samples, with
-threshold $\epsilon=0.1$. At table \ref{tab:ma2} we present the
-empirical mean $\mu$ and standard deviation $\sigma$ for each
-inference approach. In figure \ref{fig:ma2_4}, we illustrate the
+marginal posteriors, for each approach; (a) Rejection ABC (first
+column), (b) ROMC with gradient-based optimisation (second column) (c)
+ROMC with Bayesian optimisation (third column) and (d) ROMC with the
+NN extension. We observe a significant aggreement between the
+different approaches. At table \ref{tab:ma2} we present the empirical
+mean \(\mu\) and standard deviation \(\sigma\) for each inference
+approach and finally, in figure \ref{fig:ma2_4}, we illustrate the
 unnormalized posterior for the three different variations of the ROMC
-method.
-
-\subsubsection*{Extending the implementation}
-
-
+method. The results show that all ROMC variations provide consistent
+results between them and in comparison with the standard Rejection ABC
+algorithm.
 
 \begin{center} \label{tab:ma2}
 \begin{tabular}{ c|c|c|c|c }
 \hline
-& $\mu_{\theta_1}$ & $\sigma_{\theta_1}$ & $\mu_{\theta_2}$ & $\sigma_{\theta_2}$ \\
+& \(\mu_{\theta_1}\) & \(\sigma_{\theta_1}\) & \(\mu_{\theta_2}\) & \(\sigma_{\theta_2}\) \\
 \hline \hline
 Rejection ABC & 0.516 & 0.142 & 0.07 & 0.172 \\
 \hline
@@ -115,7 +106,7 @@ ROMC (Neural Network) & 0.503 & 0.140 & 0.03 & 0.171 \\
 %       \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter4/ma2_distance_hist_bo.png} \\
 %     \end{center}
 %     \caption[MA2 example, histogram of distances]{Histogram of distances
-%       $d_i^*, i \in \{ 1, \ldots, n_1 \}$. The left graph corresponds
+%       \(d_i^*, i \in \{ 1, \ldots, n_1 \}\). The left graph corresponds
 %       to the gradient-based approach and the right one to the Bayesian
 %       optimisation approach.}
 %   \label{fig:ma2_2}
@@ -167,8 +158,8 @@ ROMC (Neural Network) & 0.503 & 0.140 & 0.03 & 0.171 \\
       in the second row, using ROMC with a gradient-based optimiser
       and (c) in the third row, using ROMC with Bayesian optimization
       approach. The vertical (red) line represents the samples mean
-      $\mu$ and the horizontal (black) the standard deviation
-      $\sigma$.}
+      \(\mu\) and the horizontal (black) the standard deviation
+      \(\sigma\).}
   \label{fig:ma2_3}
 \end{figure}
 
@@ -186,4 +177,131 @@ ROMC (Neural Network) & 0.503 & 0.140 & 0.03 & 0.171 \\
     \end{center}
     \caption[MA2 example, posterior distribution.]{The unnormalized posterior distribution using the ROMC method with (a) a gradient-based optimization (b) Bayesian Optimization (c) gradient-based with a Neural Network as a surrogate model.}
   \label{fig:ma2_4}
+\end{figure}
+
+
+\subsubsection*{Parallelization}
+
+As already stated, it is straightforward for the two basic parts of
+the training part to be parallelised. There is a batch of \(n_1\)
+independent objectives functions to be optimised and \(n_1\) bounding
+boxes to be built. Both tasks can be applied in a parallel utilizing
+all the available CPU cores. Our implementation supports
+parallelization using the built-in \proglang{Python} package
+\pkg{multiprocess}. In figure~\ref{fig:exec_parallel} we observe the
+execution times for performing the inference. The parallel version
+performs all tasks between 2.5 and 6 times faster compared to the
+sequential; the optimization problems are solved almost 6 times
+faster, sampling 3.5 times faster and evaluating the posterior and
+constructing the bounding boxes almost 2.5 times faster.
+
+\begin{figure}[ht]
+  \centering
+    \begin{minipage}[t]{.49\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[
+          title={Solve optimization problems},
+          xlabel={\(n_1\)},
+          ylabel={seconds},
+          xmin=1, xmax=500,
+          ymin=0, ymax=7,
+          xtick={1,100,200,300,400,500},
+          ytick={0, 1, 2, 3, 4, 5, 6, 7},
+          legend pos=north west,
+          ymajorgrids=true,
+          grid style=dashed,
+          ]
+          \addplot[color=blue, mark=o] coordinates {
+            (1,0.05)(125,1.6)(250,3.5)(375,5)(500,6.8)
+          };
+          \addlegendentry{sequential}
+          \addplot[color=red, mark=o] coordinates {
+            (1,0.2)(125,0.6)(250,1)(375,1.5)(500,2)
+          };
+          \addlegendentry{parallel}          
+        \end{axis}
+      \end{tikzpicture}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{.49\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[
+          title={Proposal regions},
+          xlabel={\(n_1\)},
+          ylabel={seconds},
+          xmin=1, xmax=500,
+          ymin=0, ymax=7,
+          xtick={1,100,200,300,400,500},
+          ytick={0, 1, 2, 3, 4, 5, 6, 7},
+          legend pos=north west,
+          ymajorgrids=true,
+          grid style=dashed,
+          ]
+          \addplot[color=blue, mark=o] coordinates {
+            (1,0.05)(125,1.6)(250,3.5)(375,5)(500,6.8)
+          };
+          \addlegendentry{sequential}
+          \addplot[color=red, mark=o] coordinates {
+            (1,0.2)(125,0.6)(250,1)(375,1.5)(500,2)
+          };
+          \addlegendentry{parallel}          
+        \end{axis}
+      \end{tikzpicture}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{.49\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[
+          title={Sample},
+          xlabel={\(n_1\)},
+          ylabel={seconds},
+          xmin=1, xmax=500,
+          ymin=0, ymax=7,
+          xtick={1,100,200,300,400,500},
+          ytick={0, 1, 2, 3, 4, 5, 6, 7},
+          legend pos=north west,
+          ymajorgrids=true,
+          grid style=dashed,
+          ]
+          \addplot[color=blue, mark=o] coordinates {
+            (1,0.05)(125,1.6)(250,3.5)(375,5)(500,6.8)
+          };
+          \addlegendentry{sequential}
+          \addplot[color=red, mark=o] coordinates {
+            (1,0.2)(125,0.6)(250,1)(375,1.5)(500,2)
+          };
+          \addlegendentry{parallel}          
+        \end{axis}
+      \end{tikzpicture}
+    \end{minipage}\hfill
+    \begin{minipage}[t]{.49\textwidth}
+      \begin{tikzpicture}
+        \begin{axis}[
+          title={Evaluate posterior},
+          xlabel={\(n_1\)},
+          ylabel={seconds},
+          xmin=1, xmax=500,
+          ymin=0, ymax=7,
+          xtick={1,100,200,300,400,500},
+          ytick={0, 1, 2, 3, 4, 5, 6, 7},
+          legend pos=north west,
+          ymajorgrids=true,
+          grid style=dashed,
+          ]
+          \addplot[color=blue, mark=o] coordinates {
+            (1,0.05)(125,1.6)(250,3.5)(375,5)(500,6.8)
+          };
+          \addlegendentry{sequential}
+          \addplot[color=red, mark=o] coordinates {
+            (1,0.2)(125,0.6)(250,1)(375,1.5)(500,2)
+          };
+          \addlegendentry{parallel}          
+        \end{axis}
+      \end{tikzpicture}
+    \end{minipage}\hfill
+    \caption[Execution time exploiting parallelization]{In the first
+      line, we compare the parallel and sequential execution of the
+      training part and at the second line the inference part. At the
+      left figure, we measure the execution time for sampling \(n_2=50\)
+      points per region. At the right figure we measure the execution
+      time for evaluating the posterior at a batch of \(50\) points.}
+      \label{fig:exec_parallel}
 \end{figure}
