@@ -15,7 +15,7 @@ remained after filtering\footnote{From the $n_1$ optimisation
   maintained for building a bounding box}. The samples are drawn from
 a uniform distribution $q_i$ defined over the corresponding bounding
 box and the weight $w_i$ is computed as in
-algorithm~\ref{alg:sampling_GB}.
+Algorithm~\ref{alg:sampling_GB}.
 
 \begin{Code}
 ---------------------------------- python ----------------------------------
@@ -29,9 +29,9 @@ algorithm~\ref{alg:sampling_GB}.
 This function computes the expectation
 $E_{p(\thetab|\data)}[h(\thetab)]$ using
 expression~\eqref{eq:expectation}. The argument \code{h} can be any
-python \code{Callable}. \code{eval_unnorm_posterior} computes the
+python \code{Callable}. Method \code{eval_unnorm_posterior} computes the
 unnormalised posterior approximation using
-expression~\eqref{eq:approx_posterior}. \code{eval_posterior}
+expression~\eqref{eq:approx_posterior}. Method \code{eval_posterior}
 evaluates the normalised posterior estimating the partition function
 $Z = \int p_{d,\epsilon}(\thetab|\data)d\thetab$; with Riemann's
 integral approximation. The approximation is computationally feasible
@@ -40,8 +40,8 @@ only in low-dimensional parametric spaces.
 \subsubsection*{Example - Sampling and compute expectation}
 
 In the following code snippet, we perform weighted sampling from the
-ROMC approximate posterior. Afterwards, we use some of ELFI's
-built-in tools to get a summary of the obtained samples. In figure
+ROMC approximate posterior. Afterwards, we use some of \pkg{ELFI}'s
+built-in tools to get a summary of the obtained samples. In Figure
 \ref{fig:running_example_romc_inference}, we observe the histogram of the weighted
 samples and the acceptance region of the first deterministic function
 (as before) alongside the samples obtained from it. Finally, in the
@@ -56,7 +56,7 @@ point $\theta$ using expression \eqref{eq:approx_posterior_omc}. The
 $Z = \int_{\thetab} p_{d,\epsilon}(\thetab|\data) d\thetab$ using the
 Riemann approximation as explained above. In our simple example, this
 utility can provide a nice plot of the approximate posterior as
-illustrated in figure~\ref{fig:running_example_romc_inference}. We observe that the
+illustrated in Figure~\ref{fig:running_example_romc_inference}. We observe that the
 approximation is quite close to the ground-truth posterior.
 
 \begin{Code}

@@ -104,7 +104,7 @@
   provides accurate weighted samples from the posterior.  Our
   implementation can be used in two ways. A scientist may use it as an
   out-of-the-box LFI algorithm. We provide an easy-to-use API
-  harmonized with the rest of the ELFI framework; therefore, it is
+  harmonised with the rest of the ELFI framework; therefore, it is
   straightforward to compare it with all the methods included in
   ELFI. On the other direction, we have carefully split ROMC into
   isolated algorithmic steps. Therefore, we allow the researcher to
@@ -169,9 +169,9 @@
 \section{Introduction} \label{sec:intro}
 
 Simulator-based models are particularly captivating due to the
-modeling freedom they provide. In essence, a simulator-based model can
+modelling freedom they provide. In essence, a simulator-based model can
 describe any data generating mechanism that can be written as a finite
-set of algorithmic steps. This modeling freedom comes at a cost;
+set of algorithmic steps. This modelling freedom comes at a cost;
 performing the inference, i.e., sample or evaluate the posterior
 distribution, is challenging.
 
@@ -180,12 +180,12 @@ novel LFI approach for approximating the posterior
 distribution. Afterwards, \citep{Forneron2016} provided a similar
 method under `reverse sampler'. The key idea is turning the stochastic
 data-generating mechanism into a set of fully-parallelizable
-deterministic optimization processes. In their work,
-~\citep{Ikonomov2019}, located some critical failure modes of OMC, and
+deterministic optimisation processes. In their work,
+~\citet{Ikonomov2019}, located some critical failure modes of OMC, and
 proposed Robust OMC (ROMC) an alternative version of OMC with the
 appropriate improvements.
 
-In this paper, we present an extendible and parallelizable
+In this paper, we present an extendible and parallelisable
 implementation of ROMC at the \proglang{Python} package
 \proglang{Engine for Likelihood-Free inference (ELFI)}. We follow
 specific principles for making the implementation extendible. As we
@@ -196,8 +196,8 @@ algorithmic task that must be fulfilled, without enforcing which
 specific algorithm must be used for the tasks. Therefore, a researcher
 may adopt ROMC's backbone approach, but experiment with alternative
 methods to solve the distinct tasks. We have designed ROMC for
-faciliating such alterations. Finally, we have tested the accuracy and
-the efficienct of our implementation on the LFI examples supported by
+facilitating such alterations. Finally, we have tested the accuracy and
+the efficiency of our implementation on the LFI examples supported by
 the \proglang{ELFI} package.
 
 % \begin{leftbar}
@@ -277,11 +277,10 @@ the \proglang{ELFI} package.
 % \clearpage
 \section{Background}
 We first give a short introduction to implicit parametric models and
-likelihood-free inference. We then focus on the methods relevant for
-this paper: first the earlier Optmisation Monte Carlo (OMC) and then
+LFI. We then focus on the methods relevant for
+this paper: first the earlier OMC and then
 its recent robust generalisation, robust OMC, for which we provide the
-software package as part of the Engine for likelihood-free inference
-(ELFI), a larger inference platform that we briefly introduce at the
+software package as part of ELFI, a larger inference platform that we briefly introduce at the
 end of this background section.
 
 %\input{latex_files/ch2/2_1_implicit_models}
@@ -313,9 +312,7 @@ end of this background section.
 \section{Implemented functionalities}
 
 In this section, we present the implementation. At~\ref{subsec:ELFI}
-we introduce the reader to the \proglang{Python} package \pkg{Engine
-  for likelihood-free inference
-  (ELFI)}. At~\ref{subsec:general_design} we explain the general
+we introduce the reader to the \proglang{Python} package \pkg{ELFI}. At~\ref{subsec:general_design} we explain the general
 design that we follow. Then, we divide the implementation into three
 parts; at~\ref{subsec:training} we present the training (fitting)
 part, at~\ref{subsec:inference} the inference part and
@@ -343,13 +340,13 @@ with its custom modules.
 \section{Use-case illustration}
 
 In this section, we test the implementation using the second-order
-moving average (MA2) example, which is a standard model of
+moving average (MA2) example, which is one of the standard models of
 \pkg{ELFI}. We perform the inference using three different versions of
-ROMC; (i) using a gradient-based optimizer, (ii) using the Bayesian
-Optimization scheme and (iii) fitting a Neural Network as a surrogate
+ROMC; (i) using a gradient-based optimiser, (ii) using the Bayesian
+Optimisation scheme and (iii) fitting a Neural Network as a surrogate
 model. The later illustrates how to extend the implementation,
 replacing part of ROMC with a user-defined component. Finally, we
-measure the execution speed-up achieved by the parallelized version of
+measure the execution speed-up achieved by the parallelised version of
 ROMC.
 
 % \subsection{Moving average example}
@@ -365,14 +362,14 @@ ROMC.
 \section{Summary and discussion} \label{sec:summary}
 
 In this paper, we presented the implementation details we followed for
-developing the LFI method ROMC at the \proglang{ELFI} package. We paid
+developing the LFI method ROMC at the \pkg{ELFI} package. We paid
 thorough attention to two specific use-case scenarios. Firstly, we
 illustrate how a user may take advantage of our ready-to-use API for
 solving its LFI problem. Secondly, we focus on the scenario where a
 researcher wants to intervene and alter parts of the method. Our
 implementation is designed to support this as well.
 
-By all means, there are still open challenges for the future. Two
+There are still open challenges for the left for future research. Two
 directions may enable ROMC to solve high-dimensional problems
 efficiently. The first one is enabling ROMC's execution into a cluster
 of computers. ROMC can be characterized as an \textit{embarrassingly
@@ -381,7 +378,7 @@ independent task. Therefore, supporting inference into a cluster of
 computers can radically speed up the inference. The second one refers
 to implementing the method in a framework that supports automatic
 differentiation. Automatic differentiation is necessary for
-efficiently solving optimization problems, especially in
+efficiently solving optimisation problems, especially in
 high-dimensional parametric models.
 
 %% -- Optional special unnumbered sections -------------------------------------

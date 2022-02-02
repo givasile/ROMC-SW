@@ -268,7 +268,7 @@ for i, n in enumerate(n1):
 
 
 plt.figure()
-plt.title("Optimization problems: Sequential vs Parallel Execution")
+plt.title("Optimisation problems: Sequential vs Parallel Execution")
 plt.plot(n1, solve_grad, "bo--", label="linear")
 plt.plot(n1, solve_grad_parallel, "go--", label="parallel")
 plt.xlabel(r"$n_1$")

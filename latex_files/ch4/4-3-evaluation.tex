@@ -13,19 +13,19 @@ inference results.
 
 \noindent
 This function computes the divergence between the ROMC approximation
-and the ground truth posterior. Since the computation is performed
+and the ground truth posterior. Because the computation is performed
 using the Riemann's approximation, this method can only work in low
 dimensional parameter spaces; it is suggested to be used for up to the
 three-dimensional parameter space. As mentioned at the beginning of
 this chapter, in a real-case scenario it is not expected the
 ground-truth posterior to be available. However, in cases where the
-posterior can be approximated decently well with a numerical approach
+posterior can be approximated acceptably well with a numerical approach
 (as in the current example) or with some other inference approach,
 this function can provide a numerical measure of the agreement between
 the two approximations. The argument \code{step} defines the step used
 in the Riemann's approximation and the argument \code{distance} can
-take either the \code{Jensen-Shannon} or the \code{KL-divergence}
-value, for computing the appropriate distance. \code{compute_ess}
+be either \code{"Jensen-Shannon"} or \code{"KL-divergence"}, for computing 
+the appropriate distance. Method \code{compute_ess}
 computes the Effective Sample Size (ESS) using the following
 expression~\cite{Sudman1967},
 

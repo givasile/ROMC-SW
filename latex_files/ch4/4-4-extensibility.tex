@@ -1,19 +1,19 @@
 ROMC can be conceived as a meta-algorithm; it describes a sequence of
 steps for approximating the posterior distribution, without
 \emph{explicitly} enforcing the methods that solve these steps. Even
-though for each step a specific algotihm is proposed
-by~\cite{Ikonomov2019}, in general ROMC works well if a practitioner
+though for each step a specific algorithm is proposed
+by~\cite{Ikonomov2019}, in general ROMC is functional if a practitioner
 thinks of an alternative way of approaching a specific
 step. Considering this particularity, we designed the implementation
 to support such \emph{extensibility} capability.
 
 We have specified four specific points where a user may intervene with
-their custom modules; (a) the gradient-based optimization, (b) the
-Bayesian Optimization, (c) the proposal region construction and (d)
+their custom modules; (a) the gradient-based optimisation, (b) the
+Bayesian Optimisation, (c) the proposal region construction and (d)
 the surrogate model fitting. These are the four critical parts of the
 ROMC procedure, whereas the rest of the code is the backbone of the
-algorithm; each of them may be approached with a completely different
-algorithm than the one we propose, without the rest of the method to
+algorithm; each of them can be swapped to a different
+algorithm with the same functionality than the one we propose, without the rest of the method to
 collapse.
 
 The four replaceable parts described above, are solved using the four

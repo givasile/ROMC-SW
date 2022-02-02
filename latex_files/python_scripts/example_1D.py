@@ -39,7 +39,7 @@ class Likelihood:
     """
 
     def rvs(self, theta, seed=None):
-        """Vectorized sampling from likelihood.
+        """Vectorised sampling from likelihood.
 
         """
         assert isinstance(theta, np.ndarray)

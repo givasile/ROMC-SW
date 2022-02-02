@@ -21,7 +21,7 @@ L_{d, \epsilon}(\thetab) \approx \frac{1}{N} \sum_{i=1}^N \indicator{\region (\d
  \quad \text{ where } \yb_i = \simulator(\thetab, \vb_i),\; \vb_i \sim p(\vb). \label{eq:alt_view}
 \end{equation}
 We thus approximate the likelihood of a specific $\thetab$ by counting
-the fraction of samples that lie inside the area around the
+the fraction of samples that lie inside the volume around the
 observations. The fact that we isolated the randomness of the
 simulator via the $\vb_i$ has two crucial consequences: First, we can
 sample the nuisance variables $\vb_i \sim p(\vb)$ only once and use
@@ -48,7 +48,7 @@ of approximating the likelihood and/or posterior becomes a task of
 characterising the sets $\accregioni$.
 
 OMC by \citet{Meeds2015} assumes that the distance $d$ is the
-Euclidean distance between summary statistics $\Phi$ of the observed
+Euclidean distance $||\cdot||_2$ between summary statistics $\Phi$ of the observed
 and generated data, and that the $\accregioni$ can be well
 approximated by infinitesimally small ellipses. These assumptions
 leads to an approximation of the posterior in terms of weighted

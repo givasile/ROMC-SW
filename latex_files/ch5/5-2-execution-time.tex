@@ -1,10 +1,10 @@
 As already stated, it is straightforward for the two basic parts of
 the training part to be parallelised. There is a batch of \(n_1\)
 independent objectives functions to be optimised and \(n_1\) bounding
-boxes to be built. Both tasks can be applied in a parallel utilizing
+boxes to be built. Both tasks can be applied in a parallel utilising
 all the available CPU cores. Our implementation supports
-parallelization using the built-in \proglang{Python} package
-\pkg{multiprocess}. In figure~\ref{fig:exec_parallel} we observe the
+parallelisation using the built-in \proglang{Python} package
+\pkg{multiprocess}. In Figure~\ref{fig:exec_parallel} we observe the
 execution times for performing the inference. The parallel version
 performs all tasks between 2.5 and 6 times faster compared to the
 sequential. Optimisation problems are solved almost 6 times
@@ -17,7 +17,7 @@ posterior and constructing the bounding boxes almost 2.5 times faster.
     \begin{minipage}[t]{.49\textwidth}
       \begin{tikzpicture}
         \begin{axis}[
-          title={Solve optimization problems},
+          title={Solve optimisation problems},
           xlabel={\(n_1\)},
           ylabel={seconds},
           xmin=1, xmax=500,
@@ -114,7 +114,7 @@ posterior and constructing the bounding boxes almost 2.5 times faster.
         \end{axis}
       \end{tikzpicture}
     \end{minipage}\hfill
-    \caption[Execution time exploiting parallelization]{In the first
+    \caption[Execution time exploiting parallelisation]{In the first
       line, we compare the parallel and sequential execution of the
       training part and at the second line the inference part. At the
       left figure, we measure the execution time for sampling \(n_2=50\)

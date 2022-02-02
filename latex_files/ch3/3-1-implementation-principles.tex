@@ -1,23 +1,22 @@
 \input{latex_files/graphs/romc_graph}
 
 The overview of our implementation is illustrated in
-figure~\ref{fig:romc_overview}; one may interpret
-figure~\ref{fig:romc_overview} as a depiction of the main class and
+Figure~\ref{fig:romc_overview}; one may interpret
+Figure~\ref{fig:romc_overview} as a depiction of the main class and
 the ellipses are the main routines of the class. Following
 \proglang{Python}'s naming principles, the methods starting with an
 underscore (green ellipses) represent internal (private) functions,
 whereas the rest (blue ellipses) are the public methods that the user
-interacts with. In figure~\ref{fig:romc_overview}, it can be easily
-observed that the implementation follows consistently the algorithmic
-view presented in~\ref{alg:romc_algorithm}. The training part includes
+interacts with. In Figure~\ref{fig:romc_overview}, it can be easily
+observed that the implementation follows consistently Algorithm~\ref{alg:romc_algorithm}. The training part includes
 all the steps until the computation of the proposal regions
-i.e. sampling the nuisance variables, defining the optimization
+i.e.~sampling the nuisance variables, defining the optimisation
 problems, solving them, constructing the regions and fitting local
 surrogate models. The inference part comprises of evaluating the
-unnormalized posterior (and the normalized when is possible), sampling
+unnormalised posterior (and the normalised when is possible), sampling
 and computing an expectation. We also provide some utilities for
 inspecting the training process, such as plotting the histogram of the
-final distances or visualizing the constructed bounding
+final distances or visualising the constructed bounding
 boxes. Finally, in the evaluation part, we provide two methods for
 evaluating the inference; (a) computing the Effective Sample Size
 (ESS) of the samples and (b) measuring the divergence between the
@@ -28,13 +27,13 @@ available.\footnote{Normally, the ground-truth posterior is not
   (i.e.\ ABC Rejection Sampling), and we would like to measure the
   discrepancy between the two approximations.}
 
-\subsubsection*{Parallelizing ROMC method}
+\subsubsection*{Parallelising ROMC method}
 
-ROMC has the significant advantage of being fully parallelizable. We
+ROMC has the significant advantage of being fully parallelisable. We
 exploit this fact by implementing a parallel version of all the major
-components of the method; (a) solving the optimization problems, (b)
+components of the method; (a) solving the optimisation problems, (b)
 constructing bounding box regions, (c) sampling and (d) evaluating the
-posterior. We parallelize these processes using the built-in
+posterior. We parallelise these processes using the built-in
 \proglang{Python} package \pkg{multiprocessing}. The specific package
 enables concurrency, using subprocesses instead of threads, for
 side-stepping the Global Interpreter (GIL). For activating the
@@ -50,7 +49,8 @@ argument \code{parallelize=True} when instantiating \code{ROMC}.
 \subsubsection*{Simple one-dimensional example}
 
 For illustrating the functionalities we will use the following running
-example introduced by~\cite{Ikonomov2019},
+example introduced by~\cite{Ikonomov2019}, \textbf{HP comment: what is c in Eq. \eqref{eq:1D_example_eq_2}
+and in python snippet? As it is, it will not run. }
 
 \begin{gather} \label{eq:1D_example}
   p(\theta) = \mathcal{U}(\theta;-2.5,2.5)\\ \label{eq:1D_example_eq_2}

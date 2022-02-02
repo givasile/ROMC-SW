@@ -1,12 +1,15 @@
 For designing an extendable implementation of ROMC, we firstly define
 ROMC as a sequence of algorithmic steps. The algorithmic view of ROMC
 serves as the driver for the implementation at \pkg{ELFI}. At a high
-level, ROMC can be split into the trainind the inference part. In
+level, ROMC can be split into the training and the inference part. In
 general terms, the training part covers all steps for estimating the
-proposal regions and the inference part for getting weighted
+proposal regions and the inference part calculates the weighted
 samples. Algorithm~\ref{alg:romc_algorithm} defines ROMC formally;
-Steps 2-10 (before the vertical line) form the training part, while
-steps 12-17 the inference part.
+Steps 2-10 (before the horizontal line) and steps 12-17 form the training 
+part and the inference part, respectively. \textbf{HP comment Algorithm 1: I got a bit 
+lost with $M_r(\thetab)$ (Line 1) and $M_d(\thetab, \vb=\vb_i)$ (Line 4). 
+What is their relationship? Also, are Lines 13, 16 and 17 still under construction?
+Maybe refer to Eq. (X)s in the Algorithm, if wanting to keep the Algorithm compact.}
 
 \begin{algorithm}[!ht]
 	\caption{ROMC}\label{alg:romc_algorithm}
@@ -15,7 +18,7 @@ steps 12-17 the inference part.
     \For{$i \gets 1 \textrm{ to } n_1$}
       \State $\vb_i \sim p(\vb)$ \Comment{Draw nuisance variables}
       \State $d_i(\thetab) = M_d(\thetab, \vb=\vb_i)$ \Comment{Define distance function}
-      \State $\thetab_i^* = \text{argmin}_{\thetab} d_i$, $d_i^*=d_i(\thetab_i^*)$ \Comment{Solve optimization problem}
+      \State $\thetab_i^* = \text{argmin}_{\thetab} d_i$, $d_i^*=d_i(\thetab_i^*)$ \Comment{Solve optimisation problem}
       \If{$d^*_i > \epsilon$}
         \State Go to 2 \Comment{Filter solution}
       \EndIf
@@ -27,7 +30,7 @@ steps 12-17 the inference part.
       \EndFor
     \EndFor
     \State $E_{p(\thetab|\data)}[h(\thetab)]$ \Comment{Estimate an expectation}
-    \State $p_{d,\epsilon}(\thetab)$ \Comment{Evaluate the unnormalized posterior}
+    \State $p_{d,\epsilon}(\thetab)$ \Comment{Evaluate the unnormalised posterior}
     \EndProcedure
 	\end{algorithmic}
 \end{algorithm}
@@ -67,7 +70,10 @@ $d_i$\footnote{Either the real distance $d_i$ or the Gaussian Process
 approximated numerically. In case where the distance function is the
 Euclidean, the Hessian matrix can be also computed as
 $\hessian_i = \jac_i^T\jac_i$, where $\jac_i$ is the Jacobian matrix
-of the summary statistics $\Phi(M_d(\thetab, \vb=\vb_i))$ at
+of the summary statistics $\Phi(M_d(\thetab, \vb=\vb_i))$ \textbf{is 
+$M_d(\cdot, \cdot)$ the deterministic simulator function, or deterministic 
+evaluation of the distance function? If so, what is it's relationship to 
+the summary statistics?} at
 $\thetab_i^*$. The approximation through the Jacobian matrix has the
 computational advantage of using only first-order derivatives.
 
@@ -83,15 +89,17 @@ function\footnote{As before, if a surrogate model $\hat{d}$ is
   available, it can be utilised as the distance function.} is
 evaluated for checking if it lies inside the acceptance
 region. Algorithm~\ref{alg:sampling_GB} defines the steps for
-computing a weighted sample. Computing an expectation can be done
-easily after weighted samples are obtained using the
-equation~\ref{eq:expectation}, so we do not discuss it
-separately. Evaluating the unnormalised posterior requires the
+computing a weighted sample. Computing the expectation is easy after weighted 
+samples are obtained using the equation~\ref{eq:expectation}, so we do not 
+discuss it separately. Evaluating the unnormalised posterior requires the
 deterministic functions $g_i$ and the prior distribution
 $p(\thetab)$\footnote{There is no need for solving the optimisation
   problems and building the proposal regions.}. The evaluation
 requires iterating over all $g_i$ and evaluating the distance from the
-observed data.
+observed data. \textbf{HP comment: Algorithm 2 - introduce the notation $||\thetab||$, or even 
+better, define the variable separately, instead of using the same notation 
+that was used for the norm - could it be $N$ if $\thetab \in \mathbb{R}^N$. 
+Note that Line 20 would lead to an infinite loop.}
 
 % \begin{minipage}{0.46\textwidth}
 % \begin{algorithm}[H]
@@ -132,7 +140,13 @@ observed data.
 % \end{minipage}
 
 \begin{algorithm}[!ht]
-	\caption{Approximation of $\mathcal{\hat{S}}_i$ with a bounding box; Requires, a model of distance $d_i(\thetab)$, optimal point $\thetab_i^*$, number of refinements $K$, step size $\eta\_\text{start}$, maximum iterations $M$ and curvature matrix $\hessian_i$ ($\jac_i^T\jac_i $ or GP Hessian)}\label{alg:region_construction}
+	\caption{Approximation of $\mathcal{\hat{S}}_i$ with a bounding box; 
+  Requires: a model of distance $d_i(\thetab)$, 
+  an optimal point $\thetab_i^*$, 
+  a number of refinements $K$, 
+  a step size $\eta\_\text{start}$, 
+  maximum iterations $M$ and 
+  a curvature matrix $\hessian_i$ ($\jac_i^T\jac_i $ or GP Hessian)}\label{alg:region_construction}
 	\begin{algorithmic}[1]
 	\State Compute eigenvectors $\vb_{d}$ of $\hess_i$ {\scriptsize ($d = 1,\ldots,||\thetab ||)$}
 	\For{$d \gets 1 \textrm{ to } ||\thetab||$}
