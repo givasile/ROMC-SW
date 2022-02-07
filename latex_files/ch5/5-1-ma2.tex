@@ -100,19 +100,11 @@ ROMC (Neural Network) & 0.503 & 0.140 & 0.03 & 0.171 \\
 \hline
 \end{tabular}
 \end{center}
-\caption{\textbf{HP comment: Needs a fine caption to get Table number.}\label{tab:ma2}}
+\caption{Comparison of the samples obtained from the estimated
+  posterior with (a) Rejection sampling and (b) the different versions
+  of ROMC. We observe that the obtained samples share similar
+  statistics along all methods. \label{tab:ma2}}
 \end{table}
-% \begin{figure}[H]
-%     \begin{center}
-%       \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter4/ma2_distance_hist.png}
-%       \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter4/ma2_distance_hist_bo.png} \\
-%     \end{center}
-%     \caption[MA2 example, histogram of distances]{Histogram of distances
-%       \(d_i^*, i \in \{ 1, \ldots, n_1 \}\). The left graph corresponds
-%       to the gradient-based approach and the right one to the Bayesian
-%       optimisation approach.}
-%   \label{fig:ma2_2}
-% \end{figure}
 
 \begin{figure}[ht]
     \begin{center}
@@ -199,7 +191,7 @@ constructing the bounding boxes almost 2.5 times faster.
 
 \begin{figure}[ht]
   \centering
-    \begin{minipage}[t]{.49\textwidth}
+    \begin{minipage}[t]{.4\textwidth}
       \begin{tikzpicture}
         \begin{axis}[
           title={Solve optimisation problems},
@@ -224,7 +216,7 @@ constructing the bounding boxes almost 2.5 times faster.
         \end{axis}
       \end{tikzpicture}
     \end{minipage}\hfill
-    \begin{minipage}[t]{.49\textwidth}
+    \begin{minipage}[t]{.4\textwidth}
       \begin{tikzpicture}
         \begin{axis}[
           title={Proposal regions},
@@ -249,7 +241,7 @@ constructing the bounding boxes almost 2.5 times faster.
         \end{axis}
       \end{tikzpicture}
     \end{minipage}\hfill
-    \begin{minipage}[t]{.49\textwidth}
+    \begin{minipage}[t]{.4\textwidth}
       \begin{tikzpicture}
         \begin{axis}[
           title={Sample},
@@ -274,7 +266,7 @@ constructing the bounding boxes almost 2.5 times faster.
         \end{axis}
       \end{tikzpicture}
     \end{minipage}\hfill
-    \begin{minipage}[t]{.49\textwidth}
+    \begin{minipage}[t]{.4\textwidth}
       \begin{tikzpicture}
         \begin{axis}[
           title={Evaluate posterior},

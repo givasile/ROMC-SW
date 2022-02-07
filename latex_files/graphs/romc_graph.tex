@@ -99,11 +99,12 @@
       \end{tikzpicture}
     }
   \end{center}
-  \caption{Overview of the
-ROMC implementation. The training part follows a sequential pattern;
-the functions in the green ellipses \textbf{There are no ellipses.} must be called in a sequential
-fashion for completing the training part and define the posterior
-distribution. The functions in blue ellipses are the functionalities
-provided to the user.}
+  \caption{Overview of the ROMC implementation. On the left side, we
+    depict ROMC as a sequence of algotirhmic steps. On the right side,
+    we present the functions that form our implementation; the green
+    rectangles (starting with underscore) are the internal
+    functionalities and the blue rectangles the publicly exposed
+    API. This side-by-side illustration highlights that our
+    implementation follows strictly the algorithmic view of ROMC.}
 \label{fig:romc_overview}
 \end{figure}

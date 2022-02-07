@@ -13,19 +13,21 @@ The training part contains six methods.
 This method (a) draws the nuisance variables, (b) defines the
 optimisation problems and (c) solves them using either a
 gradient-based optimiser or Bayesian optimisation. These tasks are
-completed sequentially, as shown in Figure~\ref{fig:romc_overview}. The
-definition of the optimisation problems is performed by drawing
-\code{n1} integer numbers from a discrete uniform distribution
-$u_i \sim \mathcal{U}\{1, 2^{32}-1\}$. Each integer $u_i$ is the seed
-used in \pkg{ELFI}'s random simulator. The seeds $u_i$ are
-computationally analogous to the random variables $\vb_i$, that were
-defined in the previous chapter; setting the \code{seed} eliminates all randomness of the simulator transforming it to a deterministic
-function. Setting the argument \code{use_bo=True}, chooses the
-Bayesian Optimisation scheme for obtaining $\thetab_i^*$. In this
-case, apart from obtaining the optimal points $\thetab_i^*$, we also
-fit a GP as a surrogate model $\hat{d}_i$. In this
-scenario, in the following steps, $\hat{d}_i(\thetab)$ replaces
-$d_i(\thetab)$ as the distance function.
+completed sequentially, as shown in
+Figure~\ref{fig:romc_overview}. The definition of the optimisation
+problems is performed by drawing \code{n1} integer numbers from a
+discrete uniform distribution \(u_i \sim \mathcal{U}\{1,
+2^{32}-1\}\). Each integer \(u_i\) is the seed used in \pkg{ELFI}'s
+random simulator. The seeds \(u_i\) are computationally analogous to
+the random variables \(\vb_i\), that were defined in the previous
+chapter; setting the \code{seed} eliminates all randomness of the
+simulator transforming it to a deterministic function. Setting the
+argument \code{use_bo=True}, chooses the Bayesian Optimisation scheme
+for obtaining \(\thetab_i^*\). In this case, apart from obtaining the
+optimal points \(\thetab_i^*\), we also fit a GP as a surrogate model
+\(\hat{d}_i\). In this scenario, in the following steps,
+\(\hat{d}_i(\thetab)\) replaces \(d_i(\thetab)\) as the distance
+function.
 
 \begin{Code}
 ---------------------------------- python ----------------------------------
@@ -34,9 +36,9 @@ $d_i(\thetab)$ as the distance function.
 \end{Code}
 
 \noindent
-This function helps the user decide which threshold $\epsilon$ to
+This function helps the user decide which threshold \(\epsilon\) to
 use. It plots a histogram of the distances at the optimal point
-$d_i(\thetab_i^*) : \{i = 1, 2, \ldots, n_1\}$ or $\hat{d}_i^*$ in case
+\(d_i(\thetab_i^*) : \{i = 1, 2, \ldots, n_1\}\) or \(\hat{d}_i^*\) in case
 \code{use_bo=True}. The function accepts all keyword arguments and
 forwards them to the underlying \code{matplotlib.pyplot.hist()} function; in
 this way the user may customise some properties of the histogram, such
@@ -56,12 +58,12 @@ as the number of bins or the range of values.
 
 \noindent
 This method constructs a bounding box around the optimal point
-$\thetab_i^* : i = 1, 2, \ldots, n_1$ following
+\(\thetab_i^* : i = 1, 2, \ldots, n_1\) following
 Algorithm~\ref{alg:region_construction}. The Hessian matrix is
 approximated based on the Jacobian
-$\hess_i = \jac_i^T \jac_i$\footnote{The Jacobian matrix is computed
+\(\hess_i = \jac_i^T \jac_i\)\footnote{The Jacobian matrix is computed
   on the output of the summary statistics
-  $\nabla_{\thetab} \Phi(M_d(\thetab, \vb_i))$ at $\thetab_i^*$} if
+  \(\nabla_{\thetab} \Phi(M_d(\thetab, \vb_i))\) at \(\thetab_i^*\)} if
 gradients have been used, or as the Hessian of the GP, in case of
 Bayesian Optimisation. The eigenvectors are computed using the function
 \code{numpy.linalg.eig()}, and used as the axes of the
@@ -83,12 +85,12 @@ The function \code{fit_posterior} is a syntactic sugar for applying
 step. The function \code{visualize_region} can be used for plotting
 the bounding box around the optimal point, when the parameter space is
 one- or two-dimensional. The argument \code{i} is the index of the corresponding
-optimisation problem i.e.\ $i<n_1$. \code{compute_eps} returns the
-appropriate distance value $d_{i=\kappa}^*$ where
-$\kappa = \lfloor quantile \cdot n \rfloor$ from the collection
-$\{ d_i^* \} \forall i = \{1, \ldots, n\}$ where $n$ is the number of
+optimisation problem i.e.\ \(i<n_1\). \code{compute_eps} returns the
+appropriate distance value \(d_{i=\kappa}^*\) where
+\(\kappa = \lfloor quantile \cdot n \rfloor\) from the collection
+\(\{ d_i^* \} \forall i = \{1, \ldots, n\}\) where \(n\) is the number of
 accepted solutions. It can be used to automate the selection of the
-threshold $\epsilon$, e.g.\ \code{eps=romc.compute_eps(quantile=0.9)}.
+threshold \(\epsilon\), e.g.\ \code{eps=romc.compute_eps(quantile=0.9)}.
 
 
 \subsubsection*{Example}

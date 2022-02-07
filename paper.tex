@@ -99,33 +99,22 @@
   intractable likelihood is challenging; most likelihood-free
   inference (LFI) methods encounter problems in accuracy and
   efficiency. In this paper, we present the implementation of Robust
-  Optimisation Monte Carlo (ROMC) in the Python package ELFI. ROMC is
-  a novel and efficient (highly-parallelizable) LFI technique that
-  provides accurate weighted samples from the posterior.  Our
-  implementation can be used in two ways. A scientist may use it as an
-  out-of-the-box LFI algorithm. We provide an easy-to-use API
-  harmonised with the rest of the ELFI framework; therefore, it is
-  straightforward to compare it with all the methods included in
-  ELFI. On the other direction, we have carefully split ROMC into
-  isolated algorithmic steps. Therefore, we allow the researcher to
-  experiment, replacing components of the algorithm with
-  custom-designed subparts. In both scenarios, the algorithmic steps
+  Optimisation Monte Carlo (ROMC) in the \proglang{Python} package
+  \pkg{ELFI}. ROMC is a novel and efficient (highly-parallelizable)
+  LFI framework that provides accurate weighted samples from the
+  posterior. Our implementation can be used in two ways. Firstly, a
+  scientist may use it as an out-of-the-box LFI algorithm; we provide
+  an easy-to-use API harmonised with the rest of the \pkg{ELFI}
+  framework.  Therefore, it is straightforward to compare it with the
+  rest of the methods included in \pkg{ELFI}. Afterwards, we have
+  carefully split ROMC into isolated algorithmic steps. Hence, we
+  allow the researcher to experiment by replacing part(s) of the
+  algorithm with novel subcomponent(s). In both scenarios, all steps
   of ROMC run in a fully-parallelizable manner, exploiting all CPU
   cores. We also provide helpful functionalities for (i) inspecting
-  the inference process and (ii) evaluating the approximated
-  posterior. Finally, we test the robustness of our implementation on
-  some typical LFI examples.
-  
-  % This short article illustrates how to write a manuscript for the
-  % \emph{Journal of Statistical Software} (JSS) using its {\LaTeX} style files.
-  % Generally, we ask to follow JSS's style guide and FAQs precisely. Also,
-  % it is recommended to keep the {\LaTeX} code as simple as possible,
-  % i.e., avoid inclusion of packages/commands that are not necessary.
-  % For outlining the typical structure of a JSS article some brief text snippets
-  % are employed that have been inspired by \cite{Zeileis+Kleiber+Jackman:2008},
-  % discussing count data regression in \proglang{R}. Editorial comments and
-  % instructions are marked by vertical bars.
-}
+  the inference process and (ii) evaluating the obtained
+  samples. Finally, we test the robustness of our implementation on
+  some typical LFI examples.  }
 
 %% - \Keywords{} with LaTeX markup, at least one required
 %% - \Plainkeywords{} without LaTeX markup (if necessary)
@@ -175,30 +164,29 @@ set of algorithmic steps. This modelling freedom comes at a cost;
 performing the inference, i.e., sample or evaluate the posterior
 distribution, is challenging.
 
-Optimization Monte Carlo (OMC) proposed by~\citep{Meeds2015} was a
+Optimization Monte Carlo (OMC) proposed by~\citet{Meeds2015} was a
 novel LFI approach for approximating the posterior
-distribution. Afterwards, \citep{Forneron2016} provided a similar
-method under `reverse sampler'. The key idea is turning the stochastic
-data-generating mechanism into a set of fully-parallelizable
-deterministic optimisation processes. In their work,
-~\citet{Ikonomov2019}, located some critical failure modes of OMC, and
-proposed Robust OMC (ROMC) an alternative version of OMC with the
-appropriate improvements.
+distribution. Afterwards, \citet{Forneron2016} provided a similar
+method naming it `reverse sampler'. The central idea is turning the
+stochastic data-generating mechanism into a set of
+fully-parallelizable deterministic optimisation processes. In their
+work, ~\citet{Ikonomov2019}, located some critical failure modes of
+OMC, and proposed Robust OMC (ROMC) an alternative version of OMC with
+the appropriate improvements.
 
 In this paper, we present an extendible and parallelisable
-implementation of ROMC at the \proglang{Python} package
-\proglang{Engine for Likelihood-Free inference (ELFI)}. We follow
-specific principles for making the implementation extendible. As we
-will describe analytically in the next chapter, ROMC can be understood
-not only as a specific algorithm, but mainly as a framework for
-obtaining weighted samples from the posterior; it defines some
-algorithmic task that must be fulfilled, without enforcing which
-specific algorithm must be used for the tasks. Therefore, a researcher
-may adopt ROMC's backbone approach, but experiment with alternative
-methods to solve the distinct tasks. We have designed ROMC for
-facilitating such alterations. Finally, we have tested the accuracy and
-the efficiency of our implementation on the LFI examples supported by
-the \proglang{ELFI} package.
+implementation of ROMC at the \proglang{Python} package \pkg{Engine
+  for Likelihood-Free inference (ELFI)}. We choose carefully the
+designing principles for making the implementation extendible. As we
+describe analytically in the next chapter, ROMC can be understood not
+only as a specific algorithm, but mainly as a framework for obtaining
+weighted samples from the posterior; it defines a sequence of
+algorithmic steps, without enforcing a specific algorithm for solving
+them. Therefore, a researcher may adopt ROMC's backbone approach, but
+experiment with alternative methods to solve the tasks. We have
+designed ROMC for facilitating such alterations. Finally, we have
+tested the accuracy and the efficiency of our implementation on the
+LFI examples supported by the \pkg{ELFI} package.
 
 % \begin{leftbar}
 % The introduction is in principle ``as usual''. However, it should usually embed
@@ -276,21 +264,18 @@ the \proglang{ELFI} package.
 
 % \clearpage
 \section{Background}
-We first give a short introduction to implicit parametric models and
-LFI. We then focus on the methods relevant for
-this paper: first the earlier OMC and then
-its recent robust generalisation, robust OMC, for which we provide the
-software package as part of ELFI, a larger inference platform that we briefly introduce at the
-end of this background section.
+We first give a short introduction to simulator-based models and
+LFI. We then focus on the methods forming the basis of this paper; OMC
+and its robust improvement, ROMC. Finally, we introduce ELFI, the
+software package used for our implementation.
 
 %\input{latex_files/ch2/2_1_implicit_models}
 
-\subsection{Implicit models and likelihood-free inference}
+\subsection{Simulator-based models and likelihood-free inference}
 \input{latex_files/ch2/2-1-implicit-models.tex}
 
 \subsection{Optimisation Monte Carlo (OMC)}
 \input{latex_files/ch2/2-2-OMC.tex}
-
 
 \subsection{Robust optimisation Monte Carlo (ROMC)}
 \input{latex_files/ch2/2-3-ROMC.tex}
