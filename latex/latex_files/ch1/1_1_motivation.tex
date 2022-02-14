@@ -1,0 +1,36 @@
+An implicit or simulator-based model is a parameterised stochastic
+data generating mechanism \cite{Gutmann2016}. The key characteristic
+of these models is that although it is feasible to sample (simulate) data points, it is impossible to evaluate the likelihood. Formally, a simulator-based model is a
+parameterised family of probability density functions
+$\{ p_{\yb|\thetab}(\yb) \}_{\thetab}$, whose closed-form is either
+unknown or intractable to evaluate. Practically, a simulator can be understood as a black-box
+machine $M_r$\footnote{The subscript $r$ in $M_r$ indicates the
+  \textit{random} simulator. In the next chapters we will introduce
+  $M_d$ indicating the \textit{deterministic} simulator.} that
+given a set of parameters $\thetab$, produces samples $\yb$ in a
+stochastic manner i.e.\ $M_r(\thetab) \rightarrow \yb$.
+
+Simulator-based models are particularly captivating due to the
+modelling freedom they provide; any physical process that can be
+conceptualised as a computer program of finite steps can be modelled
+as a simulator-based model without any compromise. The modelling
+freedom includes any amount of hidden (unobserved) internal variables
+or rule-based decisions. Hence, implicit models are often used to
+model physical phenomena in many fiels such as biology, neuroscience
+etc. This degree of freedom comes at a cost; performing the inference
+is particularly demanding from both the computational and the
+mathematical perspective. The class of methods that try to approximate
+the posterior distribution in these cases are called likelihood-free
+inference methods. Unfortunately, the algorithms deployed so far
+permit the inference only at low-dimensional parametric spaces,
+i.e.\ $\thetab \in \mathbb{R}^D$ where $D$ is small\footnote{In broad terms, small refers to dimensionality $D$ less than a hundred.}.
+
+\subsubsection*{\textit{Goal of implicit models}}
+
+As in most Machine Learning (ML) concepts, the fundamental goal is the
+derivation of one (or many) parameter configuration(s) $\thetab^*$
+that \textit{describe} the data best i.e.\ generate
+samples $M_r(\thetab^*)$ that are as close as possible to the observed
+data $\data$. In our case, following the Bayesian approach, we treat
+the parameters of interest $\thetab$ as random variables and we try to
+\textit{infer} a posterior distribution $p(\thetab|\data)$ on them.

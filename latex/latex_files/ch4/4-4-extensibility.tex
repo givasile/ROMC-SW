@@ -1,0 +1,202 @@
+ROMC can be conceived as a meta-algorithm; it describes a sequence of
+steps for approximating the posterior distribution, without
+\emph{explicitly} enforcing the methods that solve these steps. Even
+though for each step a specific algorithm is proposed
+by~\cite{Ikonomov2019}, in general ROMC is functional if a practitioner
+thinks of an alternative way of approaching a specific
+step. Considering this particularity, we designed the implementation
+to support such \emph{extensibility} capability.
+
+We have specified four specific points where a user may intervene with
+their custom modules; (a) the gradient-based optimisation, (b) the
+Bayesian Optimisation, (c) the proposal region construction and (d)
+the surrogate model fitting. These are the four critical parts of the
+ROMC procedure, whereas the rest of the code is the backbone of the
+algorithm; each of them can be swapped to a different
+algorithm with the same functionality than the one we propose, without the rest of the method to
+collapse.
+
+The four replaceable parts described above, are solved using the four
+methods of the \linebreak \code{OptimisatioProblem} class; (a)
+\code{solve_gradients(**kwargs)}, (b) \code{solve_bo(**kwargs)},
+\linebreak (c) \code{build_region(**kwargs)}, (d)
+\code{fit_local_surrogate(**kwargs)}. Therefore, the user should
+create a custom class that inherits the basic
+\code{OptimisatioProblem} class and overwrites one or more of the
+above four functions with custom ones.
+
+We illustrate that in the
+following example; suppose we want to blindly set the proposal region
+as a predefined n-dimensional bounding box around the optimal
+point. The following snippet illustrates how:
+
+\begin{Code}
+---------------------------------- python ----------------------------------
+class customOptim(OptimisationProblem):
+    def __init__(self, **kwargs):
+        super(customOptim, self).__init__(**kwargs)
+        
+    def fit_local_surrogate(self, **kwargs):
+        nof_samples = 500
+        objective = self.objective
+
+        local_surrogates = []
+        for i in range(len(self.regions)):
+            # prepare dataset
+            x = self.regions[i].sample(nof_samples)
+            y = np.array([objective(ii) for ii in x])
+
+            # train Neural Network
+            mlp = MLPRegressor(hidden_layer_sizes=(10,10), solver='adam')
+            model = Pipeline([('linear', mlp)])
+            model = model.fit(x, y)
+            local_surrogates.append(self.create_local_surrogate(model))
+
+        self.local_surrogates = local_surrogates
+        self.state["local_surrogates"] = True
+
+    def create_local_surrogate(self, model):
+        def _local_surrogate(th):
+            th = np.expand_dims(th, 0)
+            return float(model.predict(th))
+        return _local_surrogate
+----------------------------------------------------------------------------    
+\end{Code}
+
+In the same way, the user may replace each of the other three
+functionalities. The only restriction that must be respected, concerns
+the side-effects each method has at the \code{OptimisatioProblem}
+class level. In the following four snippets we present the signature
+of each method, pointing out with a left arrow the side-effects that
+must be included in the custom routine that will replace them.
+
+
+\begin{Code}
+---------------------------------- python ----------------------------------
+def solve_gradients(self, **kwargs):
+  self.state["attempted"] = True
+
+  # custom solution procedure
+  
+  if success:
+    self.result = RomcOpimisationResult(res.x, res.y, jac, hess_inv)
+    self.state["solved"] = True
+    return True 
+  else:
+    return False 
+----------------------------------------------------------------------------    
+def solve_bo(self, **kwargs):
+  self.state["attempted"] = True
+
+  # custom procedure
+
+  if success:
+    self.result = RomcOpimisationResult(x, y)
+    self.surrogate <- Callable
+    self.state["solved"] = True
+    self.state["has_fit_surrogate"] = True
+    return True
+  else:
+    return False
+----------------------------------------------------------------------------    
+def build_region(self, **kwargs):
+    self.eps_region = eps_region
+
+    if success:
+        # construct region
+        self.regions <- List[NDimBoudningBox]
+        self.state["region"] = True
+        return True
+    else:
+        return False
+----------------------------------------------------------------------------    
+def fit_local_surrogate(self, **kwargs):
+  if success:
+    self.local_surrogate = local_surrogates
+    self.state["local_surrogates"] = True
+    return True
+  else:
+    return False
+----------------------------------------------------------------------------    
+\end{Code}
+
+The two classes that may be needed for creating the custom routines
+are \\ (a) \code{RomcOpimisationResult} and (b)
+\code{NDimBoundingBox}. We present their signatures below.
+
+\begin{Code}
+---------------------------------- python ----------------------------------
+class RomcOpimisationResult:
+    def __init__(self, x_min, f_min, hess_appr):
+        Parameters
+        ----------
+        x_min: np.ndarray (D,) or float, the minimum point
+        f_min: float, distance at the minimum point
+        hess_appr: np.ndarray (DxD), Hessian approximation at x_min
+        """
+----------------------------------------------------------------------------    
+class NDimBoundingBox:
+    def __init__(self, rotation, center, limits, eps_region):
+        Parameters
+        ----------
+        rotation: np.array (D,D),  rotation matrix for the bounding box
+        center: np.array (D,) center of the bounding box
+        limits: np.ndarray, shape: (D,2), the limits of the bounding box
+        eps_region: float, distance threshold 
+----------------------------------------------------------------------------    
+\end{Code}
+
+% Let's say we have observed that the local area around $\theta_i^*$ is
+% too complex to be represented by a simple quadratic model\footnote{as
+%   in the current implementation}. Hence, the user selects a neural
+% network as a good alternative. In the following snippet, we
+% demonstrate how they could implement this enhancement without much
+% effort; (a) they have to develop the neural network using the package
+% of their choice (b) they must create a custom optimisation class which
+% inherits the basic \code{OptimisationClass} and (c) they have to
+% overwrite the \code{fit_local_surrogate} routine, with one that
+% sets the neural network's prediction function as the
+% \code{local_surrogate} attribute. The argument \code{**kwargs}
+% may be used for passing all the important arguments, e.g.\ training
+% epochs, gradient step etc. If, for example, they would like to set the
+% size of the training set dynamically, we may replace \code{x =
+%   self.regions[0].sample(30)} with \code{x =
+%   self.regions[0].sample(kwargs["nof_examples"])}. Finally, they must
+% pass the custom optimisation class, when calling the \code{ROMC}
+% method.
+
+% \begin{Code}
+% ------------------------------ python snippet ------------------------------  
+%   class NeuralNetwork:
+%       def __init__(self, **kwargs):
+%           # set the input arguments
+
+%       def train(x, y):
+%           # training code
+
+%       def predict(x):
+%           # prediction code
+
+%   # Inherit the base optimisation class
+%   class customOptim(elfi.methods.parameter_inference.OptimisationProblem):
+%       def __init__(self, **kwargs):
+%           super(customOptim, self).__init__(**kwargs)
+
+%       # overwrite the function you want to replace
+%       def fit_local_surrogate(**kwargs):
+%           # init and train the NN
+%           x = self.regions[0].sample(30) # 30 training points
+%           y = [np.array([self.objective(ii) for ii in x])]
+%           nn = NeuralNet()
+%           nn.train(x,y)
+
+%           # set the appropriate attribute
+%           self.local_surrogate = nn.predict
+
+%           # update the state
+%           self.state["local_surrogate"] = True
+
+%   # pass the custom inference method as argument
+%   romc = elfi.ROMC(dist, bounds, custom_optim_class=customOptim)
+% ----------------------------------------------------------------------------
+% \end{Code}
