@@ -1,5 +1,3 @@
-The inference part contains four methods.
-
 \begin{Code}
 ---------------------------------- python ----------------------------------
 >>> romc.sample(n2)
@@ -26,11 +24,11 @@ Algorithm~\ref{alg:sampling_GB}.
 \end{Code}
 
 \noindent
-This function computes the expectation
+The function \code{compute_expectation} computes the expectation
 \(\E_{p(\thetab|\data)}[h(\thetab)]\) using
 expression~\eqref{eq:expectation}. The argument \code{h} can be any
-python \code{Callable}. Method \code{eval_unnorm_posterior} computes the
-unnormalised posterior approximation using
+python \code{Callable}. Method \code{eval_unnorm_posterior} computes
+the unnormalised posterior approximation using
 expression~\eqref{eq:approx_posterior}. Method \code{eval_posterior}
 evaluates the normalised posterior estimating the partition function
 \(Z = \int p_{d,\epsilon}(\thetab|\data)d\thetab\); with Riemann's
@@ -39,25 +37,16 @@ only in low-dimensional parametric spaces.
 
 \subsubsection*{Example - Sampling and compute expectation}
 
-In the following code snippet, we perform weighted sampling from the
-ROMC approximate posterior. Afterwards, we use some of \pkg{ELFI}'s
-built-in tools to get a summary of the obtained samples. In Figure
-\ref{fig:running_example_romc_inference}, we observe the histogram of the weighted
-samples and the acceptance region of the first deterministic function
-(as before) alongside the samples obtained from it. Finally, in the
-code snippet, we demonstrate how to use the \code{compute_expectation}
-function; in the current example, we define \code{h} to compute
-firstly the empirical mean and afterwards the empirical variance. In
-both cases, the empirical result is close to the ground truth
-\(\mu = 0\) and \(\sigma^2 = 1\). The
-\code{romc.eval_unnorm_posterior(theta)} evaluates the posterior at
-point \(\theta\) using expression \eqref{eq:approx_posterior_omc}. The
-\code{romc.eval_posterior(theta)} approximates the partition function
-\(Z = \int_{\thetab} p_{d,\epsilon}(\thetab|\data) d\thetab\) using the
-Riemann approximation as explained above. In our simple example, this
-utility can provide a nice plot of the approximate posterior as
-illustrated in Figure~\ref{fig:running_example_romc_inference}. We observe that the
-approximation is quite close to the ground-truth posterior.
+In the following code snippet, we use the inference utilities to (a)
+get weighted samples from the approximate posterior, (b) compute an
+expectation and (c) evaluate the approximate posterior. We also use
+some of \pkg{ELFI}'s built-in tools to get a summary of the obtained
+samples. For the utility \code{compute_expectation}, we demonstrate
+how to use it in order to compute the samples mean and
+variance. Finally, we evaluate \code{eval_posterior} at multiple
+points to plot the approximate posterior of
+Figure~\ref{fig:running_example_romc_inference}. We observe that the
+approximation is quite close to the ground-truth.
 
 \begin{Code}
 ------------------------------ python snippet ------------------------------  

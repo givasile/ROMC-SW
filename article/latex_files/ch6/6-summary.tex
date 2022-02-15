@@ -1,0 +1,19 @@
+In this paper, we presented the implementation details we followed for
+developing the LFI method ROMC at the \pkg{ELFI} package. We paid
+thorough attention to two specific use-case scenarios. Firstly, we
+illustrate how a user may take advantage of our ready-to-use API for
+solving its LFI problem. Secondly, we focus on the scenario where a
+researcher wants to intervene and alter parts of the method. Our
+implementation is designed to support this as well.
+
+There are still open challenges for the left for future research. Two
+directions may enable ROMC to solve high-dimensional problems
+efficiently. The first one is enabling ROMC's execution into a cluster
+of computers. ROMC can be characterized as an \textit{embarrassingly
+  parallel} workload; each optimization problem is an entirely
+independent task. Therefore, supporting inference into a cluster of
+computers can radically speed up the inference. The second one refers
+to implementing the method in a framework that supports automatic
+differentiation. Automatic differentiation is necessary for
+efficiently solving optimisation problems, especially in
+high-dimensional parametric models.
