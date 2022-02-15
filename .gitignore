@@ -6,7 +6,6 @@
 *.blg
 *.log
 *.out
-*.pdf
 *.run.xml
 *.bak
 *.sav
