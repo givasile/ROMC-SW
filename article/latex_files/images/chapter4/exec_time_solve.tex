@@ -1,0 +1,71 @@
+% This file was created with tikzplotlib v0.9.12.
+\begin{tikzpicture}
+
+\begin{axis}[
+legend cell align={left},
+legend style={
+  fill opacity=0.8,
+  draw opacity=1,
+  text opacity=1,
+  at={(0.03,0.97)},
+  anchor=north west,
+  draw=white!80!black
+},
+tick align=outside,
+tick pos=left,
+title={Optimisation problems},
+x grid style={white!69.0196078431373!black},
+xlabel={\(\displaystyle n_1\)},
+xmin=-8.95, xmax=209.95,
+xtick style={color=black},
+xtick={-25,0,25,50,75,100,125,150,175,200,225},
+xticklabels={
+  \(\displaystyle {\ensuremath{-}25}\),
+  \(\displaystyle {0}\),
+  \(\displaystyle {25}\),
+  \(\displaystyle {50}\),
+  \(\displaystyle {75}\),
+  \(\displaystyle {100}\),
+  \(\displaystyle {125}\),
+  \(\displaystyle {150}\),
+  \(\displaystyle {175}\),
+  \(\displaystyle {200}\),
+  \(\displaystyle {225}\)
+},
+y grid style={white!69.0196078431373!black},
+ylabel={time (sec)},
+ymin=-2.37151520130074, ymax=55.2725170752999,
+ytick style={color=black},
+ytick={-10,0,10,20,30,40,50,60},
+yticklabels={
+  \(\displaystyle {\ensuremath{-}10}\),
+  \(\displaystyle {0}\),
+  \(\displaystyle {10}\),
+  \(\displaystyle {20}\),
+  \(\displaystyle {30}\),
+  \(\displaystyle {40}\),
+  \(\displaystyle {50}\),
+  \(\displaystyle {60}\)
+}
+]
+\addplot [semithick, blue, dashed, mark=*, mark size=3, mark options={solid}]
+table {%
+1 0.248668083999291
+50 13.5617614840012
+100 27.5616243530003
+150 38.047610014999
+200 52.6523337899998
+};
+\addlegendentry{sequential}
+\addplot [semithick, red, dashed, mark=*, mark size=3, mark options={solid}]
+table {%
+1 0.410706657001356
+50 3.62168293899958
+100 6.72075138699984
+150 9.7389758570007
+200 13.5138143559998
+};
+\addlegendentry{parallel}
+\end{axis}
+
+\end{tikzpicture}

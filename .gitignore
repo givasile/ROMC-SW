@@ -13,3 +13,5 @@
 minted_files/
 
 env*
+
+.idea/

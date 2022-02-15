@@ -252,7 +252,7 @@ for i, n in enumerate(n1):
     solve_grad_parallel.append(toc-tic)
 
     tic = timeit.default_timer()
-    romc1.estimate_regions(eps_filter=eps, use_surrogate=False)
+    romc1.estimate_regions(eps_filter=eps, use_surrogate=False, fit_models=False)
     toc = timeit.default_timer()
     estimate_regions_parallel.append(toc-tic)
 

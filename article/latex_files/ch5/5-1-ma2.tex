@@ -190,107 +190,14 @@ faster, sampling 3.5 times faster and evaluating the posterior and
 constructing the bounding boxes almost 2.5 times faster.
 
 \begin{figure}[ht]
-  \centering
-    \begin{minipage}[t]{.4\textwidth}
-      \begin{tikzpicture}
-        \begin{axis}[
-          title={Solve optimisation problems},
-          xlabel={\(n_1\)},
-          ylabel={seconds},
-          xmin=1, xmax=500,
-          ymin=0, ymax=7,
-          xtick={1,100,200,300,400,500},
-          ytick={0, 1, 2, 3, 4, 5, 6, 7},
-          legend pos=north west,
-          ymajorgrids=true,
-          grid style=dashed,
-          ]
-          \addplot[color=blue, mark=o] coordinates {
-            (1,0.05)(125,1.6)(250,3.5)(375,5)(500,6.8)
-          };
-          \addlegendentry{sequential}
-          \addplot[color=red, mark=o] coordinates {
-            (1,0.2)(125,0.6)(250,1)(375,1.5)(500,2)
-          };
-          \addlegendentry{parallel}          
-        \end{axis}
-      \end{tikzpicture}
-    \end{minipage}\hfill
-    \begin{minipage}[t]{.4\textwidth}
-      \begin{tikzpicture}
-        \begin{axis}[
-          title={Proposal regions},
-          xlabel={\(n_1\)},
-          ylabel={seconds},
-          xmin=1, xmax=500,
-          ymin=0, ymax=7,
-          xtick={1,100,200,300,400,500},
-          ytick={0, 1, 2, 3, 4, 5, 6, 7},
-          legend pos=north west,
-          ymajorgrids=true,
-          grid style=dashed,
-          ]
-          \addplot[color=blue, mark=o] coordinates {
-            (1,0.05)(125,1.6)(250,3.5)(375,5)(500,6.8)
-          };
-          \addlegendentry{sequential}
-          \addplot[color=red, mark=o] coordinates {
-            (1,0.2)(125,0.6)(250,1)(375,1.5)(500,2)
-          };
-          \addlegendentry{parallel}          
-        \end{axis}
-      \end{tikzpicture}
-    \end{minipage}\hfill
-    \begin{minipage}[t]{.4\textwidth}
-      \begin{tikzpicture}
-        \begin{axis}[
-          title={Sample},
-          xlabel={\(n_1\)},
-          ylabel={seconds},
-          xmin=1, xmax=500,
-          ymin=0, ymax=7,
-          xtick={1,100,200,300,400,500},
-          ytick={0, 1, 2, 3, 4, 5, 6, 7},
-          legend pos=north west,
-          ymajorgrids=true,
-          grid style=dashed,
-          ]
-          \addplot[color=blue, mark=o] coordinates {
-            (1,0.05)(125,1.6)(250,3.5)(375,5)(500,6.8)
-          };
-          \addlegendentry{sequential}
-          \addplot[color=red, mark=o] coordinates {
-            (1,0.2)(125,0.6)(250,1)(375,1.5)(500,2)
-          };
-          \addlegendentry{parallel}          
-        \end{axis}
-      \end{tikzpicture}
-    \end{minipage}\hfill
-    \begin{minipage}[t]{.4\textwidth}
-      \begin{tikzpicture}
-        \begin{axis}[
-          title={Evaluate posterior},
-          xlabel={\(n_1\)},
-          ylabel={seconds},
-          xmin=1, xmax=500,
-          ymin=0, ymax=7,
-          xtick={1,100,200,300,400,500},
-          ytick={0, 1, 2, 3, 4, 5, 6, 7},
-          legend pos=north west,
-          ymajorgrids=true,
-          grid style=dashed,
-          ]
-          \addplot[color=blue, mark=o] coordinates {
-            (1,0.05)(125,1.6)(250,3.5)(375,5)(500,6.8)
-          };
-          \addlegendentry{sequential}
-          \addplot[color=red, mark=o] coordinates {
-            (1,0.2)(125,0.6)(250,1)(375,1.5)(500,2)
-          };
-          \addlegendentry{parallel}          
-        \end{axis}
-      \end{tikzpicture}
-    \end{minipage}\hfill
+  \begin{center}
+    \resizebox{.47\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/exec_time_solve.tex}
+    }
+    \resizebox{.49\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/exec_time_regions.tex}
+    }
+    \end{center}
     \caption[Execution time exploiting parallelisation]{In the first
       line, we compare the parallel and sequential execution of the
       training part and at the second line the inference part. At the
@@ -299,3 +206,114 @@ constructing the bounding boxes almost 2.5 times faster.
       time for evaluating the posterior at a batch of \(50\) points.}
       \label{fig:exec_parallel}
 \end{figure}
+
+% \begin{figure}[ht]
+%   \centering
+%     \begin{minipage}[t]{.4\textwidth}
+%       \begin{tikzpicture}
+%         \begin{axis}[
+%           title={Solve optimisation problems},
+%           xlabel={\(n_1\)},
+%           ylabel={seconds},
+%           xmin=1, xmax=500,
+%           ymin=0, ymax=7,
+%           xtick={1,100,200,300,400,500},
+%           ytick={0, 1, 2, 3, 4, 5, 6, 7},
+%           legend pos=north west,
+%           ymajorgrids=true,
+%           grid style=dashed,
+%           ]
+%           \addplot[color=blue, mark=o] coordinates {
+%             (1,0.05)(125,1.6)(250,3.5)(375,5)(500,6.8)
+%           };
+%           \addlegendentry{sequential}
+%           \addplot[color=red, mark=o] coordinates {
+%             (1,0.2)(125,0.6)(250,1)(375,1.5)(500,2)
+%           };
+%           \addlegendentry{parallel}          
+%         \end{axis}
+%       \end{tikzpicture}
+%     \end{minipage}\hfill
+%     \begin{minipage}[t]{.4\textwidth}
+%       \begin{tikzpicture}
+%         \begin{axis}[
+%           title={Proposal regions},
+%           xlabel={\(n_1\)},
+%           ylabel={seconds},
+%           xmin=1, xmax=500,
+%           ymin=0, ymax=7,
+%           xtick={1,100,200,300,400,500},
+%           ytick={0, 1, 2, 3, 4, 5, 6, 7},
+%           legend pos=north west,
+%           ymajorgrids=true,
+%           grid style=dashed,
+%           ]
+%           \addplot[color=blue, mark=o] coordinates {
+%             (1,0.05)(125,1.6)(250,3.5)(375,5)(500,6.8)
+%           };
+%           \addlegendentry{sequential}
+%           \addplot[color=red, mark=o] coordinates {
+%             (1,0.2)(125,0.6)(250,1)(375,1.5)(500,2)
+%           };
+%           \addlegendentry{parallel}          
+%         \end{axis}
+%       \end{tikzpicture}
+%     \end{minipage}\hfill
+%     \begin{minipage}[t]{.4\textwidth}
+%       \begin{tikzpicture}
+%         \begin{axis}[
+%           title={Sample},
+%           xlabel={\(n_1\)},
+%           ylabel={seconds},
+%           xmin=1, xmax=500,
+%           ymin=0, ymax=7,
+%           xtick={1,100,200,300,400,500},
+%           ytick={0, 1, 2, 3, 4, 5, 6, 7},
+%           legend pos=north west,
+%           ymajorgrids=true,
+%           grid style=dashed,
+%           ]
+%           \addplot[color=blue, mark=o] coordinates {
+%             (1,0.05)(125,1.6)(250,3.5)(375,5)(500,6.8)
+%           };
+%           \addlegendentry{sequential}
+%           \addplot[color=red, mark=o] coordinates {
+%             (1,0.2)(125,0.6)(250,1)(375,1.5)(500,2)
+%           };
+%           \addlegendentry{parallel}          
+%         \end{axis}
+%       \end{tikzpicture}
+%     \end{minipage}\hfill
+%     \begin{minipage}[t]{.4\textwidth}
+%       \begin{tikzpicture}
+%         \begin{axis}[
+%           title={Evaluate posterior},
+%           xlabel={\(n_1\)},
+%           ylabel={seconds},
+%           xmin=1, xmax=500,
+%           ymin=0, ymax=7,
+%           xtick={1,100,200,300,400,500},
+%           ytick={0, 1, 2, 3, 4, 5, 6, 7},
+%           legend pos=north west,
+%           ymajorgrids=true,
+%           grid style=dashed,
+%           ]
+%           \addplot[color=blue, mark=o] coordinates {
+%             (1,0.05)(125,1.6)(250,3.5)(375,5)(500,6.8)
+%           };
+%           \addlegendentry{sequential}
+%           \addplot[color=red, mark=o] coordinates {
+%             (1,0.2)(125,0.6)(250,1)(375,1.5)(500,2)
+%           };
+%           \addlegendentry{parallel}          
+%         \end{axis}
+%       \end{tikzpicture}
+%     \end{minipage}\hfill
+%     \caption[Execution time exploiting parallelisation]{In the first
+%       line, we compare the parallel and sequential execution of the
+%       training part and at the second line the inference part. At the
+%       left figure, we measure the execution time for sampling \(n_2=50\)
+%       points per region. At the right figure we measure the execution
+%       time for evaluating the posterior at a batch of \(50\) points.}
+%       \label{fig:exec_parallel}
+% \end{figure}
