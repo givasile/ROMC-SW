@@ -7,11 +7,8 @@ convenient modules for all the fundamental components of a
 probabilistic model (e.g.\ prior, simulator, summaries
 etc.). Furthermore, \pkg{ELFI} already supports some recently proposed
 likelihood-free inference methods, making it straightforward to
-perform comparisons between methods.
-
-% \subsubsection{Modelling at ELFI}
-% \label{sec:modelling}
-
+perform comparisons.
+%
 \pkg{ELFI} handles the probabilistic model as a Directed Acyclic Graph
 (DAG). This functionality is based on the package
 \pkg{NetworkX}~\cite{hagberg2008exploring}, which supports
@@ -22,9 +19,8 @@ simulator is connected to the summary statistics that, in turn, lead
 to the output node. Samples can be obtained from all nodes through
 sequential (ancestral) sampling. \pkg{ELFI} automatically considers as
 parameters of interest, i.e. those we try to infer a posterior
-distribution, as the ones defined through the \code{elfi.Prior}
-class. Finally, the observations are passed to the appropriate node
-through the argument \code{observed}.
+distribution, the ones include in the \code{elfi.Prior}
+class.
 
 \begin{figure}[ht]
     \begin{center}
@@ -34,15 +30,11 @@ through the argument \code{observed}.
     \label{fig:elfi}
 \end{figure}
 
-% \subsubsection{Inference at ELFI}
-% \label{sec:inference-methods}
-
-All inference methods in \pkg{ELFI} share the following rules;
+All inference methods in \pkg{ELFI} share two rules;
 
 \begin{itemize}
 \item they follow the signature \code{elfi.<Class name>(<output node>,
-    *arg)}; the initial argument is the output node model and the rest
+    *arg)}; the initial argument is the output node of the model and the rest
   of the arguments are hyper-parameters of the method.
-\item they provide a central sampling functionality, which in most
-  cases is named \\ \code{<method_name>.sample()}.
+\item they obtain posterior samples under the API \code{<method_name>.sample()}
 \end{itemize}

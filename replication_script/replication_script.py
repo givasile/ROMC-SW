@@ -681,11 +681,13 @@ class CustomOptim(OptimisationProblem):
         nof_samples = 500
         objective = self.objective
 
+        # helper function
         def local_surrogate(theta, model_scikit):
             assert theta.ndim == 1
             theta = np.expand_dims(theta, 0)
             return float(model_scikit.predict(theta))
 
+        # create local surrogate model as a function of theta
         def create_local_surrogate(model):
             return partial(local_surrogate, model_scikit=model)
 

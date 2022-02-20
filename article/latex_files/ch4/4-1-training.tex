@@ -85,14 +85,13 @@ to perform the training part at our running example.
   # Training (fitting) part
   n1 = 500 # number of optimisation problems
   seed = 21 # seed for solving the optimisation problems
-  eps = .75 
   use_bo = False # set to True for switching to Bayesian optimisation
 
   # Training step-by-step
   romc.solve_problems(n1=n1, seed=seed, use_bo=use_bo)
   romc.theta_hist(bins=100) # plot hist to decide which eps to use
 
-  eps = .75 # threshold for the bounding box based on histogram inspection
+  eps = .75 # threshold for the bounding box 
   romc.estimate_regions(eps=eps) # build the bounding boxes
 
   romc.visualize_region(i=1) # for inspecting visually the bounding box

@@ -1,8 +1,26 @@
 ------------------------------------------------------------------------------------------
 The directory contains:
 
-* requirements.txt: File describing the pip dependencies for running the code
 * replication_script.py: A standalone script that replicates all the examples presented in the article.
+* requirements.txt: Pip requirements for running the replication_script.py.
+
+------------------------------------------------------------------------------------------
+For running the script using requirements-from-repo.txt, the following steps must be followed:
+
+* Install a python 3.7.9 in your system
+* Initiate a virtual environment
+
+python -m vevn env
+source env/bin/activate
+
+* Install all packages described in requirements.txt
+
+pip install --upgrade pip
+pip install -r requirements.txt
+
+* Run the script
+
+python replication_script.py
 
 ------------------------------------------------------------------------------------------
 The replication script is divided in 5 parts;
@@ -17,16 +35,10 @@ The replication script is divided in 5 parts;
 
 * Part 5 generates the subfigures of figure 7, for measuring/comparing the execution times
 
-------------------------------------------------------------------------------------------
-For reproducing the results through the script, you should first
-
-* Instal a python 3.7 version in your system
-* Install all packages described in requirements.txt with command pip instal -r requirements.txt
-* Install the latest version of ELFI, either thorough the provide .zip file or through the PyPI repo
 
 ------------------------------------------------------------------------------------------
 Comments:
 
-* The figures are stored in both .png and .tex. For the latter to work, apart from the python package tikzplotlib, the latest LiveTex environment must be installed. If this is not the case, you may turn savefig=False at line 20 of the replication_script.py.
+* The figures are stored in both .png and .tex version. For the latter to work, apart from the python package tikzplotlib, the latest LiveTex environment must be installed. If this is not the case, you may set savefig=False at line 20 of the replication_script.py.
 
 * The replication_script.py takes about 30 minutes to run.

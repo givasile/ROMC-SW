@@ -4,7 +4,7 @@ The overview of our implementation is illustrated in
 Figure~\ref{fig:romc_overview}. Following \proglang{Python}'s naming
 principles, the methods starting with an underscore (green rectangles)
 represent internal (private) functions, whereas the rest (blue
-ellipses) are the methods exposed as the public API. In
+rectangles) are the methods exposed as the public API. In
 Figure~\ref{fig:romc_overview}, it can be easily observed that the
 implementation follows Algorithm~\ref{alg:romc_algorithm}. The
 training part includes all the steps until the computation of the
@@ -27,16 +27,16 @@ available.\footnote{Normally, the ground-truth posterior is not
 
 \subsubsection*{Parallelising ROMC method}
 
-ROMC has the significant advantage of being fully parallelisable. We
-exploit this fact by implementing a parallel version of all the major
-components of the method; (a) solving the optimisation problems, (b)
-constructing bounding box regions, (c) sampling and (d) evaluating the
-posterior. We parallelise these processes using the built-in
-\proglang{Python} package \pkg{multiprocessing}. The specific package
-enables concurrency, using subprocesses instead of threads, for
-side-stepping the Global Interpreter (GIL). For activating the
-parallel version of the algorithm, the user simpy has to pass the
-argument \code{parallelize=True} when instantiating \code{ROMC}.
+As discussed, ROMC has the significant advantage of being fully
+parallelisable. We exploit this fact by implementing a parallel
+version of the major fitting components; (a) solving the optimisation
+problems, (b) constructing bounding box regions. We parallelise these
+processes using the built-in \proglang{Python} package
+\pkg{multiprocessing}. The specific package enables concurrency, using
+subprocesses instead of threads, for side-stepping the Global
+Interpreter (GIL). For activating the parallel version of the
+algorithm, the user simpy has to pass the argument
+\code{parallelize=True} when instantiating \code{ROMC}.
 
 \begin{Code}
 ---------------------------------- python ----------------------------------

@@ -1,12 +1,12 @@
-For designing an extendable implementation of ROMC, we firstly define
-ROMC as a sequence of algorithmic steps. The algorithmic view of ROMC
-serves as the driver for the implementation at \pkg{ELFI}. At a high
-level, ROMC can be split into the training and the inference part. In
-general terms, the training part covers all steps for estimating the
-proposal regions and the inference part calculates the weighted
+For designing an extendable implementation, we firstly define ROMC as
+a sequence of algorithmic steps, which is the driver for the
+implementation that follows. At a high level, ROMC can be split into
+the training and the inference part. In broad view, the training part
+covers all steps for estimating the proposal regions and the inference
+part calculates the weighted
 samples. Algorithm~\ref{alg:romc_algorithm} defines ROMC formally;
-Steps 2-10 (before the horizontal line) form the training part and
-steps 12-17 the inference part, respectively.
+Steps 2-11 (before the horizontal line) form the training part and
+steps 13-18 the inference part.
 
 \begin{algorithm}[!ht]
 	\caption{ROMC. Requires the prior \( p(\thetab) \), the simulator
@@ -16,15 +16,15 @@ steps 12-17 the inference part, respectively.
 	\begin{algorithmic}[1]
     \Procedure{ROMC}{}
     \For{\(i \gets 1 \textrm{ to } n_1\)}
-    \State \(\vb_i \sim p(\vb)\) \Comment{Draw nuisance variables}
-    \State Convert \(M_r(\thetab) \) to \( g(\thetab, \vb=\vb_i) \) \Comment{Define deterministic simulator}
-      \State \( d_i(\thetab) = ||g(\thetab, \vb=\vb_i) - \yb_0||_2 \) \Comment{Define distance function}
+    \State \(\ub_i \sim p(\ub)\) \Comment{Draw nuisance variables}
+    \State Convert \(M_r(\thetab) \) to \( g(\thetab, \ub=\ub_i) \) \Comment{Define deterministic simulator}
+      \State \( d_i(\thetab) = d(g(\thetab, \ub=\ub_i), \yb_0) \) \Comment{Define distance function}
       \State \(\thetab_i^* = \text{argmin}_{\thetab} d_i\), \(d_i^*=d_i(\thetab_i^*)\) \Comment{Solve optimisation problem}
       \If{\(d^*_i > \epsilon\)}
         \State Go to 2 \Comment{Filter solution}
       \EndIf
-      \State Estimate \(\mathcal{\hat{S}}_i\) and define \(q_i\) \Comment{Estimate proposal area}
-      \State (Optional) Fit \(\Tilde{d}_i\) on \(\mathcal{\hat{S}}_i\) \Comment{Fit surrogate model}
+      \State Estimate \(\hat{\accregioni}\) and define \(q_i\) \Comment{Estimate proposal area}
+      \State (Optional) Fit \(\Tilde{d}_i\) on \(\hat{\accregioni}\) \Comment{Fit surrogate model}
       \\\hrulefill
       \For{\(j \gets 1 \textrm{ to } n_2\)}
       \State \(\thetab_{ij} \sim q_i\), compute \(w_{ij}\) as in Algorithm \ref{alg:sampling_GB} \Comment{Sample}
@@ -39,19 +39,19 @@ steps 12-17 the inference part, respectively.
 \subsubsection*{Training part}
 \noindent
 At the training (fitting) part, the goal is the estimation of the
-proposal regions \(\mathcal{\hat{S}}_i\). The tasks are; (a) sampling
-the nuisance variables \(\vb_i \sim p(\vb)\) for obtaining the
-deterministic functions \(d_i(\thetab)\), (b) defining the optimisation
-problems \(\min_{\thetab} \: d_i(\thetab)\), (c) obtaining
-\(\thetab_i^*\), \(d_i^*\) (d) checking whether \(d_i^* \leq \epsilon\) and
-(e) computing the proposal distribution \(q_i\).
+proposal regions \(\hat{\accregioni}\). The tasks are; (a) sampling
+the nuisance variables \(\ub_i \sim p(\ub)\) for obtaining the
+deterministic functions \(d_i(\thetab)\), (b) solving the optimisation
+problems \(\min_{\thetab} \: d_i(\thetab)\) for obtaining
+\(\thetab_i^*\), \(d_i^*\), and (c) estimate the proposal distribution
+\(q_i\).
 
 If \(d_i(\thetab)\) is differentiable, using a gradient-based method
 is advised for obtaining \(\thetab_i^*\) faster. In this case, the
 gradients \(\nabla_{\thetab} d_i\) gradients are approximated
 automatically with finite-differences. This approximation requires two
 evaluations of \(d_i\) for \emph{each} parameter
-\(\theta_d, d \in \{1, \ldots, D\}\)\footnote{\(D\) is the
+\(\theta_m, m \in \{1, \ldots, D\}\)\footnote{\(D\) is the
   dimensionality of \(\thetab\), i.e.  \(\thetab \in \mathbb{R}^D\)},
 which works in low-dimensional problems. If \(d_i(\thetab)\) is not
 differentiable, Bayesian Optimisation can be used as an alternative
@@ -62,7 +62,7 @@ After obtaining the optimal points \(\thetab^*\), we estimate the
 proposal regions. Algorithm~\ref{alg:region_construction} describes
 the line search approach for finding the region's boundaries. An
 important step for the proposal region estimation is deciding the axes
-of the bounding box; the directions \(\vb_d, d = \{1, \ldots, D\}\) we
+of the bounding box; the directions \(\vb_m, m = \{1, \ldots, D\}\) we
 follow for reaching the boundaries. We approximate them as the
 direction of the highest curvature of \(d_i\) at \(\thetab_i^*\). This
 estimation is given by the eigenvalues of the Hessian matrix
@@ -72,7 +72,7 @@ estimation is given by the eigenvalues of the Hessian matrix
 where the distance function is the Euclidean, the Hessian matrix can
 be also computed as \(\hessian_i = \jac_i^T\jac_i\), where \(\jac_i\)
 is the Jacobian matrix of the summary statistics
-\(\Phi(g(\thetab, \vb=\vb_i))\) at \(\thetab_i^*\). The approximation
+\(\Phi(g(\thetab, \ub=\ub_i))\) at \(\thetab_i^*\). The approximation
 through the Jacobian matrix has the computational advantage of using
 only first-order derivatives.
 
@@ -98,7 +98,7 @@ evaluation requires iterating over all \(g_i\) and evaluating the
 distance from the observed data.
 
 \begin{algorithm}[!ht]
-	\caption{Approximation of \(\mathcal{\hat{S}}_i\) with a bounding box; 
+	\caption{Approximation \(\accregioni\) with a bounding box \(\hat{\accregioni}\); 
   Requires: a model of distance \(d_i(\thetab)\), 
   an optimal point \(\thetab_i^*\), 
   a number of refinements \(K\), 
@@ -106,26 +106,26 @@ distance from the observed data.
   maximum iterations \(M\) and 
   a curvature matrix \(\hessian_i\) (\(\jac_i^T\jac_i \) or GP Hessian)}\label{alg:region_construction}
 	\begin{algorithmic}[1]
-	\State Compute eigenvectors \(\vb_{d}\) of \(\hess_i\) {\scriptsize (\(d = 1,\ldots,||\thetab ||)\)}
-	\For{\(d \gets 1 \textrm{ to } D\)}
+	\State Compute eigenvectors \(\vb_{m}\) of \(\hess_i\) {\scriptsize (\(d = 1,\ldots,D)\)}
+	\For{\(m \gets 1 \textrm{ to } D\)}
 		\State \(\Tilde{\thetab} \gets \thetab_i^*\) \label{algstep:box_constr_start}
 		\State \(k \gets 0\)
 		\State \(\eta \gets \eta\_\text{start}\) \Comment{Initialize \(\eta\)}
 		\Repeat
           \State \(j \gets 0\)
         	\Repeat
-            \State \(\Tilde{\thetab} \gets \Tilde{\thetab} + \eta \ \vb_{d}\) \Comment{Large step size \(\eta\).}
+            \State \(\Tilde{\thetab} \gets \Tilde{\thetab} + \eta \ \vb_{m}\) \Comment{Large step size \(\eta\).}
             \State \(j \gets j + 1\)
-        	\Until{\(d(f_i(\Tilde{\thetab}), \data) > \epsilon\) or \(j \geq M\)} \Comment{Check distance or maximum iterations}
-        	\State \(\Tilde{\thetab} \gets \Tilde{\thetab} - \eta \ \vb_{d}\)
+        	\Until{\(d(g(\Tilde{\thetab}, \ub=\ub_i), \data) > \epsilon\) or \(j \geq M\)} \Comment{Check distance or maximum iterations}
+        	\State \(\Tilde{\thetab} \gets \Tilde{\thetab} - \eta \ \vb_{m}\)
         	\State \(\eta \gets \eta/2\) \Comment{More accurate region boundary}
         	\State \(k \gets k + 1\)
       \Until \(k = K\)
       \If{\(\Tilde{\thetab} = \thetab_i^*\)} \Comment{Check if no step has been done}
-        \State \(\Tilde{\thetab} \gets \Tilde{\thetab} + \dfrac{\eta\_{\text{start}}}{2^K} \vb_d\) \Comment{Then, make the minimum step}
+        \State \(\Tilde{\thetab} \gets \Tilde{\thetab} + \dfrac{\eta\_{\text{start}}}{2^K} \ub_m\) \Comment{Then, make the minimum step}
       \EndIf \label{algstep:box_constr_end}
-    	\State Set \(\Tilde{\thetab}\) as the positive end point along \(\mathbf{v}_{d}\)
-    	\State Runc steps~\ref{algstep:box_constr_start}~-~\ref{algstep:box_constr_end} for \(\mathbf{v}_{d} = - \mathbf{v}_{d}\) and set \(\Tilde{\thetab}\) as the negative end point along \(\mathbf{v}_{d}\)
+    	\State Set \(\Tilde{\thetab}\) as the positive end point along \(\vb_m\)
+    	\State Runc steps~\ref{algstep:box_constr_start}~-~\ref{algstep:box_constr_end} for \(\vb_m = - \vb_m\) and set \(\Tilde{\thetab}\) as the negative end point along \(\mathbf{v}_{m}\)
 	\EndFor
 	\State Fit a rectangular box around the region end points and define \(q_i\) as uniform distribution
 	\end{algorithmic}

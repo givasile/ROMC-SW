@@ -45,6 +45,7 @@
 \newcommand{\Thetab}{\mathbf{\Theta}}
 
 \newcommand{\vb}{\mathbf{v}}
+\newcommand{\ub}{\mathbf{u}}
 \newcommand{\yb}{\mathbf{y}}
 \newcommand{\xb}{\mathbf{x}}
 
@@ -86,22 +87,22 @@
 \Shorttitle{An Extendable ROMC implementation}
 
 %% - \Abstract{} almost as usual
-\Abstract{ Performing the inference in statistical models with
-  intractable likelihood is challenging; most likelihood-free
-  inference (LFI) methods encounter problems in accuracy and
-  efficiency. In this paper, we present the implementation of Robust
-  Optimisation Monte Carlo (ROMC) in the \proglang{Python} package
-  \pkg{ELFI}. ROMC is a novel and efficient (highly-parallelizable)
-  LFI framework that provides accurate weighted samples from the
-  posterior. Our implementation can be used in two ways. Firstly, a
-  scientist may use it as an out-of-the-box LFI algorithm; we provide
-  an easy-to-use API harmonised with the rest of the \pkg{ELFI}
-  framework.  Therefore, it is straightforward to compare it with the
-  rest of the methods included in \pkg{ELFI}. Afterwards, we have
-  carefully split ROMC into isolated algorithmic steps. Hence, we
-  allow the researcher to experiment by replacing part(s) of the
-  algorithm with novel subcomponent(s). In both scenarios, all steps
-  of ROMC run in a fully-parallelizable manner, exploiting all CPU
+\Abstract{Performing inference in statistical models with intractable
+  likelihood is challenging; most likelihood-free inference (LFI)
+  methods encounter accuracy and efficiency limitations. In this
+  paper, we present the implementation of Robust Optimisation Monte
+  Carlo (ROMC) in the \proglang{Python} package \pkg{ELFI}. ROMC is a
+  novel and efficient (highly-parallelisable) LFI framework that
+  provides accurate weighted samples from the posterior. Our
+  implementation can be used in two ways. First, a scientist may use
+  it as an out-of-the-box LFI algorithm; we provide an easy-to-use API
+  harmonised with the principles of \pkg{ELFI}, enabling effortless
+  comparisons with the rest of the methods included in the
+  package. Additionally, we have carefully split ROMC into isolated
+  components for supporting extensibility. A researcher may experiment
+  with novel method(s) for solving part(s) of ROMC without
+  reimplementing everything from scratch. In both scenarios, all steps
+  run in a fully-parallelisable manner, exploiting all CPU
   cores. We also provide helpful functionalities for (i) inspecting
   the inference process and (ii) evaluating the obtained
   samples. Finally, we test the robustness of our implementation on
@@ -145,7 +146,12 @@
 \input{latex_files/ch2/2-4-ELFI.tex}
 
 %% -- Design Principles -----------------------------------------------------
-\section{Design principles}  % better title needed
+\section{Implementation}
+This section is split in two parts. We first express ROMC as an
+algorithm and then we present the general implementation principles we
+follow.
+
+\subsection{Algotirhmic view of ROMC}
 \input{latex_files/ch3/3-0-design-principles.tex}
 
 \subsection{General implementation principles}
@@ -183,13 +189,15 @@
 %% -- Optional special unnumbered sections -------------------------------------
 
 \section*{Computational details}
-
-The results in this paper were obtained using \proglang{Python}~3.7.1
-with the \pkg{ELFI}~0.8.2 package. The experiments have been executed
+The results in this paper were obtained using \proglang{Python}~3.7.9
+with the \pkg{ELFI}~0.8.3 package. The experiments have been executed
 in a single machine with an Intel® Core™ i7-8750H Processor an with
 Ubuntu 20.04 lts operating system.
 
-% \section*{Acknowledgments}
+\section*{Acknowledgments}
+
+HP was funded by European Research Council grant 742158 (SCARABEE,
+Scalable inference algorithms for Bayesian evolutionary epidemiology).
 
 \clearpage
 \bibliography{refs}

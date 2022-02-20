@@ -4,18 +4,18 @@ reader to their paper for the technical details and conditions for
 this issue to occur. Intuitively, it happens because the weights in
 OMC are only computed from information at \(\thetab_i^*\), and using
 only local information can be misleading. For example if the curvature
-of \(||\Phi(\data)-\Phi(\simulator(\thetab, \vb_i))||_2\) at
+of \(||\Phi(\data)-\Phi(\simulator(\thetab, \ub_i))||_2\) at
 \(\thetab_i^*\) is nearly flat, the curvature alone may wrongly
 indicate that \(\accregioni\) is much larger than it actually is. In
 our software package we implement the robust generalisation of OMC by
 \citet{Ikonomov2019} that resolves this issue.
 
-ROMC approximates the acceptance regions \(\accregioni\) and on them defines
-local proposal distributions \(q_i(\thetab)\) from which the
-posterior samples \(\thetab_{ij} \sim q_i\) are generated. The samples
-are assigned (importance) weights \(w_{ij}\) that compensate for using
-the proposal distributions \(q_i(\thetab)\) and not the prior
-\(p(\thetab)\),
+ROMC, firstly, approximates the acceptance regions \(\accregioni\),
+and defines proposal distributions \(q_i(\thetab)\) on them. The
+proposal distributions are used for generating posterior samples
+\(\thetab_{ij} \sim q_i\). The samples are assigned (importance)
+weights \(w_{ij}\) that compensate for using the proposal
+distributions \(q_i(\thetab)\) and not the prior \(p(\thetab)\),
 \begin{equation}
   w_{ij} = \frac{\indicator{\accregioni}(\thetab_{ij}) p(\thetab_{ij})}{q(\thetab_{ij})}.
   \label{eq:sampling}
@@ -35,12 +35,14 @@ problems as in OMC, (2) constructing bounding boxes around
 surrogate model of the distance.
 
 \subsubsection*{Solving the deterministic optimisation problems}
-For each set of nuisance variables \(\vb_i, i = \{1,2,\ldots,n_1 \}\), we
-search for a point \(\thetab^*_i\) such that
-\(d(\simulator(\thetab^*_i,\vb_i), \data) \le \epsilon\). For notational
-convenience, we denote the distance \(d(\simulator(\thetab,\vb_i), \data)\) by
-\(d_i(\thetab)\).  Obtaining \(\theta_i^*\) involves solving the following
-optimisation problem:
+For each set of nuisance variables \(\ub_i, i = \{1,2,\ldots,n_1 \}\),
+we search for a point \(\thetab^*_i\) such that
+\(d(\simulator(\thetab^*_i,\ub_i), \data) \le \epsilon\). In general,
+\(d\) can be any valid distance, but for the rest of the paper we
+consider \(d\) as the squared Euclidean distance. For notational
+convenience, we denote \(d(\simulator(\thetab,\ub_i), \data)\) as
+\(d_i(\thetab)\).  Obtaining \(\theta_i^*\) involves solving the
+following optimisation problem:
 \begin{subequations}
 \begin{alignat}{2}      
   &\!\min_{\thetab}        && d_i(\thetab) \label{eq:optProb}\\
@@ -61,20 +63,20 @@ approach. In this scenario, apart from obtaining an optimal
 \(\thetab_i^* \), a surrogate model \(\hat{d}_i(\thetab)\) of the
 distance function \(d_i(\thetab)\) is also automatically obtained;
 \(\hat{d}_i\) can then substitute the actual distance function in
-downstream steps of the algorithms, which can lead to computational
-gains if running the simulator for evaluating the actual distance
-\(d_i(\thetab)\) is expensive.
+downstream steps of the algorithms, with possible computational gains
+especially if evaluating the actual distance \(d_i(\thetab)\) is
+expensive.
 
 \subsubsection*{Estimating the acceptance regions}
 The acceptance region \(\accregioni\) is approximated by a bounding
 box \(\accregionihat\). Ideally, we want the bounding box to be as
-tight as possible to \(\mathcal{S}_i\), to ensure high acceptance rate
-in the importance sampling, but big enough for not discarding valid
-parts of \(\mathcal{S}_i\). The bounding boxes are built in two
-steps. First, we define their axes \(\mathbf{v}_d\) based on the
+tight as possible to \(\accregioni\) to ensure high acceptance rate in
+the importance sampling, but big enough for not discarding valid
+parts. The bounding boxes are built in two steps. First, we define
+their axes \(\mathbf{v}_m\), \(m = \{1, \ldots, D\}\) based on the
 (estimated) curvature of the distance at \(\thetab_i^*\). Second, we
 determine the size of the box via a one-dimensional line-search method
-along each axix, see Algorithm~\ref{alg:region_construction} for the
+along each axis, see Algorithm~\ref{alg:region_construction} for the
 details. After the bounding boxes construction, a uniform distribution
 \(q_i\) is defined on each bounding box, and is used as the proposal
 region for importance sampling.

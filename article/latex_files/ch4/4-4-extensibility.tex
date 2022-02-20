@@ -1,44 +1,51 @@
-ROMC can be conceived as a meta-algorithm; it describes a sequence of
-steps for approximating the posterior distribution, without
-\emph{explicitly} enforcing the methods that solve these steps. Even
-though for each step a specific algorithm is proposed
-by~\cite{Ikonomov2019}, in general ROMC is functional if a practitioner
-thinks of an alternative way of approaching a specific
+ROMC describes a sequence of steps for approximating the posterior
+distribution, without explicitly enforcing the methods that solve
+these steps. Even though for each step a specific algorithm is
+proposed by~\cite{Ikonomov2019}, in general ROMC is functional if a
+practitioner thinks of an alternative way of approaching a specific
 step. Considering this particularity, we designed the implementation
-to support such \emph{extensibility} capability.
+to support extensibility.
 
 We have specified four specific points where a user may intervene with
 their custom modules; (a) the gradient-based optimisation, (b) the
 Bayesian Optimisation, (c) the proposal region construction and (d)
 the surrogate model fitting. These are the four critical parts of the
 ROMC procedure, whereas the rest of the code is the backbone of the
-algorithm; each of them can be swapped to a different
-algorithm with the same functionality than the one we propose, without the rest of the method to
-collapse.
+algorithm.
 
 The four replaceable parts described above, are solved using the four
 methods of the \linebreak \code{OptimisatioProblem} class; (a)
 \code{solve_gradients(**kwargs)}, (b) \code{solve_bo(**kwargs)},
 \linebreak (c) \code{build_region(**kwargs)}, (d)
-\code{fit_local_surrogate(**kwargs)}. Therefore, the user should
-create a custom class that inherits the basic
-\code{OptimisatioProblem} class and overwrites one or more of the
-above four functions with custom ones.
-
-We illustrate that in the
-following example; suppose we want to blindly set the proposal region
-as a predefined n-dimensional bounding box around the optimal
-point. The following snippet illustrates how:
+\code{fit_local_surrogate(**kwargs)}. The user can create a custom
+class that inherits the basic \code{OptimisatioProblem} and, then,
+overwrite any of the four functions with custom ones. Suppose a user
+wants to fit Neural Networks as local surrogate models
+\(\tilde{d}_i\). The user should overwrite the
+\code{fit_local_surrogate(**kwargs)} function with one that internally
+trains a neural network. In the following snippet we illustrate that,
+using the \code{neural_network.MLPRegressor} class of the
+\pkg{scikit-learn} package.
 
 \begin{Code}
 ---------------------------------- python ----------------------------------
-class customOptim(OptimisationProblem):
+class CustomOptim(OptimisationProblem):
     def __init__(self, **kwargs):
-        super(customOptim, self).__init__(**kwargs)
-        
+        super(CustomOptim, self).__init__(**kwargs)
+
     def fit_local_surrogate(self, **kwargs):
         nof_samples = 500
         objective = self.objective
+
+        # helper function
+        def local_surrogate(theta, model_scikit):
+            assert theta.ndim == 1
+            theta = np.expand_dims(theta, 0)
+            return float(model_scikit.predict(theta))
+
+        # create local surrogate model as a function of theta
+        def create_local_surrogate(model):
+            return partial(local_surrogate, model_scikit=model)
 
         local_surrogates = []
         for i in range(len(self.regions)):
@@ -50,67 +57,77 @@ class customOptim(OptimisationProblem):
             mlp = MLPRegressor(hidden_layer_sizes=(10,10), solver='adam')
             model = Pipeline([('linear', mlp)])
             model = model.fit(x, y)
-            local_surrogates.append(self.create_local_surrogate(model))
+            local_surrogates.append(create_local_surrogate(model))
 
         self.local_surrogates = local_surrogates
         self.state["local_surrogates"] = True
-
-    def create_local_surrogate(self, model):
-        def _local_surrogate(th):
-            th = np.expand_dims(th, 0)
-            return float(model.predict(th))
-        return _local_surrogate
-----------------------------------------------------------------------------    
+----------------------------------------------------------------------------
 \end{Code}
 
 In the same way, the user may replace each of the other three
 functionalities. The only restriction that must be respected, concerns
 the side-effects each method has at the \code{OptimisatioProblem}
 class level. In the following four snippets we present the signature
-of each method, pointing out with a left arrow the side-effects that
-must be included in the custom routine that will replace them.
+of each method. We name the class-level variables that must be set
+under the comment \code{\# side-effects}.
 
 
 \begin{Code}
 ---------------------------------- python ----------------------------------
 def solve_gradients(self, **kwargs):
-  self.state["attempted"] = True
-
   # custom solution procedure
+  x = ...
+  y = ...
+  jac = ...
+  hess_inv = ...
   
-  if success:
-    self.result = RomcOpimisationResult(res.x, res.y, jac, hess_inv)
-    self.state["solved"] = True
-    return True 
-  else:
-    return False 
-----------------------------------------------------------------------------    
-def solve_bo(self, **kwargs):
+  # side-effects
   self.state["attempted"] = True
-
+  if success:
+    self.result = RomcOpimisationResult(x, y, jac, hess_inv)
+    self.state["solved"] = True
+    return True
+  else:
+    return False
+----------------------------------------------------------------------------
+def solve_bo(self, **kwargs):
   # custom procedure
-
+  x = ...
+  y = ...
+  custom_surrogate = ...
+  
+  # side-effects
+  self.state["attempted"] = True
   if success:
     self.result = RomcOpimisationResult(x, y)
-    self.surrogate <- Callable
+    self.surrogate = custom_surrogate
     self.state["solved"] = True
     self.state["has_fit_surrogate"] = True
     return True
   else:
     return False
-----------------------------------------------------------------------------    
+----------------------------------------------------------------------------
 def build_region(self, **kwargs):
-    self.eps_region = eps_region
+  # custom build_region method
+  bounding_box: List[NDimBoudningBox] = ...
+  success = True/False # whether region built correctly
 
-    if success:
-        # construct region
-        self.regions <- List[NDimBoudningBox]
-        self.state["region"] = True
-        return True
-    else:
-        return False
-----------------------------------------------------------------------------    
+  # side-effects
+  self.eps_region = eps_region
+  if success:
+    # construct region
+    self.regions = bounding_box
+    self.state["region"] = True
+    return True
+  else:
+    return False
+----------------------------------------------------------------------------
 def fit_local_surrogate(self, **kwargs):
+  # custom local surrogates
+  custom_surrogates = ...
+  success = True/False # whether local surrogates fit correctly
+
+  # side-effects
   if success:
     self.local_surrogate = local_surrogates
     self.state["local_surrogates"] = True
