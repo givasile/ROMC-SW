@@ -34,9 +34,9 @@ xticklabels={
 },
 y grid style={white!69.0196078431373!black},
 ylabel={time (sec)},
-ymin=-2.47820221714874, ymax=58.5401840941498,
+ymin=-1.91896843149916, ymax=44.8788451695003,
 ytick style={color=black},
-ytick={-10,0,10,20,30,40,50,60},
+ytick={-10,0,10,20,30,40,50},
 yticklabels={
   \(\displaystyle {\ensuremath{-}10}\),
   \(\displaystyle {0}\),
@@ -44,26 +44,25 @@ yticklabels={
   \(\displaystyle {20}\),
   \(\displaystyle {30}\),
   \(\displaystyle {40}\),
-  \(\displaystyle {50}\),
-  \(\displaystyle {60}\)
+  \(\displaystyle {50}\)
 }
 ]
 \addplot [semithick, blue, dashed, mark=*, mark size=3, mark options={solid}]
 table {%
-1 0.295360797001194
-50 13.6289079279995
-100 24.9877134140006
-150 43.5660594969995
-200 55.7666210799998
+1 0.208204914000817
+50 10.8651014509996
+100 21.4615424589974
+150 32.0731122189973
+200 42.7516718240004
 };
 \addlegendentry{sequential}
 \addplot [semithick, red, dashed, mark=*, mark size=3, mark options={solid}]
 table {%
-1 0.395076787999642
-50 3.30418470500081
-100 6.169718268
-150 9.81355952200101
-200 14.0821000380001
+1 0.408692035001877
+50 2.97865102099968
+100 5.50569359699875
+150 8.41258640300293
+200 11.4589973489965
 };
 \addlegendentry{parallel}
 \end{axis}

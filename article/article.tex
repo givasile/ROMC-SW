@@ -86,26 +86,26 @@
 \Shorttitle{An Extendable ROMC implementation}
 
 %% - \Abstract{} almost as usual
-\Abstract{ Performing the inference in statistical models with
-  intractable likelihood is challenging; most likelihood-free
-  inference (LFI) methods encounter problems in accuracy and
-  efficiency. In this paper, we present the implementation of Robust
-  Optimisation Monte Carlo (ROMC) in the \proglang{Python} package
-  \pkg{ELFI}. ROMC is a novel and efficient (highly-parallelizable)
-  LFI framework that provides accurate weighted samples from the
-  posterior. Our implementation can be used in two ways. Firstly, a
-  scientist may use it as an out-of-the-box LFI algorithm; we provide
-  an easy-to-use API harmonised with the rest of the \pkg{ELFI}
-  framework.  Therefore, it is straightforward to compare it with the
-  rest of the methods included in \pkg{ELFI}. Afterwards, we have
-  carefully split ROMC into isolated algorithmic steps. Hence, we
-  allow the researcher to experiment by replacing part(s) of the
-  algorithm with novel subcomponent(s). In both scenarios, all steps
-  of ROMC run in a fully-parallelizable manner, exploiting all CPU
-  cores. We also provide helpful functionalities for (i) inspecting
-  the inference process and (ii) evaluating the obtained
+\Abstract{Performing inference in statistical models with intractable
+  likelihood is challenging; most likelihood-free inference (LFI)
+  methods encounter accuracy and efficiency limitations. In this
+  paper, we present the implementation of Robust Optimisation Monte
+  Carlo (ROMC) in the \proglang{Python} package \pkg{ELFI}. ROMC is a
+  novel and efficient (highly-parallelisable) LFI framework that
+  provides accurate weighted samples from the posterior. Our
+  implementation can be used in two ways. Firstly, a scientist may use
+  it as an out-of-the-box LFI algorithm; we provide an easy-to-use API
+  harmonised with the rest of the \pkg{ELFI} framework for enabling
+  effortless comparisons with the rest of the LFI methods implemented
+  there. Additionally, we support extensibility by splitting ROMC into
+  isolated components. A researcher may experiment with novel
+  method(s) for solving specific subpart(s) of ROMC without
+  reimplementing everything from scratch. In both scenarios, the
+  algorithm runs in a fully-parallelisable manner for exploiting all
+  CPU cores. We also provide helpful functionalities for (i)
+  inspecting the inference process and (ii) evaluating the obtained
   samples. Finally, we test the robustness of our implementation on
-  some typical LFI examples.}
+  some typical LFI examples.  }
 
 %% - \Keywords{}
 \Keywords{Bayesian inference, implicit models, likelihood-free, \proglang{Python}, \pkg{ELFI}}
@@ -185,11 +185,14 @@
 \section*{Computational details}
 
 The results in this paper were obtained using \proglang{Python}~3.7.9
-with the \pkg{ELFI}~0.8.2 package. The experiments have been executed
+with the \pkg{ELFI}~0.8.3 package. The experiments have been executed
 in a single machine with an Intel® Core™ i7-8750H Processor an with
 Ubuntu 20.04 lts operating system.
 
-% \section*{Acknowledgments}
+\section*{Acknowledgments}
+
+Henri Pesonen was funded by European Research Council grant 742158 (SCARABEE,
+Scalable inference algorithms for Bayesian evolutionary epidemiology).
 
 \clearpage
 \bibliography{refs}
