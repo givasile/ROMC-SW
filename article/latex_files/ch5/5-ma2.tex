@@ -41,11 +41,11 @@ autocovariances with \(\mathrm{lag}=1\) and \(\mathrm{lag}=2\), as shown in equa
 distance node is the squared Euclidean distance
 \eqref{eq:ma2_summary_4}.
 
-\begin{gather} \label{eq:ma2_summary_1}
-  s_1(\yb) = \frac{1}{T-1} \sum_{t=2}^T y_ty_{t-1}\\ \label{eq:ma2_summary_2}
-  s_2(\yb) = \frac{1}{T-2} \sum_{t=3}^T y_ty_{t-2} \\
-  s(\yb) = (s_1(\yb), s_2(\yb))\\ \label{eq:ma2_summary_4}
-  d = ||s(\yb) - s(\yb_0)||_2^2 
+\begin{gather}
+  \label{eq:ma2_summary_1} s_1(\yb) = \frac{1}{T-1} \sum_{t=2}^T y_ty_{t-1}\\
+  \label{eq:ma2_summary_2} s_2(\yb) = \frac{1}{T-2} \sum_{t=3}^T y_ty_{t-2} \\
+  s(\yb) = (s_1(\yb), s_2(\yb))\\
+  \label{eq:ma2_summary_4} d = ||s(\yb) - s(\yb_0)||_2^2
 \end{gather}
 
 \subsubsection*{Inference}
@@ -93,11 +93,11 @@ algorithm.
 \hline \hline
 Rejection ABC & 0.516 & 0.142 & 0.07 & 0.172 \\
 \hline
-ROMC (gradient-based) & 0.503 & 0.143 & 0.032 & 0.17 \\
+ROMC (gradient-based) & 0.501 & 0.142 & 0.033 & 0.169 \\
 \hline
 ROMC (Bayesian optimisation) & 0.494 & 0.16 & 0.086 & 0.167 \\
 \hline
-ROMC (Neural Network) & 0.503 & 0.140 & 0.03 & 0.171 \\
+ROMC (Neural Network) & 0.491 & 0.138 & 0.04 & 0.172 \\
 \hline
 \end{tabular}
 \end{center}
@@ -182,8 +182,8 @@ the proposal regions. Our implementation supports exploiting all the
 available CPU cores through the built-in \proglang{Python} package
 \pkg{multiprocess}\footnote{https://docs.python.org/3/library/multiprocessing.html}. In
 Figure~\ref{fig:exec_parallel} we observe the execution times for
-performing the inference on the ma2 model; the parallel version
-performs both tasks almost six times faster than the sequential. The
+performing the inference on the MA2 model; the parallel version
+performs both tasks almost five times faster than the sequential. The
 result is reasonable given that the experiments have run in a single
 machine with the Intel® Core™ i7-8750H Processor, which has six
 separate cores.
@@ -199,8 +199,7 @@ separate cores.
     }
     \end{center}
     \caption[Execution time exploiting parallelisation]{Comparison
-      between parallel and sequential execution of the fitting part of
-      ROMC. We observe that the parallel version runs between 2.5 an 6
-      times faster.}
+      between parallel and sequential execution of ROMC. We observe
+      that the parallel version runs almost 5 times faster.}
       \label{fig:exec_parallel}
 \end{figure}

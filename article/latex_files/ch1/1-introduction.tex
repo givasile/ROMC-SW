@@ -1,39 +1,38 @@
 Simulator-based models are particularly captivating due to the
-modelling freedom they provide. In essence, a simulator-based model can
-describe any data generating mechanism that can be written as a finite
-set of algorithmic steps. This modelling freedom comes at a cost;
-performing the inference, i.e., sample or evaluate the posterior
-distribution, is challenging.
+modelling freedom they provide. In essence, a simulator-based model
+can describe any data generating mechanism that can be written as a
+finite set of algorithmic steps. Such freedom comes at a cost;
+performing the inference, i.e., sampling or evaluating the posterior,
+is challenging.
 
-Optimization Monte Carlo (OMC) proposed by~\citet{Meeds2015} was a
-novel LFI approach for approximating the posterior
-distribution. Afterwards, \citet{Forneron2016} provided a similar
-method naming it `reverse sampler'. The central idea is turning the
-stochastic data-generating mechanism into a set of
-fully-parallelizable deterministic optimisation processes. In their
-work, ~\citet{Ikonomov2019}, located some critical failure modes of
-OMC, and proposed Robust OMC (ROMC) an alternative version of OMC with
-the appropriate improvements.
+Optimisation Monte Carlo (OMC) proposed by~\citet{Meeds2015} is a
+novel LFI approach for approximating the posterior distribution. The
+central idea is turning the stochastic data-generating mechanism into
+a set of deterministic optimisation processes. Afterwards,
+\citet{Forneron2016} provided a similar method under the name `reverse
+sampler'. In their work, ~\citet{Ikonomov2019}, located some critical
+limitations of OMC. They proposed Robust OMC (ROMC), an alternative
+version of OMC with appropriate modifications.
 
-In this paper, we present an extendible and parallelisable
-implementation of ROMC at the \proglang{Python} package \pkg{Engine
-  for Likelihood-Free inference (ELFI)}. We choose carefully the
-designing principles for making the implementation extendible. As we
-describe analytically in the next chapter, ROMC can be understood not
-only as a specific algorithm, but mainly as a framework for obtaining
-weighted samples from the posterior; it defines a sequence of
-algorithmic steps, without enforcing a specific algorithm for solving
-them. Therefore, a researcher may adopt ROMC's backbone approach, but
-experiment with alternative methods to solve the tasks. We have
-designed ROMC for facilitating such alterations. Finally, we have
-tested the accuracy and the efficiency of our implementation on the
-LFI examples supported by the \pkg{ELFI} package.
+In this paper, we present an implementation of ROMC at the
+\proglang{Python} package \pkg{Engine for Likelihood-Free inference
+(ELFI)}. We follow appropriate design principles for ensuring
+extensibility. As we describe analytically in the next chapter, ROMC
+is a general framework for obtaining weighted samples from the
+posterior; it defines a sequence of algorithmic steps without
+enforcing a specific algorithm for solving each step\footnote{For
+being a ready-to-use algorithm,~\citet{Ikonomov2019} proposed a
+default method for each step, but this choice is by no means
+restrictive.}. A researcher may adopt ROMC and develop novel methods
+to solve each task. We have designed our software for facilitating
+such alterations. Finally, we have tested the accuracy and the
+efficiency of our implementation on some LFI examples supported by the
+\pkg{ELFI} package.
 
 To the best of our knowledge, this is the first attempt to implement
-the ROMC inference method to a generic LFI framework. Therefore, there
-are not other implementation directly comparable to ours. For this
-reason, we test the implementation against (i) an artificial example
-with tractable likelihood and (ii) the second-order moving average
-(MA2) example from the \pkg{ELFI} package. In the latter, we generate
-data using known parameters and we compare our results with the
-typical Rejection ABC approach.
+the ROMC inference method to a generic LFI framework; there are no
+other packages for making direct comparisons. Therefore, we test it
+against (i) an artificial example with tractable likelihood and (ii)
+the second-order moving average (MA2) example from the \pkg{ELFI}
+package. In the latter, we generate data using known parameters and
+compare our results with the typical Rejection ABC~\citet{Beaumont2002}.

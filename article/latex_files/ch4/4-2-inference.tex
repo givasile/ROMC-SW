@@ -9,7 +9,7 @@ This is the basic inference utility of the ROMC implementation; we
 draw \(n_2\) samples for each bounding box region. This gives a total of
 \(k \times n_2\), where \(k < n_1\) is the number of the optimal points
 remained after filtering\footnote{From the \(n_1\) optimisation
-  problems, only the ones with \(d_i(\thetab_*) < \epsilon\) are
+  problems, only the ones with \(d_i(\thetab^*) < \epsilon\) are
   maintained for building a bounding box}. The samples are drawn from
 a uniform distribution \(q_i\) defined over the corresponding bounding
 box and the weight \(w_i\) is computed as in
@@ -27,13 +27,13 @@ Algorithm~\ref{alg:sampling_GB}.
 The function \code{compute_expectation} computes the expectation
 \(\E_{p(\thetab|\data)}[h(\thetab)]\) using
 expression~\eqref{eq:expectation}. The argument \code{h} can be any
-python \code{Callable}. Method \code{eval_unnorm_posterior} computes
-the unnormalised posterior approximation using
-expression~\eqref{eq:approx_posterior}. Method \code{eval_posterior}
+python \code{Callable}. The method \code{eval_unnorm_posterior} computes
+the unnormalised posterior approximation using the
+expression~\eqref{eq:approx_posterior}. The method \code{eval_posterior}
 evaluates the normalised posterior estimating the partition function
 \(Z = \int p_{d,\epsilon}(\thetab|\data)d\thetab\); with Riemann's
 integral approximation. The approximation is computationally feasible
-only in low-dimensional parametric spaces.
+only in a low-dimensional parametric space.
 
 \subsubsection*{Example - Sampling and compute expectation}
 

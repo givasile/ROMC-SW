@@ -45,6 +45,7 @@
 \newcommand{\Thetab}{\mathbf{\Theta}}
 
 \newcommand{\vb}{\mathbf{v}}
+\newcommand{\ub}{\mathbf{u}}
 \newcommand{\yb}{\mathbf{y}}
 \newcommand{\xb}{\mathbf{x}}
 
@@ -93,17 +94,17 @@
   Carlo (ROMC) in the \proglang{Python} package \pkg{ELFI}. ROMC is a
   novel and efficient (highly-parallelisable) LFI framework that
   provides accurate weighted samples from the posterior. Our
-  implementation can be used in two ways. Firstly, a scientist may use
+  implementation can be used in two ways. First, a scientist may use
   it as an out-of-the-box LFI algorithm; we provide an easy-to-use API
-  harmonised with the rest of the \pkg{ELFI} framework for enabling
-  effortless comparisons with the rest of the LFI methods implemented
-  there. Additionally, we support extensibility by splitting ROMC into
-  isolated components. A researcher may experiment with novel
-  method(s) for solving specific subpart(s) of ROMC without
-  reimplementing everything from scratch. In both scenarios, the
-  algorithm runs in a fully-parallelisable manner for exploiting all
-  CPU cores. We also provide helpful functionalities for (i)
-  inspecting the inference process and (ii) evaluating the obtained
+  harmonised with the principles of \pkg{ELFI}, enabling effortless
+  comparisons with the rest of the methods included in the
+  package. Additionally, we have carefully split ROMC into isolated
+  components for supporting extensibility. A researcher may experiment
+  with novel method(s) for solving part(s) of ROMC without
+  reimplementing everything from scratch. In both scenarios, all steps
+  run in a fully-parallelisable manner, exploiting all CPU
+  cores. We also provide helpful functionalities for (i) inspecting
+  the inference process and (ii) evaluating the obtained
   samples. Finally, we test the robustness of our implementation on
   some typical LFI examples.  }
 
@@ -145,7 +146,12 @@
 \input{latex_files/ch2/2-4-ELFI.tex}
 
 %% -- Design Principles -----------------------------------------------------
-\section{Design principles}  % better title needed
+\section{Implementation}
+This section is split in two parts. We first express ROMC as an
+algorithm and then we present the general implementation principles we
+follow.
+
+\subsection{Algotirhmic view of ROMC}
 \input{latex_files/ch3/3-0-design-principles.tex}
 
 \subsection{General implementation principles}
@@ -191,7 +197,7 @@ Ubuntu 20.04 lts operating system.
 
 \section*{Acknowledgments}
 
-Henri Pesonen was funded by European Research Council grant 742158 (SCARABEE,
+HP was funded by European Research Council grant 742158 (SCARABEE,
 Scalable inference algorithms for Bayesian evolutionary epidemiology).
 
 \clearpage
