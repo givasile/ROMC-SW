@@ -122,7 +122,7 @@ distance from the observed data.
         	\State \(k \gets k + 1\)
       \Until \(k = K\)
       \If{\(\Tilde{\thetab} = \thetab_i^*\)} \Comment{Check if no step has been done}
-        \State \(\Tilde{\thetab} \gets \Tilde{\thetab} + \dfrac{\eta\_{\text{start}}}{2^K} \ub_m\) \Comment{Then, make the minimum step}
+        \State \(\Tilde{\thetab} \gets \Tilde{\thetab} + \dfrac{\eta\_{\text{start}}}{2^K} \vb_m\) \Comment{Then, make the minimum step}
       \EndIf \label{algstep:box_constr_end}
     	\State Set \(\Tilde{\thetab}\) as the positive end point along \(\vb_m\)
     	\State Runc steps~\ref{algstep:box_constr_start}~-~\ref{algstep:box_constr_end} for \(\vb_m = - \vb_m\) and set \(\Tilde{\thetab}\) as the negative end point along \(\mathbf{v}_{m}\)

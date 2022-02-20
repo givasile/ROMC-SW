@@ -1,5 +1,4 @@
-# install ELFI dev branch from github
-git+https://github.com/elfi-dev/elfi.git
+elfi==0.8.3
 algopy==0.5.7
 argcomplete==1.12.3
 attrs==21.2.0

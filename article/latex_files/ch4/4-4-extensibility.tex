@@ -23,8 +23,8 @@ overwrite any of the four functions with custom ones. Suppose a user
 wants to fit Neural Networks as local surrogate models
 \(\tilde{d}_i\). The user should overwrite the
 \code{fit_local_surrogate(**kwargs)} function with one that internally
-trains a neural network. In the following snippet we illustrate that,
-using the \code{neural_network.MLPRegressor} class of the
+trains a neural network. In the following snippet we illustrate how to
+do that, using the \code{neural_network.MLPRegressor} class of the
 \pkg{scikit-learn} package.
 
 \begin{Code}
@@ -65,10 +65,10 @@ class CustomOptim(OptimisationProblem):
 \end{Code}
 
 In the same way, the user may replace each of the other three
-functionalities. The only restriction that must be respected, concerns
+functionalities. The only restriction that must be respected concerns
 the side-effects each method has at the \code{OptimisatioProblem}
 class level. In the following four snippets we present the signature
-of each method. We name the class-level variables that must be set
+of each method and we name the class-level variables that must be set
 under the comment \code{\# side-effects}.
 
 
@@ -162,58 +162,3 @@ class NDimBoundingBox:
         eps_region: float, distance threshold 
 ----------------------------------------------------------------------------    
 \end{Code}
-
-% Let's say we have observed that the local area around $\theta_i^*$ is
-% too complex to be represented by a simple quadratic model\footnote{as
-%   in the current implementation}. Hence, the user selects a neural
-% network as a good alternative. In the following snippet, we
-% demonstrate how they could implement this enhancement without much
-% effort; (a) they have to develop the neural network using the package
-% of their choice (b) they must create a custom optimisation class which
-% inherits the basic \code{OptimisationClass} and (c) they have to
-% overwrite the \code{fit_local_surrogate} routine, with one that
-% sets the neural network's prediction function as the
-% \code{local_surrogate} attribute. The argument \code{**kwargs}
-% may be used for passing all the important arguments, e.g.\ training
-% epochs, gradient step etc. If, for example, they would like to set the
-% size of the training set dynamically, we may replace \code{x =
-%   self.regions[0].sample(30)} with \code{x =
-%   self.regions[0].sample(kwargs["nof_examples"])}. Finally, they must
-% pass the custom optimisation class, when calling the \code{ROMC}
-% method.
-
-% \begin{Code}
-% ------------------------------ python snippet ------------------------------  
-%   class NeuralNetwork:
-%       def __init__(self, **kwargs):
-%           # set the input arguments
-
-%       def train(x, y):
-%           # training code
-
-%       def predict(x):
-%           # prediction code
-
-%   # Inherit the base optimisation class
-%   class customOptim(elfi.methods.parameter_inference.OptimisationProblem):
-%       def __init__(self, **kwargs):
-%           super(customOptim, self).__init__(**kwargs)
-
-%       # overwrite the function you want to replace
-%       def fit_local_surrogate(**kwargs):
-%           # init and train the NN
-%           x = self.regions[0].sample(30) # 30 training points
-%           y = [np.array([self.objective(ii) for ii in x])]
-%           nn = NeuralNet()
-%           nn.train(x,y)
-
-%           # set the appropriate attribute
-%           self.local_surrogate = nn.predict
-
-%           # update the state
-%           self.state["local_surrogate"] = True
-
-%   # pass the custom inference method as argument
-%   romc = elfi.ROMC(dist, bounds, custom_optim_class=customOptim)
-% ----------------------------------------------------------------------------
-% \end{Code}
