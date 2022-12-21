@@ -1,58 +1,57 @@
 An implicit or simulator-based model is a parameterised stochastic
 data generating mechanism. The key characteristic of these models is
 that we can sample data points, but we cannot evaluate the
-likelihood. formally, a simulator-based model is a parameterised
+likelihood. Formally, a simulator-based model is a parameterised
 family of probability density functions
 \(\{ p(\yb|\thetab) \}_{\thetab}\) whose closed-form is either unknown
-or computationally intractable. practically, in these scenarios, we
-can only a access a simulator \( m_r(\thetab) \), i.e. a random
+or computationally intractable. In these scenarios, we
+can only a access a simulator \( m_r(\thetab) \), i.e., a random
 black-box machine (computer code) that generates samples \(\yb\) in a
 stochastic manner for any given a set of parameters \(\thetab\);
-\( m_r(\thetab) \rightarrow \yb \). we can isolate the randomness by
+\( m_r(\thetab) \rightarrow \yb \). We can isolate the randomness by
 introducing the stochastic nuisance variables \(\ub \sim p(\ub)\) so
 that the simulator becomes a deterministic mapping \(\simulator\) that
-maps \((\thetab, \ub)\) to the data \(\yb\), i.e.\
-\(\yb=\simulator(\thetab,\ub)\). within the computer code, the
+maps \((\thetab, \ub)\) to the data \(\yb\), i.e., \
+\(\yb=\simulator(\thetab,\ub)\). Within the computer code, the
 distribution \(p(\ub)\) is defined as the random number generating
 process.
 
-simulator-based models provide considerable modelling freedom; any
+Simulator-based models provide considerable modelling freedom; any
 physical process that can be conceptualised as a computer program of
 finite steps can be modelled as a simulator-based model without any
-compromise. the modelling freedom allows for any amount of hidden
-(unobserved) internal variables or rule-based decisions. hence,
+compromise. The modelling freedom allows for any amount of hidden
+(unobserved) internal variables or rule-based decisions. Hence,
 implicit models are often used to model physical phenomena in the
-natural sciences such as e.g.~genetics, epidemiology, or neuroscience. 
-further background on simulator-based models and
+natural sciences such as, e.g., genetics, epidemiology or
+neuroscience. Further background on simulator-based models and
 example applications can be found in the articles
-by \citet{gutmann2016, lintusaari2017, sisson2018, cranmer2020}.
+by~\citet{gutmann2016, lintusaari2017, sisson2018, cranmer2020}.
 
-
-the modelling freedom of simulator-based models, however, comes at the
-price of difficulties in inferring their parameters. denoting the
+The modelling freedom of simulator-based models, however, comes at the
+price of difficulties in inferring their parameters. Denoting the
 observed data as \(\data\), the main difficulty is that the likelihood
 function \(l(\thetab) = p(\data|\thetab)\) is generally
-intractable. to better see the sources of the intractability, and to
+intractable. To better see the sources of the intractability, and to
 address them, we go back to the basic characterisation of the
 likelihood as the (rescaled) probability of a parameter of the model
 to generate data \(\yb\) that is similar to the observed data
-\(\data\). more formally, the likelihood \(l(\thetab)\) equals
+\(\data\). More formally, the likelihood \(l(\thetab)\) equals
 \begin{equation} \label{eq:likelihood}
   l(\thetab) = \lim_{\epsilon \to 0} c_\epsilon \int_{\yb \in b_{d,\epsilon}(\data)} p(\yb|\thetab)d\yb =
   \lim_{\epsilon \to 0} c_\epsilon \Pr(\simulator(\thetab, \ub) \in \region(\data)  \mid \theta)
 \end{equation}
 where \(c_\epsilon\) is a proportionality factor that depends on
 \(\epsilon\) and \(\region(\data)\) is an \(\epsilon\) region around \(\data\)
-that is defined via a distance function \(d\), i.e.\ \(\region(\data)
+that is defined via a distance function \(d\), i.e., \ \(\region(\data)
 := \{\yb: d(\yb, \data) \leq \epsilon \}\). 
 
-the basic characterisation of the likelihood in \eqref{eq:likelihood}
-highlights two sources of intractability: the first is the computation
+The basic characterisation of the likelihood in~\eqref{eq:likelihood}
+highlights two sources of intractability; the first is the computation
 of the probability
 \(\Pr(\simulator(\thetab,\ub) \in \region(\data))\), the second is the
-limit of \(\epsilon \to 0\).  approximating the probability with
+limit of \(\epsilon \to 0\). Approximating the probability with
 samples becomes computationally infeasible if \(\epsilon\) is too
-small. hence, a large class of inference methods work with
+small. Hence, a large class of inference methods work with
 \(\epsilon > 0\), which leads to the approximate likelihood function
 \(l_{d, \epsilon}(\thetab)\)
 \begin{equation} \label{eq:approx_likelihood}
@@ -65,13 +64,13 @@ and, in turn, to the approximate posterior
   p_{d,\epsilon}(\thetab|\data) \propto l_{d, \epsilon}(\thetab) p(\thetab).
 \end{equation}
 
-the approximation in \eqref{eq:approx_likelihood} is by no means the
+The approximation in~\eqref{eq:approx_likelihood} is by no means the
 only strategy to deal with the intractabilities of the likelihood
-function in \eqref{eq:likelihood}. other strategies include modelling
+function in~\eqref{eq:likelihood}. Other strategies include modelling
 the (stochastic) relationship between \(\thetab\) and \(\yb\), and its
 reverse, or framing likelihood-free inference as a ratio estimation
 problem, see for example \citet{blum2010, Wood2006, Papamakarios2016,
   Papamakarios2019, Chen2019, Thomas2020, Hermans2020}. However, both
 OMC and robust OMC, which we introduce next, are based on the
-approximation in \eqref{eq:approx_likelihood}.
+approximation in~\eqref{eq:approx_likelihood}.
 

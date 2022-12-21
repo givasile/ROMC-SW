@@ -23,7 +23,7 @@ The r.v. \(w_{k} \sim \mathcal{N}(0,1) \) is white noise and the two
 parameters of interest, \(\theta_1, \theta_2\), model the dependence
 from the previous observations. The number of sequential observations
 \(T\) is a constant and set to \(T=100\). For securing
-that the inference problem is identifiable, i.e.\ the likelihood has
+that the inference problem is identifiable, i.e., the likelihood has
 only one mode, we use the prior proposed by~\cite{Marin2012},
 
 \begin{equation} \label{eq:ma2_prior}
@@ -62,7 +62,7 @@ preference, as shown in Chapter~\ref{subsec:extensibility}. For the
 definition of the NN, we use the \pkg{MLPRegressor} class of the
 \pkg{scikit-learn} package. Therefore, the NN substitutes the real
 distance function \(d_i\) inside the proposal region
-\(q_i~ \forall i\) at the inference phase i.e.~sampling,
+\(q_i~ \forall i\) at the inference phase, i.e., sampling,
 computing an expectation and evaluating the posterior. In our example
 we use a neural network of two hidden layers of 10 neurons each and we
 train it sampling 500 examples from each proposal region.
@@ -177,7 +177,7 @@ ROMC (Neural Network) & 0.491 & 0.138 & 0.04 & 0.172 \\
 
 As stated above, ROMC is a ridiculously parallelisable
 method. Therefore, it is straightforward to parallelise the fitting
-part, i.e. (i) solving the optimisation problems and (ii) estimating
+part, i.e., (i) solving the optimisation problems and (ii) estimating
 the proposal regions. Our implementation supports exploiting all the
 available CPU cores through the built-in \proglang{Python} package
 \pkg{multiprocess}\footnote{https://docs.python.org/3/library/multiprocessing.html}. In

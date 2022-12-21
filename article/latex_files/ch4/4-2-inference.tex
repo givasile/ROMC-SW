@@ -1,7 +1,5 @@
 \begin{Code}
----------------------------------- python ----------------------------------
->>> romc.sample(n2)
-----------------------------------------------------------------------------
+romc.sample(n2)
 \end{Code}
 
 \noindent
@@ -16,11 +14,9 @@ box and the weight \(w_i\) is computed as in
 Algorithm~\ref{alg:sampling_GB}.
 
 \begin{Code}
----------------------------------- python ----------------------------------
->>> romc.compute_expectation(h) # E[h(x)|theta]
->>> romc.eval_unorm_posterior(theta, eps_cutoff=False) # unnorm p(theta)
->>> romc.eval_posterior(theta, eps_cutoff=False) # normalised p(theta)
-----------------------------------------------------------------------------
+romc.compute_expectation(h) # E[h(x)|theta]
+romc.eval_unorm_posterior(theta, eps_cutoff = False) # unnorm p(theta)
+romc.eval_posterior(theta, eps_cutoff = False) # normalised p(theta)
 \end{Code}
 
 \noindent
@@ -49,53 +45,36 @@ Figure~\ref{fig:running_example_romc_inference}. We observe that the
 approximation is quite close to the ground-truth.
 
 \begin{Code}
------------------------------- python snippet ------------------------------  
-  # Inference part
-  seed = 21
-  n2 = 50
-  romc.sample(n2=n2, seed=seed)
+# Inference part
+seed = 21
+n2 = 50
+romc.sample(n2 = n2, seed = seed)
 
-  # visualize region, adding the samples now
-  romc.visualize_region(i=1)
+# visualize region, adding the samples now
+romc.visualize_region(i = 1)
 
-  # Visualise marginal (built-in ELFI tool)
-  romc.result.plot_marginals(weights=romc.result.weights,
-                             bins=100, range=(-3,3))
+# Visualise marginal (built-in ELFI tool)
+weights = romc.result.weights
+romc.result.plot_marginals(weights = weights, bins = 100, range = (-3,3))
 
-  # Summarize the samples (built-in ELFI tool)
-  romc.result.summary()
-  # Number of samples: 19300
-  # Sample means: theta: -0.0116
+# Summarize the samples (built-in ELFI tool)
+romc.result.summary()
+# Number of samples  : 19300
+# Sample means: theta: -0.0116
 
-  # compute expectation
-  exp_val = romc.compute_expectation(h=lambda x: np.squeeze(x))
-  print("Expected value   : %.3f" % exp_val)
-  # Expected value   : -0.012
+# compute expectation
+exp_val = romc.compute_expectation(h = lambda x: np.squeeze(x))
+print("Expected value   : %.3f" % exp_val)
+# Expected value: -0.012
 
-  exp_var = romc.compute_expectation(h=lambda x: np.squeeze(x)**2)
-  print("Expected variance: %.3f" % exp_var)
-  # Expected variance: 1.120
+exp_var = romc.compute_expectation(h = lambda x: np.squeeze(x)**2)
+print("Expected variance: %.3f" % exp_var)
+# Expected variance: 1.120
 
-  # eval unnorm posterior
-  romc.eval_unnorm_posterior(theta=0)
+# eval unnorm posterior
+romc.eval_unnorm_posterior(theta = 0)
 
-  # check eval posterior
-  romc.eval_posterior(theta=0)
-----------------------------------------------------------------------------
+# check eval posterior
+romc.eval_posterior(theta = 0)
 \end{Code}
 
-% \begin{figure}[h]
-%     \begin{center}
-%       \includegraphics[width=0.48\textwidth]{./latex_files/images/chapter3/example_marginal.png}
-%     \end{center}
-%   \caption[Histogram of the obtained samples at the 1D example.]{(a) Left: Histogram of the obtained samples. (b) Right: Acceptance region around \(\theta_1^*\) with the obtained samples plotted inside.}
-%   \label{fig:example_sampling}
-% \end{figure}
-
-% \begin{figure}[h]
-%     \begin{center}
-%       \includegraphics[width=0.6\textwidth]{./latex_files/images/chapter3/example_posterior.png}
-%     \end{center}
-%   \caption[Approximate posterior evaluation, at the 1D example.]{Approximate posterior evaluation.}
-%   \label{fig:approx_posterior}
-% \end{figure}

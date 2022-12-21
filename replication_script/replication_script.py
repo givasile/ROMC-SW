@@ -823,8 +823,7 @@ for i, n in enumerate(n1):
     romc = elfi.ROMC(model, bounds, discrepancy_name="d", parallelize=False)
 
     tic = timeit.default_timer()
-    romc.solve_problems(n1=int(n), seed=seed,
-                        use_bo=False)
+    romc.solve_problems(n1=int(n), seed=seed, use_bo=False)
     toc = timeit.default_timer()
     solve_grad.append(toc-tic)
 

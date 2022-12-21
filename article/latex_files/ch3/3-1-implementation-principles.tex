@@ -8,7 +8,7 @@ rectangles) are the methods exposed as the public API. In
 Figure~\ref{fig:romc_overview}, it can be easily observed that the
 implementation follows Algorithm~\ref{alg:romc_algorithm}. The
 training part includes all the steps until the computation of the
-proposal regions i.e.~sampling the nuisance variables, defining the
+proposal regions, i.e., ~sampling the nuisance variables, defining the
 optimisation problems, solving them, constructing the regions and
 fitting local surrogate models. The inference part comprises of
 evaluating the unnormalised posterior (and the normalised when is
@@ -21,8 +21,8 @@ Sample Size (ESS) of the samples and (b) measuring the divergence
 between the approximate posterior the ground-truth, if the latter is
 available.\footnote{Normally, the ground-truth posterior is not
   available; However, this functionality is useful in cases where the
-  posterior can be computed numerically or with an alternative method
-  (i.e.\ ABC Rejection Sampling), and we would like to measure the
+  posterior can be computed numerically or with an alternative method,
+  i.e., ABC Rejection Sampling), and we would like to measure the
   discrepancy between the two approximations.}
 
 \subsubsection*{Parallelising ROMC method}
@@ -39,9 +39,7 @@ algorithm, the user simpy has to pass the argument
 \code{parallelize=True} when instantiating \code{ROMC}.
 
 \begin{Code}
----------------------------------- python ----------------------------------
->>> elfi.ROMC(<output_node>, parallelize=True)
-----------------------------------------------------------------------------
+elfi.ROMC(<output_node>, parallelize = True)
 \end{Code}
   
 \subsubsection*{Simple one-dimensional example}
@@ -68,35 +66,33 @@ example can be performed quite easily without using a likelihood-free
 inference approach. We can exploit this fact for validating the
 accuracy of our implementation.
 
-In the following code snippet, we code the model at \pkg{ELFI}.
+In the following code snippet, we code the model at \pkg{ELFI}:
 
 \begin{Code}
------------------------------- python snippet ------------------------------
-  import elfi
-  import scipy.stats as ss
-  import numpy as np
+import elfi
+import scipy.stats as ss
+import numpy as np
 
-  def simulator(t1, batch_size=1,random_state=None):
+def simulator(t1, batch_size = 1, random_state = None):
     c = 0.5 - 0.5**4
     if t1 < -0.5:
-        y = ss.norm(loc=-t1-c, scale=1).rvs(random_state=random_state)
+        y = ss.norm(loc = -t1-c, scale = 1).rvs(random_state = random_state)
     elif t1 <= 0.5:
-        y = ss.norm(loc=t1**4, scale=1).rvs(random_state=random_state)
+        y = ss.norm(loc = t1**4, scale = 1).rvs(random_state = random_state)
     else:
-        y = ss.norm(loc=t1-c, scale=1).rvs(random_state=random_state)
+        y = ss.norm(loc = t1-c, scale = 1).rvs(random_state = random_state)
     return y
 
-  # observation
-  y = 0
+# observation
+y = 0
 
-  # Elfi graph
-  t1 = elfi.Prior('uniform', -2.5, 5)
-  sim = elfi.Simulator(simulator, t1, observed=y)
-  d = elfi.Distance('euclidean', sim)
+# Elfi graph
+t1 = elfi.Prior('uniform', -2.5, 5)
+sim = elfi.Simulator(simulator, t1, observed = y)
+d = elfi.Distance('euclidean', sim)
 
-  # Initialise the ROMC inference method
-  bounds = [(-2.5, 2.5)] # limits of the prior
-  parallelize = True # activate parallel execution
-  romc = elfi.ROMC(d, bounds=bounds, parallelize=parallelize)
-----------------------------------------------------------------------------
+# Initialise the ROMC inference method
+bounds = [(-2.5, 2.5)] # bounds of the prior
+parallelize = True # activate parallel execution
+romc = elfi.ROMC(d, bounds = bounds, parallelize = parallelize)
 \end{Code}
