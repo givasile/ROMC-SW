@@ -18,8 +18,8 @@ comparing the two methods. The argument \code{step} defines the step
 used in the Riemann's approximation and the argument \code{distance}
 can be either \code{"Jensen-Shannon"} or \code{"KL-divergence"}.
 
-The method \code{compute_ess} computes the Effective Sample Size (ESS)
-using the following expression~\cite{Sudman1967},
+The method \code{compute_ess} computes the Effective Sample Size
+(ESS) using the following expression,
 
 \begin{equation} \label{eq:ESS}
   ESS = \frac{(\sum_i w_i)^2}{\sum_i w_i^2}

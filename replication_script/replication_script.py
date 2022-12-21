@@ -17,7 +17,7 @@ import tikzplotlib as tplt
 import matplotlib
 matplotlib.rcParams['text.usetex'] = True
 logging.basicConfig(level=logging.INFO)
-savefig = True
+savefig = False
 
 ######################################################################
 # Part 1. Generates the subfigures used in the running example in the#
@@ -50,7 +50,7 @@ class Likelihood:
 
         """
         assert isinstance(theta, np.ndarray)
-        theta = theta.astype(np.float)
+        theta = theta.astype(float)
         samples = np.empty_like(theta)
 
         c = 0.5 - 0.5 ** 4
@@ -83,7 +83,7 @@ class Likelihood:
 
         BS = theta.shape[0]
         N = x.shape[0]
-        theta = theta.astype(np.float)
+        theta = theta.astype(float)
 
         pdf_eval = np.zeros((BS))
         c = 0.5 - 0.5 ** 4
