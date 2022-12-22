@@ -12,7 +12,7 @@ n2 = 200
 bounds = [(-2, 2), (-1.25, 1.25)]
 eps = .01
 
-# define model
+# ROMC
 romc = elfi.ROMC(model, bounds=bounds, parallelize=False, discrepancy_name="d")
 
 # fitting part
@@ -26,3 +26,13 @@ romc.visualize_region(vis_ind_1)
 # print summary statistics
 print(romc.result.summary())
 print(romc.result.samples_cov())
+
+
+# BOLFI
+bolfi = elfi.BOLFI(model, target_name = "d",
+                   batch_size=1,
+                   initial_evidence=20,
+                   update_interval=10,
+                   bounds={'t1':(-2, 2), 't2':(-1.25, 1.25)},
+                   acq_noise_var=0.1,
+                   seed=seed)
