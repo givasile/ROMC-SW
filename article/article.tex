@@ -126,39 +126,41 @@
 \begin{document}
 
 %% -- Introduction -------------------------------------------------------------
-\section{Introduction} \label{sec:intro}
+\section{Introduction}
+\label{sec:intro}
 
 Simulator-based models are particularly captivating due to the
-provided modeling freedom. In essence, any data generating mechanism
-that can be written as a finite set of algorithmic steps can be
-programmed as a simulator-based model. In these cases, it is feasible
-to generate samples using the simulator but it is infeasible to
-evaluate the likelihood function. The intractability of the likelihood
-makes the likelihood-free inference (LFI), i.e., the approximation of
-the posterior distribution without using the likelihood function,
-particularly challenging.
+modeling freedom they provide. In essence, any data generating
+mechanism that can be written as a finite set of algorithmic steps can
+be programmed as a simulator-based model. Hence, these models are
+often used to model physical phenomena in the natural sciences such
+as, e.g., genetics, epidemiology or neuroscience~\citet{gutmann2016,
+  lintusaari2017, sisson2018, cranmer2020}. In simulator-based models,
+it is feasible to generate samples using the simulator but is
+infeasible to evaluate the likelihood function. The intractability of
+the likelihood makes the so-called likelihood-free inference (LFI),
+i.e., the approximation of the posterior distribution without using
+the likelihood function, particularly challenging.
 
-Optimization Monte Carlo (OMC) proposed by~\citet{Meeds2015} is a
-novel LFI approach for approximating the posterior distribution. The
-central idea is turning the stochastic data-generating mechanism into
-a set of deterministic optimization processes. Afterwards,
-\citet{Forneron2016} provided a similar method under the name `reverse
-sampler'. In their work,~\citet{Ikonomov2019}, located some critical
-limitations of OMC, so they proposed Robust OMC (ROMC), an alternative
-version of OMC with the appropriate modifications.
+Optimization Monte Carlo (OMC), proposed by~\citet{Meeds2015}, is a
+novel LFI approach. The central idea is to convert the stochastic
+data-generating mechanism into a set of deterministic optimization
+processes. Afterwards, \citet{Forneron2016} described a similar method
+under the name `reverse sampler'. In their work,~\citet{Ikonomov2019},
+identified some critical limitations of OMC and proposed Robust OMC
+(ROMC) as an improved version of OMC with appropriate
+modifications.
 
 In this paper, we present the implementation of ROMC at the
 \proglang{Python} package \pkg{ELFI} (Engine for likelihood-free
-inference)~\citet{1708.00707}. As we illustrate at
-Section~\ref{sec:implementation}, we have carefully designed the
-implementation to ensure extensibility. ROMC is a general framework
-for obtaining weighted samples from the posterior, i.e., it defines a
-sequence of algorithmic steps without enforcing a specific algorithm
-for solving each step. Therefore, a researcher may use ROMC as the
-backbone algorithm and develop novel methods to solve each separate
-step.\footnote{For being a ready-to-use
-algorithm,~\citet{Ikonomov2019} proposed a default method for each
-step, but this choice is by no means restrictive.} We have designed
+inference)~\citet{1708.00707}. The implementation has been designed to
+ensure extensibility. ROMC is an LFI framework; it defines a sequence
+of algorithmic steps for aproximating the posterior without enforcing
+a specific algorithm for solving each step. Therefore, a researcher
+may use ROMC as the backbone algorithm and develop novel methods to
+solve each separate step.\footnote{For being a ready-to-use
+  algorithm,~\citet{Ikonomov2019} proposed a default method for each
+  step, but this choice is by no means restrictive.} We have designed
 our software for facilitating such experimentation.
 
 To the best of our knowledge, this is the first implementation of the
@@ -169,68 +171,55 @@ likelihood. The artificial example also serves as a step-by-step guide
 for showcasing how to use the various functionalities of our
 implementation. Second, we use the second-order moving average (MA2)
 example from the \pkg{ELFI} package, using as ground truth the samples
-obtained with Rejection ABC~\citet{lintusaari2017}, with a very large
-number of trials. Finally, we present the execution times of ROMC,
-measuring the speed-up obtained by using the parallel version of the
+obtained with Rejection ABC~\citet{lintusaari2017} using a very high
+number of samples. Finally, we present the execution times of ROMC,
+measuring the speed-up achieved by the parallel version of the
 implementation.
 
 % \clearpage
 \section{Background}
 
 We first give a short introduction to simulator-based models, we then
-focus on OMC and its robust improvement, ROMC, and we, finally,
-introduce \pkg{ELFI}, the underlying package that is used for the
-implementation of ROMC.
+focus on OMC and its robust version, ROMC, and we, finally, introduce
+\pkg{ELFI}, the \proglang{Python} package used for the implementation.
 
 \subsection{Simulator-based models and likelihood-free inference}
 
 An implicit or simulator-based model is a parameterized stochastic
-data generating mechanism. The key characteristic of simulator-based
-models is that we can sample data points, but we cannot evaluate the
-likelihood. Formally, a simulator-based model is a parameterized
-family of probability density functions
+data generating mechanism, where we can sample data points but we
+cannot evaluate the likelihood. Formally, a simulator-based model is a
+parameterized family of probability density functions
 \(\{ p(\yb|\thetab)\}_{\thetab}\) whose closed-form is either unknown
-or computationally intractable. In these scenarios, we can only a
-access the simulator \( m_r(\thetab) \), i.e., the black-box mechanism
-(computer code) that generates samples \(\yb\) in a stochastic manner
-from a set of parameters \(\thetab\). We denote the process of
-obtaining samples from the simulator with
-\( m_r(\thetab) \rightarrow \yb \). As shown by~\citet{Meeds2015}, it
-is feasible to isolate the randomness of the simulator by introducing
-a set of nuisance random variables denoted by \(\ub \sim
-p(\ub)\). Therefore, for a specific tuple \((\thetab, \ub)\) the
-simulator becomes a deterministic mapping \(g\), such that
-\(\yb=\simulator(\thetab,\ub)\). In terms of computer code, the
-randomness of a random process is governed by the global
-seed. Although each software may handle the randomness in slightly
+or computationally intractable. In these cases, we can only access the
+simulator \( m_r(\thetab) \), i.e., the black-box mechanism (computer
+code) that generates samples \(\yb\) in a stochastic manner from a set
+of parameters \(\thetab\). We denote the process of obtaining samples
+from the simulator with \( m_r(\thetab) \rightarrow \yb \). As shown
+by~\citet{Meeds2015}, it is feasible to isolate the randomness of the
+simulator by introducing a set of nuisance random variables denoted by
+\(\ub \sim p(\ub)\). Therefore, for a specific tuple
+\((\thetab, \ub)\) the simulator becomes a deterministic mapping
+\(g\), such that \(\yb=\simulator(\thetab,\ub)\). In terms of computer
+code, the randomness of a random process is governed by the global
+seed. Although each package may handle the randomness in slightly
 different ways\footnote{For example, at
   \pkg{Numpy}~\citet{harris2020array}, the pseudo-random number
   generation is based on a global state, whereas, in
   \pkg{JAX}~\citet{jax2018github} random functions consume a key that
-  is passed as parameter. }, in all cases, freezing the initial seed
-to a specific integer converts the simulation to a deterministic piece
-of code.
+  is passed as parameter. }, in all cases, setting the initial seed to
+a specific integer converts the simulation to a deterministic piece of
+code.
 
-Simulator-based models provide modeling freedom, including hidden
-(unobserved) random variables or rule-based decisions. In fact, any
-physical process that can be conceptualized as a computer program of
-finite steps can be modeled as a simulator-based model. Hence,
-implicit models are often used to model physical phenomena in the
-natural sciences such as, e.g., genetics, epidemiology or
-neuroscience. Further background on simulator-based models and example
-applications can be found in the articles by~\citet{gutmann2016,
-  lintusaari2017, sisson2018, cranmer2020}.
-
-The modeling freedom of simulator-based models, however, comes at the
-price of difficulties in inferring the parameters of
-interest. Denoting the observed data as \(\data\), the main difficulty
-lies at the intractability of the likelihood function
+As stated at the Introduction, the modeling freedom of simulator-based
+models comes at the price of difficulties in inferring the parameters
+of interest. Denoting the observed data as \(\data\), the main
+difficulty lies at the intractability of the likelihood function
 \(L(\thetab) = p(\data|\thetab)\). To better see the sources of the
 intractability, and to address them, we go back to the basic
 characterization of the likelihood as the (rescaled) probability of
 generating data \(\yb\) that is similar to the observed data
 \(\data\), using parameters \(\thetab\). Formally, the likelihood
-\(L(\thetab)\) equals
+\(L(\thetab)\) is:
 
 \begin{equation}
   \label{eq:likelihood}
@@ -240,13 +229,12 @@ generating data \(\yb\) that is similar to the observed data
 where \(c_\epsilon\) is a proportionality factor that depends on
 \(\epsilon\) and \(\region(\data)\) is an \(\epsilon\) region around
 \(\data\) that is defined through a distance function \(d\), i.e., \
-\(\region(\data) := \{\yb: d(\yb, \data) \leq \epsilon \}\).
-
-Equation~\ref{eq:likelihood} highlights the main source of
+\(\region(\data) := \{\yb: d(\yb, \data) \leq \epsilon
+\}\). Equation~\ref{eq:likelihood} highlights the main source of
 intractability; computing
-\(\Pr(\simulator(\thetab,\ub) \in \region(\data)) | \thetab\) as the
+\(\Pr(\simulator(\thetab,\ub) \in \region(\data) | \thetab) \) as the
 fraction of samples that lie inside the \(\epsilon\) region around
-\(\data\) is computationally infeasible in the limit of
+\(\data\) is computationally infeasible in the limit where
 \(\epsilon \to 0\). Hence, the constraint is relaxed to
 \(\epsilon > 0\), which leads to the approximate likelihood:
 
@@ -259,7 +247,6 @@ and, in turn, to the approximate posterior:
 
 \begin{equation} \label{eq:approx_posterior}
   p_{d,\epsilon}(\thetab|\data)
-  \propto L_{d, \epsilon}(\thetab) p(\thetab)
   \propto L_{d, \epsilon}(\thetab) p(\thetab)
 \end{equation}
 
@@ -311,14 +298,13 @@ In Equation~\ref{eq:samples_approx_likelihood_omc}, for each
 \(\ub_i\), there is a region \(\accregioni\) in the parameter space
 \(\thetab\) where the indicator function returns one, i.e.,
 \(\accregioni = \{ \thetab: \simulator(\thetab, \ub_i) \in
-\region(\data) \}\). Therefore, we can approximate the likelihood as:
+\region(\data) \}\). Therefore, we can rewrite the approximate
+likelihood and posterior as:
 
 \begin{equation}
   \label{eq:alt_view_theta}
   L_{d, \epsilon}(\thetab) \approx \frac{1}{N} \sum_{i=1}^N \indicator{\accregioni}(\thetab)
 \end{equation}
-
-and the corresponding approximate posterior:
 
 \begin{equation}
   \label{eq:approx_posterior_omc}
@@ -365,12 +351,11 @@ package we implement the robust generalization of OMC by
 
 ROMC approximates the acceptance regions \(\accregioni\) with
 \(D\)-dimensional bounding boxes \(\accregionihat\). A uniform
-distribution, \(q_i(\thetab)\), is defined on top of each bounding
-box. Each \(q_i(\thetab)\) serves a proposal distribution for
-generating posterior samples \(\thetab_{ij} \sim q_i\). The samples
-get an (importance) weight \(w_{ij}\) that compensate for using the
-proposal distributions \(q_i(\thetab)\) instead of the prior
-\(p(\thetab)\):
+distribution, \(q_i(\thetab)\), is defined on top of each bounding box
+and serves as a proposal distribution for generating posterior samples
+\(\thetab_{ij} \sim q_i\). The samples get an (importance) weight
+\(w_{ij}\) that compensate for using the proposal distributions
+\(q_i(\thetab)\) instead of the prior \(p(\thetab)\):
 
 \begin{equation}
   \label{eq:sampling}
@@ -382,10 +367,8 @@ Given the weighted samples, any expectation
 \begin{equation} \label{eq:expectation}
   \E_{p(\thetab|\data)}[h(\thetab)] \approx \frac{\sum_{ij} w_{ij} h(\thetab_{ij})}{\sum_{ij} w_{ij}}
 \end{equation}
-\citet{Ikonomov2019} considered uniform distributions as proposal
-distributions so that the main task is to approximate the acceptance
-regions \(\accregioni\) and to represent them so that uniform sampling
-is easy. The approximation of the acceptance regions contains two
+
+The approximation of the acceptance regions contains two
 compulsory and one optional step: (i) solving the optimization
 problems as in OMC, (ii) constructing bounding boxes around
 \(\accregioni\) and, optionally, (iii) refining the approximation via a
@@ -397,24 +380,19 @@ we search for a point \(\thetab^*_i\) such that
 \(d(\simulator(\thetab^*_i,\ub_i), \data) \le \epsilon\). In
 principle, \(d(\cdot)\) can refer to any valid distance function. For
 the rest of the paper we consider \(d(\cdot)\) as the squared
-Euclidean distance, as in~\citet{Ikonomov2019}. For easier notation,
-we use \(d_i(\thetab)\) to refer to
-\(d(\simulator(\thetab,\ub_i), \data)\). We search for \(\theta_i^*\)
-solving the following optimization problem:
+Euclidean distance, as in~\citet{Ikonomov2019}. For simplicity, we use
+\(d_i(\thetab)\) to refer to \(d(\simulator(\thetab,\ub_i),
+\data)\). We search for \(\theta_i^*\) solving:
 
 \begin{equation}
   \label{eq:optProb}
   \thetab_i^* = \!\argmin_{\thetab} d_i(\thetab)
 \end{equation}
 %
-The solution is accepted only if it satisfies the constraint
-\(d_i(\thetab_i^*) \le \epsilon\). If not, there is no point into
-building an acceptance region around \(\accregioni\), so
-\(\thetab_i^*\) is discarded. There are two proposed options for
-solving Equation~\ref{eq:optProb} depending on the differentiability
-of \(d_i(\thetab)\). If \(d_i(\thetab)\) is differentiable any
-gradient-based optimizer can be used for
-Equation~\ref{eq:optProb}. The gradients
+and we accept the solution only if it satisfies the constraint
+\(d_i(\thetab_i^*) \le \epsilon\). If \(d_i(\thetab)\) is
+differentiable, Equation~\ref{eq:optProb} can be solved using any
+gradient-based optimizer. The gradients
 \(\nabla_{\thetab} d_i(\thetab)\) can be either provided in closed
 form or approximated by finite differences. If \(d_i\) is not
 differentiable, Bayesian Optimization~\citep{Shahriari2016} can be
@@ -431,22 +409,24 @@ distance \(d_i(\thetab)\) is expensive.
 Each acceptance region \(\accregioni\) is approximated by a bounding
 box \(\accregionihat\). The acceptance regions \(\accregioni\) can
 contain any number of disjoint subsets in the \(D\)-dimensional space
-and any of these subsets can take any arbitrary shape. First, since
-the bounding boxes are built around \(\thetab_i^*\), we focus only on
-the connected subset of \(\accregioni\) that contains \(\thetab_i^*\),
-which we denote as \(\accregionitheta\). Second, we want to ensure
-that the bounding box \(\accregionihat\) is big enough to contain on
-its interior all the volume of \(\accregionitheta\). Third, we want to
-be as tight as possible to \(\accregionihat\) to ensure high
-acceptance rate on the importance sampling step that will
-follow. Therefore, the bounding boxes are built as follows. First, we
-compute their axes \(\mathbf{v}_m\), for \(m = \{1, \ldots, D\}\)
+and any of these subsets can take any arbitrary shape. We should make
+three important remarks. First, since the bounding boxes are built
+around \(\thetab_i^*\), we focus only on the connected subset of
+\(\accregioni\) that contains \(\thetab_i^*\), which we denote as
+\(\accregionitheta\). Second, we want to ensure that the bounding box
+\(\accregionihat\) is big enough to contain on its interior all the
+volume of \(\accregionitheta\). Third, we want \(\accregionihat\) to
+be as tight as possible to \(\accregionitheta\) to ensure high
+acceptance rate on the importance sampling step that
+follows. Therefore, the bounding boxes are built in two steps. First,
+we compute their axes \(\mathbf{v}_m\), for \(m = \{1, \ldots, D\}\)
 based on the (estimated) curvature of the distance at \(\thetab_i^*\),
-and, second, we apply a line-search method along each axis to determine
-the size of the box, see Algorithm~\ref{alg:region_construction} for
-the details. After the bounding boxes construction, a uniform
-distribution \(q_i\) is defined on each bounding box, and is used as
-the proposal region for importance sampling.
+and, second, we apply a line-search method along each axis to
+determine the size of the box. We refer the reader to
+Algorithm~\ref{alg:region_construction} for the details. After the
+bounding boxes construction, a uniform distribution \(q_i\) is defined
+on each bounding box, and is used as the proposal region for
+importance sampling.
 
 \subsubsection*{(iii) Refining the estimate via a local surrogate model (optional)}
 
@@ -508,16 +488,13 @@ distribution, the ones included in the \code{elfi.Prior} class.
     \label{fig:elfi}
 \end{figure}
 
-All inference methods are implemented as separate \pkg{ELFI} classes
-with the two conventions:
-
-\begin{itemize}
-\item their constructor is \code{elfi.<Class name>(<output node>, *arg)};
-  the initial argument is the output node of the simulator-based model
-  and the rest of the arguments are parameters of the method.
-\item they obtain posterior samples using \code{elfi.<Class name>.sample(*args)}
-\end{itemize}
-
+All inference methods of \pkg{ELFI} are implemented following two
+conventions. First, their constructor follows the signature
+\code{elfi.<Class name>(<output node>, *arg)}, where \code{<output
+  node>} is the output node of the simulator-based model and
+\code{*arg} are the parameters of the method. Second, they provide a
+method \code{elfi.<Class name>.sample(*args)} for drawing samples from
+the approximate posterior.
 
 %% -- Design Principles -----------------------------------------------------
 \section{Implementation}
