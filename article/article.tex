@@ -184,94 +184,287 @@ implementation of ROMC.
 \subsection{Simulator-based models and likelihood-free inference}
 
 An implicit or simulator-based model is a parameterized stochastic
-data generating mechanism. The key characteristic of these models is
-that we can sample data points, but we cannot evaluate the
+data generating mechanism. The key characteristic of simulator-based
+models is that we can sample data points, but we cannot evaluate the
 likelihood. Formally, a simulator-based model is a parameterized
 family of probability density functions
 \(\{ p(\yb|\thetab)\}_{\thetab}\) whose closed-form is either unknown
 or computationally intractable. In these scenarios, we can only a
-access the simulator \( m_r(\thetab) \), i.e., a black-box mechanism
+access the simulator \( m_r(\thetab) \), i.e., the black-box mechanism
 (computer code) that generates samples \(\yb\) in a stochastic manner
 from a set of parameters \(\thetab\). We denote the process of
 obtaining samples from the simulator with
-\( m_r(\thetab) \rightarrow \yb \). It is feasible to isolate the
-randomness of the simulator by introducing the nuisance random
-variables denoted by \(\ub \sim p(\ub)\). Therefore, for a tuple
-\((\thetab, \ub)\), the simulator turns to a deterministic mapping
-\(g\), such that \(\yb=\simulator(\thetab,\ub)\). In terms of computer
-code, the randomness of a random process is governed by the global
-seed. Even though each software may handle the random generation
-process in a different way\footnote{For example, at
+\( m_r(\thetab) \rightarrow \yb \). As shown by~\citet{Meeds2015}, it
+is feasible to isolate the randomness of the simulator by introducing
+a set of nuisance random variables denoted by \(\ub \sim
+p(\ub)\). Therefore, for a specific tuple \((\thetab, \ub)\) the
+simulator becomes a deterministic mapping \(g\), such that
+\(\yb=\simulator(\thetab,\ub)\). In terms of computer code, the
+stochasticity of a random process is governed by the global
+seed. Although each software may handle the randomness in slightly
+different ways\footnote{For example, at
   \pkg{Numpy}~\citet{harris2020array}, the pseudo-random number
   generation is based on a global state, whereas, in
   \pkg{JAX}~\citet{jax2018github} random functions consume a key that
-  is passed as parameter. }, in all cases, by sampling an integer value
-and setting it as the initial seed converts the simulation to a
-deterministic sequence of steps.
+  is passed as parameter. }, in all cases, freezing the initial seed
+to a specific integer converts the simulation to a deterministic piece
+of code.
 
-Simulator-based models provide considerable modeling freedom; any
+Simulator-based models provide modeling freedom, including hidden
+(unobserved) random variables or rule-based decisions. In fact, any
 physical process that can be conceptualized as a computer program of
-finite steps can be modeled as a simulator-based model without any
-compromise. The modeling freedom allows for any amount of hidden
-(unobserved) internal variables or rule-based decisions. Hence,
+finite steps can be modeled as a simulator-based model. Hence,
 implicit models are often used to model physical phenomena in the
 natural sciences such as, e.g., genetics, epidemiology or
-neuroscience. Further background on simulator-based models and
-example applications can be found in the articles
-by~\citet{gutmann2016, lintusaari2017, sisson2018, cranmer2020}.
+neuroscience. Further background on simulator-based models and example
+applications can be found in the articles by~\citet{gutmann2016,
+  lintusaari2017, sisson2018, cranmer2020}.
 
 The modeling freedom of simulator-based models, however, comes at the
-price of difficulties in inferring their parameters. Denoting the
-observed data as \(\data\), the main difficulty is that the likelihood
-function \(l(\thetab) = p(\data|\thetab)\) is generally
-intractable. To better see the sources of the intractability, and to
-address them, we go back to the basic characterization of the
-likelihood as the (rescaled) probability of a parameter of the model
-to generate data \(\yb\) that is similar to the observed data
-\(\data\). More formally, the likelihood \(l(\thetab)\) equals
-\begin{equation} \label{eq:likelihood}
-  l(\thetab) = \lim_{\epsilon \to 0} c_\epsilon \int_{\yb \in b_{d,\epsilon}(\data)} p(\yb|\thetab)d\yb =
+price of difficulties in inferring the parameters of
+interest. Denoting the observed data as \(\data\), the main difficulty
+lies at the intractability of the likelihood function
+\(L(\thetab) = p(\data|\thetab)\). To better see the sources of the
+intractability, and to address them, we go back to the basic
+characterization of the likelihood as the (rescaled) probability of
+generating data \(\yb\) that is similar to the observed data
+\(\data\), using parameters \(\thetab\). Formally, the likelihood
+\(L(\thetab)\) equals
+
+\begin{equation}
+  \label{eq:likelihood}
+  L(\thetab) = \lim_{\epsilon \to 0} c_\epsilon \int_{\yb \in B_{d,\epsilon}(\data)} p(\yb|\thetab)d\yb =
   \lim_{\epsilon \to 0} c_\epsilon \Pr(\simulator(\thetab, \ub) \in \region(\data)  \mid \theta)
 \end{equation}
 where \(c_\epsilon\) is a proportionality factor that depends on
-\(\epsilon\) and \(\region(\data)\) is an \(\epsilon\) region around \(\data\)
-that is defined via a distance function \(d\), i.e., \ \(\region(\data)
-:= \{\yb: d(\yb, \data) \leq \epsilon \}\).
+\(\epsilon\) and \(\region(\data)\) is an \(\epsilon\) region around
+\(\data\) that is defined through a distance function \(d\), i.e., \
+\(\region(\data) := \{\yb: d(\yb, \data) \leq \epsilon \}\).
 
-The basic characterization of the likelihood in~\eqref{eq:likelihood}
-highlights two sources of intractability; the first is the computation
-of the probability
-\(\Pr(\simulator(\thetab,\ub) \in \region(\data))\), the second is the
-limit of \(\epsilon \to 0\). Approximating the probability with
-samples becomes computationally infeasible if \(\epsilon\) is too
-small. Hence, a large class of inference methods work with
-\(\epsilon > 0\), which leads to the approximate likelihood function
-\(l_{d, \epsilon}(\thetab)\)
-\begin{equation} \label{eq:approx_likelihood}
-  l_{d, \epsilon}(\thetab) = \Pr(\yb \in \region(\data) \mid \theta), \quad \text{where  } \epsilon > 0.
+Equation~\ref{eq:likelihood} highlights the main source of
+intractability; computing
+\(\Pr(\simulator(\thetab,\ub) \in \region(\data)) | \thetab\) as the
+fraction of samples that lie inside the \(\epsilon\) region around
+\(\data\) is computationally infeasible in the limit of
+\(\epsilon \to 0\). Hence, the constrainted is relaxed to
+\(\epsilon > 0\), which leads to the approximate likelihood:
+
+\begin{equation}
+  \label{eq:approx_likelihood}
+  L_{d, \epsilon}(\thetab) = \Pr(\yb \in \region(\data) \mid \theta), \quad \text{where  } \epsilon > 0.
 \end{equation}
 
-and, in turn, to the approximate posterior
+and, in turn, to the approximate posterior:
 
 \begin{equation} \label{eq:approx_posterior}
-  p_{d,\epsilon}(\thetab|\data) \propto l_{d, \epsilon}(\thetab) p(\thetab).
+  p_{d,\epsilon}(\thetab|\data)
+  \propto L_{d, \epsilon}(\thetab) p(\thetab)
+  \propto L_{d, \epsilon}(\thetab) p(\thetab)
 \end{equation}
 
-The approximation in~\eqref{eq:approx_likelihood} is by no means the
-only strategy to deal with the intractability of the likelihood
-function in~\eqref{eq:likelihood}. Other strategies include modeling
-the (stochastic) relationship between \(\thetab\) and \(\yb\), and its
-reverse, or framing likelihood-free inference as a ratio estimation
-problem, see for example \citet{blum2010, Wood2006, Papamakarios2016,
-  Papamakarios2019, Chen2019, Thomas2020, Hermans2020}. However, both
-OMC and robust OMC, which we introduce next, are based on the
-approximation in~\eqref{eq:approx_likelihood}.
+The approximation in
+Equations~\ref{eq:approx_likelihood},~\ref{eq:approx_posterior} is by
+no means the only strategy to deal with the intractability of the
+likelihood function in Equation~\ref{eq:likelihood}. Other strategies include
+modeling the (stochastic) relationship between \(\thetab\) and
+\(\yb\), and its reverse, or framing likelihood-free inference as a
+ratio estimation problem, see for example \citet{blum2010, Wood2006,
+  Papamakarios2016, Papamakarios2019, Chen2019, Thomas2020,
+  Hermans2020}. However, both OMC and robust OMC, which we introduce
+next, are based on the approximation in Equation~\ref{eq:approx_likelihood}.
 
 \subsection{Optimization Monte Carlo (OMC)}
-\input{latex_files/ch2/2-2-OMC.tex}
+
+Our description of OMC~\citet{Meeds2015}
+follows~\citet{Ikonomov2019}. We define the indicator function (boxcar
+kernel) that equals one only if \(\xb\) lies in \(\region(\yb)\):
+%
+\begin{equation}
+  \label{eq:indicator}
+  \indicator{\region(\yb)}(\xb)=
+  \left\{
+    \begin{array}{ll}
+      1 & \mbox{if } \xb \in \region(\yb) \\
+      0 & \mbox{otherwise}
+    \end{array} \right. \end{equation}
+%
+
+We, then, rewrite the approximate likelihood function
+\(L_{d, \epsilon}(\thetab)\) of Equation~\ref{eq:approx_likelihood} as:
+
+\begin{gather}
+  \label{eq:approx_likelihood_omc}
+  L_{d, \epsilon}(\thetab) = \Pr(\yb \in \region(\data) | \thetab) =
+  \int_{\ub} \indicator{\region(\data)}(g(\thetab, \ub)) d \ub
+\end{gather}
+
+which can be approximated using samples from the simulator:
+
+\begin{equation}
+  \label{eq:samples_approx_likelihood_omc}
+  L_{d, \epsilon}(\thetab) \approx \frac{1}{N} \sum_{i=1}^N \indicator{\region (\data)} (\simulator(\thetab, \ub_i))
+ \quad \text{ where } \ub_i \sim p(\ub).
+\end{equation}
+
+In Equation~\ref{eq:samples_approx_likelihood_omc}, for each
+\(\ub_i\), there is a region \(\accregioni\) in the parameter space
+\(\thetab\) where the indicator function returns one, i.e.,
+\(\accregioni = \{ \thetab: \simulator(\thetab, \ub_i) \in
+\region(\data) \}\). Therefore, we can approximate the likelihood as:
+
+\begin{equation}
+  \label{eq:alt_view_theta}
+  L_{d, \epsilon}(\thetab) \approx \frac{1}{N} \sum_{i=1}^N \indicator{\accregioni}(\thetab)
+\end{equation}
+
+and the corresponding approximate posterior:
+
+\begin{equation}
+  \label{eq:approx_posterior_omc}
+  p_{d,\epsilon}(\thetab|\data) \propto
+  p(\thetab) \sum_i^N  \indicator{\accregioni}(\thetab).
+\end{equation}
+
+As argued by \citet{Ikonomov2019}, these derivations provide a unique
+perspective for likelihood-free inference by shifting the focus onto
+the geometry of the acceptance regions \(\accregioni\). Indeed, the
+task of approximating the likelihood and the posterior becomes a task
+of characterising the sets \(\accregioni\). OMC by \citet{Meeds2015}
+assumes that the distance \(d\) is the Euclidean distance
+\(||\cdot||_2\) between summary statistics \(\Phi\) of the observed
+and generated data, and that the \(\accregioni\) can be well
+approximated by infinitesimally small ellipses. These assumptions lead
+to an approximation of the posterior in terms of weighted samples
+\(\thetab_i^*\) that achieve the smallest distance between observed
+and simulated data for each realisation \(\ub_i \sim p(\ub)\), i.e.,\
+\begin{equation} \label{eq:omc_opt_prob}
+\thetab_i^* = \argmin_{\thetab} ||\Phi(\data)-\Phi(\simulator(\thetab, \ub_i))||_2  , \quad \ub_i \sim p(\ub).
+\end{equation}
+The weighting for each \(\thetab_i^*\) is proportional to the prior
+density at \(\thetab_i^*\) and inversely proportional to the determinant
+of the Jacobian matrix of the summary statistics at \(\thetab_i^*\). For
+further details on OMC we refer the reader to \citep{Meeds2015,
+  Ikonomov2019}.
+
+
 
 \subsection{Robust optimization Monte Carlo (ROMC)}
-\input{latex_files/ch2/2-3-ROMC.tex}
+
+\citet{Ikonomov2019} showed that considering infinitesimally small
+ellipses can lead to highly overconfident posteriors. We refer the
+reader to their paper for the technical details and conditions for
+this issue to occur. Intuitively, it happens because the weights in
+OMC are only computed from information at \(\thetab_i^*\), and using
+only local information can be misleading. For example if the curvature
+of \(||\Phi(\data)-\Phi(\simulator(\thetab, \ub_i))||_2\) at
+\(\thetab_i^*\) is nearly flat, the curvature alone may wrongly
+indicate that \(\accregioni\) is much larger than it actually is. In
+our software package we implement the robust generalisation of OMC by
+\citet{Ikonomov2019} that resolves this issue.
+
+ROMC, firstly, approximates the acceptance regions \(\accregioni\),
+and defines proposal distributions \(q_i(\thetab)\) on them. The
+proposal distributions are used for generating posterior samples
+\(\thetab_{ij} \sim q_i\). The samples are assigned (importance)
+weights \(w_{ij}\) that compensate for using the proposal
+distributions \(q_i(\thetab)\) and not the prior \(p(\thetab)\),
+\begin{equation}
+  w_{ij} = \frac{\indicator{\accregioni}(\thetab_{ij}) p(\thetab_{ij})}{q(\thetab_{ij})}.
+  \label{eq:sampling}
+\end{equation}
+Given the weighted samples, any expectation
+\(\E_{p(\thetab|\data)}[h(\thetab)]\) of some function \(h(\thetab)\), can be approximated as
+\begin{equation} \label{eq:expectation}
+  \E_{p(\thetab|\data)}[h(\thetab)] \approx \frac{\sum_{ij} w_{ij} h(\thetab_{ij})}{\sum_{ij} w_{ij}}
+\end{equation}
+\citet{Ikonomov2019} considered uniform distributions as proposal
+distributions so that the main task is to approximate the acceptance
+regions \(\accregioni\) and to represent them so that uniform sampling
+is easy. The approximation of the acceptance regions contains two
+compulsory and one optional step: (1) solving the optimisation
+problems as in OMC, (2) constructing bounding boxes around
+\(\accregioni\) and optionally, (3) refining the approximation via a
+surrogate model of the distance.
+
+\subsubsection*{Solving the deterministic optimisation problems}
+For each set of nuisance variables \(\ub_i, i = \{1,2,\ldots,n_1 \}\),
+we search for a point \(\thetab^*_i\) such that
+\(d(\simulator(\thetab^*_i,\ub_i), \data) \le \epsilon\). In general,
+\(d\) can be any valid distance, but for the rest of the paper we
+consider \(d\) as the squared Euclidean distance. For notational
+convenience, we denote \(d(\simulator(\thetab,\ub_i), \data)\) as
+\(d_i(\thetab)\).  Obtaining \(\theta_i^*\) involves solving the
+following optimisation problem:
+\begin{subequations}
+\begin{alignat}{2}
+  &\!\min_{\thetab}        && d_i(\thetab) \label{eq:optProb}\\
+  &\text{subject to} & \quad& d_i(\thetab) \leq \epsilon
+\end{alignat}
+\end{subequations}
+%
+The optimisation problem can be treated as unconstrained, accepting
+the optimal point
+\(\thetab_i^* = \text{argmin}_{\thetab} d_i(\thetab)\) only if
+\(d_i(\thetab_i^*) \le \epsilon\). If \(d_i(\thetab)\) is
+differentiable any gradient-based optimizer can be used
+for~\ref{eq:optProb}. The gradients \(\nabla_{\thetab} d_i(\thetab)\)
+can be either provided in closed form or approximated by finite
+differences. In case \(d_i\) is not differentiable, Bayesian
+Optimisation~\citep{Shahriari2016} provides an alternative
+approach. In this scenario, apart from obtaining an optimal
+\(\thetab_i^* \), a surrogate model \(\hat{d}_i(\thetab)\) of the
+distance function \(d_i(\thetab)\) is also automatically obtained;
+\(\hat{d}_i\) can then substitute the actual distance function in
+downstream steps of the algorithms, with possible computational gains
+especially if evaluating the actual distance \(d_i(\thetab)\) is
+expensive.
+
+\subsubsection*{Estimating the acceptance regions}
+The acceptance region \(\accregioni\) is approximated by a bounding
+box \(\accregionihat\). Ideally, we want the bounding box to be as
+tight as possible to \(\accregioni\) to ensure high acceptance rate in
+the importance sampling, but big enough for not discarding valid
+parts. The bounding boxes are built in two steps. First, we define
+their axes \(\mathbf{v}_m\), \(m = \{1, \ldots, D\}\) based on the
+(estimated) curvature of the distance at \(\thetab_i^*\). Second, we
+determine the size of the box via a one-dimensional line-search method
+along each axis, see Algorithm~\ref{alg:region_construction} for the
+details. After the bounding boxes construction, a uniform distribution
+\(q_i\) is defined on each bounding box, and is used as the proposal
+region for importance sampling.
+
+\subsubsection*{Refining the estimate via a local surrogate model (optional)}
+When computing the weight \(w_{ij}\) in \eqref{eq:sampling}, we need
+to check whether the samples \(\thetab_{ij} \sim q_i\) lie inside the
+acceptance region \(\accregioni\). This can be considered to be a
+safety-mechanism that corrects for any inaccuracies in the
+construction of \(\accregionihat\) above. However, this check involves
+evaluting the distance function \(d_i(\thetab_{ij})\), which can be
+expensive if the model is complex. \citet{Ikonomov2019} thus proposed
+to fit a surrogate model \(\tilde{d}_i(\thetab)\) of the distance
+function \(d_i(\thetab)\), on data points that lie inside
+\(\accregionihat\). They used a simple quadratic model whilst other
+regression models are, in principle, possible too. The advantage of
+using a quadratic model is that it has ellipsoidal isocontours, which
+thus naturally allowed \citet{Ikonomov2019} to replace the bounding
+box approximation of \(\accregioni\) with a tigher-fitting ellipsoidal
+approximation.\footnote{The difference to the infinitesimal
+  ellipsoidal model in OMC is the estimation procedure: OMC uses
+  information at \(\thetab_i^*\) whilst, here, information in
+  \(\accregionihat\) is used, which results in a more stable fit.}
+
+The training data for the quadratic model is obtained by sampling
+\(\thetab_{ij} \sim q_i\) and accessing the distances
+\(d_i(\thetab_{ij})\). The generation of the training data adds an
+extra computational cost, but leads to a significant speed-up when
+evaluating the weights \(w_{ij}\). Moreover, the extra cost is largely
+eliminated if Bayesian Optimisation with a Gaussian process (GP)
+surrogate model \(\hat{d}_i(\thetab)\) was used to obtain
+\(\thetab_i^*\) in the first step. In this case, we can use
+\(\hat{d}_i(\thetab)\) instead of \(d_i(\thetab)\) to generate the
+training data. This essentially replaces the global GP model with a
+simpler local quadratic model which is typically more robust.
+
 
 \subsection[Engine for likelihood-free inference (ELFI)]{\pkg{Engine for likelihood-free inference (ELFI)}}
 \label{subsec:ELFI}
