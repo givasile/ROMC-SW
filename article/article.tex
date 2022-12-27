@@ -61,6 +61,7 @@
 \newcommand{\regioni}{B_{d,\epsilon}^i}
 \newcommand{\data}{\mathbf{y_0}}
 \newcommand{\accregioni}{C^i_{\epsilon}}
+\newcommand{\accregionitheta}{C^i_{\epsilon, \theta_i^*}}
 \newcommand{\accregionihat}{\hat{C}^i_{\epsilon}}
 
 \newcommand{\danger}{\fontencoding{U}\fontfamily{futs}\selectfont\char 66\relax}
@@ -200,7 +201,7 @@ a set of nuisance random variables denoted by \(\ub \sim
 p(\ub)\). Therefore, for a specific tuple \((\thetab, \ub)\) the
 simulator becomes a deterministic mapping \(g\), such that
 \(\yb=\simulator(\thetab,\ub)\). In terms of computer code, the
-stochasticity of a random process is governed by the global
+randomness of a random process is governed by the global
 seed. Although each software may handle the randomness in slightly
 different ways\footnote{For example, at
   \pkg{Numpy}~\citet{harris2020array}, the pseudo-random number
@@ -246,7 +247,7 @@ intractability; computing
 \(\Pr(\simulator(\thetab,\ub) \in \region(\data)) | \thetab\) as the
 fraction of samples that lie inside the \(\epsilon\) region around
 \(\data\) is computationally infeasible in the limit of
-\(\epsilon \to 0\). Hence, the constrainted is relaxed to
+\(\epsilon \to 0\). Hence, the constraint is relaxed to
 \(\epsilon > 0\), which leads to the approximate likelihood:
 
 \begin{equation}
@@ -329,14 +330,14 @@ As argued by \citet{Ikonomov2019}, these derivations provide a unique
 perspective for likelihood-free inference by shifting the focus onto
 the geometry of the acceptance regions \(\accregioni\). Indeed, the
 task of approximating the likelihood and the posterior becomes a task
-of characterising the sets \(\accregioni\). OMC by \citet{Meeds2015}
+of characterizing the sets \(\accregioni\). OMC by \citet{Meeds2015}
 assumes that the distance \(d\) is the Euclidean distance
 \(||\cdot||_2\) between summary statistics \(\Phi\) of the observed
 and generated data, and that the \(\accregioni\) can be well
 approximated by infinitesimally small ellipses. These assumptions lead
 to an approximation of the posterior in terms of weighted samples
 \(\thetab_i^*\) that achieve the smallest distance between observed
-and simulated data for each realisation \(\ub_i \sim p(\ub)\), i.e.,\
+and simulated data for each realization \(\ub_i \sim p(\ub)\), i.e.,\
 \begin{equation} \label{eq:omc_opt_prob}
 \thetab_i^* = \argmin_{\thetab} ||\Phi(\data)-\Phi(\simulator(\thetab, \ub_i))||_2  , \quad \ub_i \sim p(\ub).
 \end{equation}
@@ -355,23 +356,27 @@ ellipses can lead to highly overconfident posteriors. We refer the
 reader to their paper for the technical details and conditions for
 this issue to occur. Intuitively, it happens because the weights in
 OMC are only computed from information at \(\thetab_i^*\), and using
-only local information can be misleading. For example if the curvature
-of \(||\Phi(\data)-\Phi(\simulator(\thetab, \ub_i))||_2\) at
-\(\thetab_i^*\) is nearly flat, the curvature alone may wrongly
-indicate that \(\accregioni\) is much larger than it actually is. In
-our software package we implement the robust generalisation of OMC by
+only local information can be misleading. For example, if the
+curvature of \(||\Phi(\data)-\Phi(\simulator(\thetab, \ub_i))||_2\) at
+\(\thetab_i^*\) is nearly flat, it may wrongly indicate that
+\(\accregioni\) is much larger than it actually is. In our software
+package we implement the robust generalization of OMC by
 \citet{Ikonomov2019} that resolves this issue.
 
-ROMC, firstly, approximates the acceptance regions \(\accregioni\),
-and defines proposal distributions \(q_i(\thetab)\) on them. The
-proposal distributions are used for generating posterior samples
-\(\thetab_{ij} \sim q_i\). The samples are assigned (importance)
-weights \(w_{ij}\) that compensate for using the proposal
-distributions \(q_i(\thetab)\) and not the prior \(p(\thetab)\),
+ROMC approximates the acceptance regions \(\accregioni\) with
+\(D\)-dimensional bounding boxes \(\accregionihat\). A uniform
+distribution, \(q_i(\thetab)\), is defined on top of each bounding
+box. Each \(q_i(\thetab)\) serves a proposal distribution for
+generating posterior samples \(\thetab_{ij} \sim q_i\). The samples
+get an (importance) weight \(w_{ij}\) that compensate for using the
+proposal distributions \(q_i(\thetab)\) instead of the prior
+\(p(\thetab)\):
+
 \begin{equation}
-  w_{ij} = \frac{\indicator{\accregioni}(\thetab_{ij}) p(\thetab_{ij})}{q(\thetab_{ij})}.
   \label{eq:sampling}
+  w_{ij} = \indicator{\accregioni}(\thetab_{ij}) \frac{ p(\thetab_{ij})}{q(\thetab_{ij})}.
 \end{equation}
+
 Given the weighted samples, any expectation
 \(\E_{p(\thetab|\data)}[h(\thetab)]\) of some function \(h(\thetab)\), can be approximated as
 \begin{equation} \label{eq:expectation}
@@ -381,94 +386,138 @@ Given the weighted samples, any expectation
 distributions so that the main task is to approximate the acceptance
 regions \(\accregioni\) and to represent them so that uniform sampling
 is easy. The approximation of the acceptance regions contains two
-compulsory and one optional step: (1) solving the optimisation
-problems as in OMC, (2) constructing bounding boxes around
-\(\accregioni\) and optionally, (3) refining the approximation via a
+compulsory and one optional step: (i) solving the optimization
+problems as in OMC, (ii) constructing bounding boxes around
+\(\accregioni\) and, optionally, (iii) refining the approximation via a
 surrogate model of the distance.
 
-\subsubsection*{Solving the deterministic optimisation problems}
+\subsubsection*{(i) Solving the deterministic optimization problems}
 For each set of nuisance variables \(\ub_i, i = \{1,2,\ldots,n_1 \}\),
 we search for a point \(\thetab^*_i\) such that
-\(d(\simulator(\thetab^*_i,\ub_i), \data) \le \epsilon\). In general,
-\(d\) can be any valid distance, but for the rest of the paper we
-consider \(d\) as the squared Euclidean distance. For notational
-convenience, we denote \(d(\simulator(\thetab,\ub_i), \data)\) as
-\(d_i(\thetab)\).  Obtaining \(\theta_i^*\) involves solving the
-following optimisation problem:
-\begin{subequations}
-\begin{alignat}{2}
-  &\!\min_{\thetab}        && d_i(\thetab) \label{eq:optProb}\\
-  &\text{subject to} & \quad& d_i(\thetab) \leq \epsilon
-\end{alignat}
-\end{subequations}
+\(d(\simulator(\thetab^*_i,\ub_i), \data) \le \epsilon\). In
+principle, \(d(\cdot)\) can refer to any valid distance function. For
+the rest of the paper we consider \(d(\cdot)\) as the squared
+Euclidean distance, as in~\citet{Ikonomov2019}. For easier notation,
+we use \(d_i(\thetab)\) to refer to
+\(d(\simulator(\thetab,\ub_i), \data)\). We search for \(\theta_i^*\)
+solving the following optimization problem:
+
+\begin{equation}
+  \label{eq:optProb}
+  \thetab_i^* = \!\argmin_{\thetab} d_i(\thetab)
+\end{equation}
 %
-The optimisation problem can be treated as unconstrained, accepting
-the optimal point
-\(\thetab_i^* = \text{argmin}_{\thetab} d_i(\thetab)\) only if
-\(d_i(\thetab_i^*) \le \epsilon\). If \(d_i(\thetab)\) is
-differentiable any gradient-based optimizer can be used
-for~\ref{eq:optProb}. The gradients \(\nabla_{\thetab} d_i(\thetab)\)
-can be either provided in closed form or approximated by finite
-differences. In case \(d_i\) is not differentiable, Bayesian
-Optimisation~\citep{Shahriari2016} provides an alternative
-approach. In this scenario, apart from obtaining an optimal
-\(\thetab_i^* \), a surrogate model \(\hat{d}_i(\thetab)\) of the
-distance function \(d_i(\thetab)\) is also automatically obtained;
-\(\hat{d}_i\) can then substitute the actual distance function in
-downstream steps of the algorithms, with possible computational gains
-especially if evaluating the actual distance \(d_i(\thetab)\) is
-expensive.
+The solution is accepted only if it satisfies the constraint
+\(d_i(\thetab_i^*) \le \epsilon\). If not, there is no point into
+building an acceptance region around \(\accregioni\), so
+\(\thetab_i^*\) is discarded. There are two proposed options for
+solving Equation~\ref{eq:optProb} depending on the differentiability
+of \(d_i(\thetab)\). If \(d_i(\thetab)\) is differentiable any
+gradient-based optimizer can be used for
+Equation~\ref{eq:optProb}. The gradients
+\(\nabla_{\thetab} d_i(\thetab)\) can be either provided in closed
+form or approximated by finite differences. If \(d_i\) is not
+differentiable, Bayesian Optimization~\citep{Shahriari2016} can be
+used instead. In this scenario, apart from obtaining an optimal
+\(\thetab_i^* \), we can also automatically build a surrogate model
+\(\hat{d}_i(\thetab)\) of the distance function \(d_i(\thetab)\). The
+surrogate model \(\hat{d}_i\) can then substitute the actual distance
+function in downstream steps of the algorithms, with possible
+computational gains especially in cases where evaluating the actual
+distance \(d_i(\thetab)\) is expensive.
 
-\subsubsection*{Estimating the acceptance regions}
-The acceptance region \(\accregioni\) is approximated by a bounding
-box \(\accregionihat\). Ideally, we want the bounding box to be as
-tight as possible to \(\accregioni\) to ensure high acceptance rate in
-the importance sampling, but big enough for not discarding valid
-parts. The bounding boxes are built in two steps. First, we define
-their axes \(\mathbf{v}_m\), \(m = \{1, \ldots, D\}\) based on the
-(estimated) curvature of the distance at \(\thetab_i^*\). Second, we
-determine the size of the box via a one-dimensional line-search method
-along each axis, see Algorithm~\ref{alg:region_construction} for the
-details. After the bounding boxes construction, a uniform distribution
-\(q_i\) is defined on each bounding box, and is used as the proposal
-region for importance sampling.
+\subsubsection*{(ii) Estimating the acceptance regions}
 
-\subsubsection*{Refining the estimate via a local surrogate model (optional)}
-When computing the weight \(w_{ij}\) in \eqref{eq:sampling}, we need
-to check whether the samples \(\thetab_{ij} \sim q_i\) lie inside the
-acceptance region \(\accregioni\). This can be considered to be a
-safety-mechanism that corrects for any inaccuracies in the
-construction of \(\accregionihat\) above. However, this check involves
-evaluting the distance function \(d_i(\thetab_{ij})\), which can be
-expensive if the model is complex. \citet{Ikonomov2019} thus proposed
-to fit a surrogate model \(\tilde{d}_i(\thetab)\) of the distance
-function \(d_i(\thetab)\), on data points that lie inside
-\(\accregionihat\). They used a simple quadratic model whilst other
-regression models are, in principle, possible too. The advantage of
-using a quadratic model is that it has ellipsoidal isocontours, which
-thus naturally allowed \citet{Ikonomov2019} to replace the bounding
-box approximation of \(\accregioni\) with a tigher-fitting ellipsoidal
-approximation.\footnote{The difference to the infinitesimal
-  ellipsoidal model in OMC is the estimation procedure: OMC uses
-  information at \(\thetab_i^*\) whilst, here, information in
-  \(\accregionihat\) is used, which results in a more stable fit.}
+Each acceptance region \(\accregioni\) is approximated by a bounding
+box \(\accregionihat\). The acceptance regions \(\accregioni\) can
+contain any number of disjoint subsets in the \(D\)-dimensional space
+and any of these subsets can take any arbitrary shape. First, since
+the bounding boxes are built around \(\thetab_i^*\), we focus only on
+the connected subset of \(\accregioni\) that contains \(\thetab_i^*\),
+which we denote as \(\accregionitheta\). Second, we want to ensure
+that the bounding box \(\accregionihat\) is big enough to contain on
+its interior all the volume of \(\accregionitheta\). Third, we want to
+be as tight as possible to \(\accregionihat\) to ensure high
+acceptance rate on the importance sampling step that will
+follow. Therefore, the bounding boxes are built as follows. First, we
+compute their axes \(\mathbf{v}_m\), for \(m = \{1, \ldots, D\}\)
+based on the (estimated) curvature of the distance at \(\thetab_i^*\),
+and, second, we apply a line-search method along each axis to determine
+the size of the box, see Algorithm~\ref{alg:region_construction} for
+the details. After the bounding boxes construction, a uniform
+distribution \(q_i\) is defined on each bounding box, and is used as
+the proposal region for importance sampling.
+
+\subsubsection*{(iii) Refining the estimate via a local surrogate model (optional)}
+
+For computing the weight \(w_{ij}\) in Equation~\ref{eq:sampling}, we
+need to check whether the samples \(\thetab_{ij}\) drawn from the
+bounding boxes are inside the acceptance region \(\accregioni\). This
+can be considered to be a safety-mechanism that corrects for any
+inaccuracies in the construction of \(\accregionihat\) above. However,
+this check involves evaluating the distance function
+\(d_i(\thetab_{ij})\), which can be expensive if the model is
+complex. \citet{Ikonomov2019} proposed fitting a surrogate model
+\(\tilde{d}_i(\thetab)\) of the distance function \(d_i(\thetab)\), on
+data points that lie inside \(\accregionihat\). In principle, any
+regression model can be used as surrogate model. \citet{Ikonomov2019}
+used a simple quadratic model because it has ellipsoidal isocontours,
+which facilitates replacing the bounding box approximation of
+\(\accregioni\) with a tighter-fitting ellipsoidal approximation.
 
 The training data for the quadratic model is obtained by sampling
 \(\thetab_{ij} \sim q_i\) and accessing the distances
 \(d_i(\thetab_{ij})\). The generation of the training data adds an
 extra computational cost, but leads to a significant speed-up when
 evaluating the weights \(w_{ij}\). Moreover, the extra cost is largely
-eliminated if Bayesian Optimisation with a Gaussian process (GP)
+eliminated if Bayesian Optimization with a Gaussian process (GP)
 surrogate model \(\hat{d}_i(\thetab)\) was used to obtain
 \(\thetab_i^*\) in the first step. In this case, we can use
 \(\hat{d}_i(\thetab)\) instead of \(d_i(\thetab)\) to generate the
 training data. This essentially replaces the global GP model with a
 simpler local quadratic model which is typically more robust.
 
-
 \subsection[Engine for likelihood-free inference (ELFI)]{\pkg{Engine for likelihood-free inference (ELFI)}}
 \label{subsec:ELFI}
-\input{latex_files/ch2/2-4-ELFI.tex}
+
+\pkg{Engine for Likelihood-Free Inference (ELFI)}\footnote{Extended
+  documentation can be found
+  \href{https://elfi.readthedocs.io/en/latest/}{https://elfi.readthedocs.io}}~\cite{1708.00707}
+is a \proglang{Python} package for LFI. We selected to implemented
+ROMC in \pkg{ELFI} since it provides convenient modules for all the
+fundamental components of a probabilistic model (e.g.\ prior,
+simulator, summaries etc.). Furthermore, \pkg{ELFI} already supports
+some recently proposed likelihood-free inference methods. \pkg{ELFI}
+handles the probabilistic model as a Directed Acyclic Graph
+(DAG). This functionality is based on the package
+\pkg{NetworkX}~\cite{hagberg2008exploring}, which supports
+general-purpose graphs. In most cases, the structure of a
+likelihood-free model follows the pattern of Figure~\ref{fig:elfi};
+some edges connect the prior distributions to the simulator, the
+simulator is connected to the summary statistics that, in turn, lead
+to the output node. Samples can be obtained from all nodes through
+sequential (ancestral) sampling. \pkg{ELFI} automatically considers as
+parameters of interest, i.e., those we try to infer a posterior
+distribution, the ones included in the \code{elfi.Prior} class.
+
+\begin{figure}[ht]
+    \begin{center}
+      \includegraphics[width=0.8\textwidth]{./latex_files/images/chapter2/elfi.png}
+    \end{center}
+    \caption[Baseline example for creating an \pkg{ELFI} model]{Baseline example for creating an \pkg{ELFI} model. Image taken from \cite{1708.00707}}
+    \label{fig:elfi}
+\end{figure}
+
+All inference methods are implemented as separate \pkg{ELFI} classes
+with the two conventions:
+
+\begin{itemize}
+\item their constructor is \code{elfi.<Class name>(<output node>, *arg)};
+  the initial argument is the output node of the simulator-based model
+  and the rest of the arguments are parameters of the method.
+\item they obtain posterior samples using \code{elfi.<Class name>.sample(*args)}
+\end{itemize}
+
 
 %% -- Design Principles -----------------------------------------------------
 \section{Implementation}
