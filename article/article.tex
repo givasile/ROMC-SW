@@ -155,7 +155,7 @@ In this paper, we present the implementation of ROMC at the
 \proglang{Python} package \pkg{ELFI} (Engine for likelihood-free
 inference)~\citet{1708.00707}. The implementation has been designed to
 ensure extensibility. ROMC is an LFI framework; it defines a sequence
-of algorithmic steps for aproximating the posterior without enforcing
+of algorithmic steps for approximating the posterior without enforcing
 a specific algorithm for solving each step. Therefore, a researcher
 may use ROMC as the backbone algorithm and develop novel methods to
 solve each separate step.\footnote{For being a ready-to-use
@@ -497,38 +497,724 @@ method \code{elfi.<Class name>.sample(*args)} for drawing samples from
 the approximate posterior.
 
 %% -- Design Principles -----------------------------------------------------
-\section{Implementation}
+\section{Overview of the implementation}
 \label{sec:implementation}
-This section is split in two parts. We first express ROMC as an
-algorithm and then we present the general implementation principles we
-follow.
+In this section, we express ROMC as an algorithm and then we present
+the general implementation principles.
 
 \subsection{Algorithmic view of ROMC}
-\input{latex_files/ch3/3-0-design-principles.tex}
+
+For designing an extendable implementation, we firstly define ROMC as
+a sequence of algorithmic steps. At a high level, ROMC can be split
+into the training and the inference part; the training part covers the
+steps for estimating the proposal regions and the inference part
+calculates the weighted samples. In
+Algorithm~\ref{alg:romc_algorithm}, that defines ROMC as an algorithm,
+steps 2-11 (before the horizontal line) refer to the training part and
+steps 13-18 to the inference part.
+
+\begin{algorithm}[!ht]
+  \caption{ROMC. Requires the prior \( p(\thetab) \), the simulator
+    \(M_r(\thetab)\), number of optimization problems \(n_1\), number
+    of samples per region \(n_2\), acceptance limit
+    \(\epsilon\)}\label{alg:romc_algorithm}
+  \begin{algorithmic}[1]
+    \Procedure{ROMC}{}
+    \For{\(i \gets 1 \textrm{ to } n_1\)}
+    \State \(\ub_i \sim p(\ub)\) \Comment{Draw nuisance variables}
+    \State Convert \(M_r(\thetab) \) to \( g(\thetab, \ub=\ub_i) \) \Comment{Define deterministic simulator}
+      \State \( d_i(\thetab) = d(g(\thetab, \ub=\ub_i), \yb_0) \) \Comment{Define distance function}
+      \State \(\thetab_i^* = \text{argmin}_{\thetab} d_i\), \(d_i^*=d_i(\thetab_i^*)\) \Comment{Solve optimization problem}
+      \If{\(d^*_i > \epsilon\)}
+        \State Go to 2 \Comment{Filter solution}
+      \EndIf
+      \State Estimate \(\hat{\accregioni}\) and define \(q_i\) \Comment{Estimate proposal area}
+      \State (Optional) Fit \(\Tilde{d}_i\) on \(\hat{\accregioni}\) \Comment{Fit surrogate model}
+      \\\hrulefill
+      \For{\(j \gets 1 \textrm{ to } n_2\)}
+      \State \(\thetab_{ij} \sim q_i\), compute \(w_{ij}\) as in Algorithm \ref{alg:sampling_GB} \Comment{Sample}
+      \EndFor
+    \EndFor
+    \State \(\E_{p(\thetab|\data)}[h(\thetab)]\) as in eq.~\eqref{eq:expectation} \Comment{Estimate an expectation}
+    \State \(p_{d,\epsilon}(\thetab) \) as in eq.~\eqref{eq:approx_posterior_omc} \Comment{Evaluate the unnormalized posterior}
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+\subsubsection*{Training part}
+\noindent
+At the training (fitting) part, the goal is the estimation of the
+proposal regions \(\hat{\accregioni}\), which expands to three
+mandatory tasks; (a) sample the nuisance variables
+\(\ub_i \sim p(\ub)\) for defining the deterministic distance
+functions \(d_i(\thetab)\) (Steps 3-5), (b) solve the optimization
+problems for obtaining \(\thetab_i^*, d_i^*\) and keep the solutions
+inside the threshold \(\epsilon\)(Steps 6-9), and (c) estimate the
+bounding boxes \(\accregionihat\) to define uniform distributions
+\(q_i\) on them (Step 10). Optionally, a surrogate model
+\(\tilde{d}_i\) can be fitted for a faster inference phase.
+
+If \(d_i(\thetab)\) is differentiable, using a gradient-based method
+is advised for obtaining \(\thetab_i^*\) faster. In this case, the
+gradients \(\nabla_{\thetab} d_i\) gradients are approximated
+automatically with finite-differences. This approximation requires two
+evaluations of \(d_i\) for each parameter
+\(\theta_m, m \in \{1, \ldots, D\}\), which scales well only in
+low-dimensional problems. If \(d_i(\thetab)\) is not differentiable,
+Bayesian Optimization can be used as an alternative. In this scenario,
+the training part becomes slower due to fitting of the surrogate model
+and the blind optimization steps.
+
+After obtaining the optimal points \(\thetab^*_i\), we estimate the
+proposal regions. Algorithm~\ref{alg:region_construction} describes
+the line search approach for finding the region boundaries. The axes
+of each bounding box \(\vb_m, m = \{1, \ldots, D\}\) are defined as
+the directions with the highest curvature at \(\thetab_i^*\) computed
+by the eigenvalues of the Hessian matrix \(\hessian_i\) of \(d_i\) at
+\(\thetab_i\) (Step 1). Depending on the algorithm used in the
+optimization step, we either use the real distance \(d_i\) or the
+Gaussian Process approximation \(\hat{d}_i\). When the distance
+function is the Euclidean distance (default choice), the Hessian
+matrix can be also computed as \(\hessian_i = \jac_i^T\jac_i\), where
+\(\jac_i\) is the Jacobian matrix of the summary statistics
+\(\Phi(g(\thetab, \ub_i))\) at \(\thetab_i^*\). This approximation has
+the computational advantage of using only first-order
+derivatives. After defining the axes, we search for the bounding box
+limits with a line step algorithm (Steps 2-21). The key idea is to
+take long steps \(\eta\_\text{start}\) until crossing the boundary
+where \(d > \epsilon\) and then take small steps backwards to find the
+exact boundary position.
+
+
+\begin{algorithm}[!ht]
+  \caption{Approximation \(\accregioni\) with a bounding box \(\hat{\accregioni}\);
+  Requires: a model of distance \(d_i(\thetab)\),
+  an optimal point \(\thetab_i^*\),
+  a number of refinements \(K\),
+  a step size \(\eta\_\text{start}\),
+  maximum iterations \(M\) and
+  a curvature matrix \(\hessian_i\) (\(\jac_i^T\jac_i \) or GP Hessian)}\label{alg:region_construction}
+  \begin{algorithmic}[1]
+  \State Compute eigenvectors \(\vb_{m}\) of \(\hess_i\) {\scriptsize (\(m = 1,\ldots,D)\)}
+  \For{\(m \gets 1 \textrm{ to } D\)}
+    \State \(\Tilde{\thetab} \gets \thetab_i^*\) \label{algstep:box_constr_start}
+    \State \(k \gets 0\)
+    \State \(\eta \gets \eta\_\text{start}\) \Comment{Initialize \(\eta\)}
+    \Repeat
+          \State \(j \gets 0\)
+          \Repeat
+            \State \(\Tilde{\thetab} \gets \Tilde{\thetab} + \eta \ \vb_{m}\) \Comment{Large step size \(\eta\).}
+            \State \(j \gets j + 1\)
+          \Until{\(d(g(\Tilde{\thetab}, \ub=\ub_i), \data) > \epsilon\) or \(j \geq M\)} \Comment{Check distance or maximum iterations}
+          \State \(\Tilde{\thetab} \gets \Tilde{\thetab} - \eta \ \vb_{m}\)
+          \State \(\eta \gets \eta/2\) \Comment{More accurate region boundary}
+          \State \(k \gets k + 1\)
+      \Until \(k = K\)
+      \If{\(\Tilde{\thetab} = \thetab_i^*\)} \Comment{Check if no step has been done}
+        \State \(\Tilde{\thetab} \gets \Tilde{\thetab} + \dfrac{\eta\_{\text{start}}}{2^K} \vb_m\) \Comment{Then, make the minimum step}
+      \EndIf \label{algstep:box_constr_end}
+      \State Set \(\Tilde{\thetab}\) as the positive end point along \(\vb_m\)
+      \State Run steps~\ref{algstep:box_constr_start}~-~\ref{algstep:box_constr_end} for \(\vb_m = - \vb_m\) and set \(\Tilde{\thetab}\) as the negative end point along \(\mathbf{v}_{m}\)
+  \EndFor
+  \State Fit a rectangular box around the region end points and define \(q_i\) as uniform distribution
+  \end{algorithmic}
+\end{algorithm}
+
+
+\subsubsection*{Inference Part}
+
+The inference part includes one or more of the following three tasks;
+(a) sample from the posterior distribution
+\( \thetab_i \sim p_{d, \epsilon}(\thetab|\data)\)
+(Equation~\ref{eq:sampling}), (b) compute an expectation
+\(\E_{\thetab|\data}[h(\thetab)]\) (Equation~\ref{eq:expectation})
+and/or (c) evaluate the unnormalized posterior
+\(p_{d, \epsilon}(\thetab|\data)\)
+(Equation~\ref{eq:approx_posterior_omc}). Sampling is performed by
+getting \(n_2\) samples from each proposal distribution \(q_i\). For
+each sample \(\thetab_{ij}\), the distance function\footnote{As
+  before, if a surrogate model \(\hat{d}\) is available, it can be
+  utilized as the distance function.} is evaluated for checking if it
+lies inside the acceptance region. Algorithm~\ref{alg:sampling_GB}
+defines the steps for computing a weighted sample. After we obtain
+weighted samples, computing the expectation is straightforward using
+Equation~\ref{eq:expectation}. Finally, evaluating the unnormalized
+posterior at a specific point \(\thetab\) requires access to the
+distance functions \(d_i\) and the prior distribution
+\(p(\thetab)\). Following Equation~\ref{eq:approx_posterior_omc}, the
+evaluation involves counting how many distance functions rating over
+all \(d_i(\thetab) < \epsilon\). It is worth noticing that for
+evaluating the unnormalized posterior, there is no need for solving
+the optimization problems and building the proposal regions.
+
+\begin{algorithm}[H]
+    \centering
+    \caption{Sampling. Requires a function of distance \(d_i\), the prior distribution \(p(\thetab)\), the proposal distribution \(q_i\)}\label{alg:sampling_GB}
+    \begin{algorithmic}[1]
+      \State \(\thetab_{ij} \sim q_i\)
+          \If {\(d_i(\thetab_{ij}) > \epsilon\)}
+            \State Go to 2 \Comment{Reject sample}
+          \Else {}
+            \State \(w_{ij} = \frac{p(\thetab_{ij})}{q(\thetab_{ij})}\) \Comment{Compute weight}
+            \State Store \((w_{ij}, \thetab_{ij})\) \Comment{Store weighted sample}
+          \EndIf
+    \end{algorithmic}
+\end{algorithm}
+
 
 \subsection{General implementation principles}
 \label{subsec:general_design}
-\input{latex_files/ch3/3-1-implementation-principles.tex}
+
+\input{latex_files/graphs/romc_graph}
+
+The overview of our implementation is illustrated in
+Figure~\ref{fig:romc_overview}. Following \proglang{Python}'s naming
+principles, the methods starting with an underscore (green rectangles)
+represent internal (private) functions, whereas the rest (blue
+rectangles) are the methods exposed at the API. In
+Figure~\ref{fig:romc_overview}, it can be easily observed that the
+implementation follows Algorithm~\ref{alg:romc_algorithm}. The
+training part includes all the steps until the computation of the
+proposal regions, i.e., sampling the nuisance variables, defining the
+optimization problems, solving them, constructing the regions and
+fitting local surrogate models. The inference part comprises of
+evaluating the unnormalized posterior (and the normalized when is
+possible), sampling and computing an expectation. We also provide some
+utilities for inspecting the training process, such as plotting the
+histogram of the final distances or visualizing the constructed
+bounding boxes. Finally, in the evaluation part, we provide two
+methods for evaluating the inference; (a) computing the Effective
+Sample Size (ESS) of the samples and (b) measuring the divergence
+between the approximate posterior the ground-truth, if the latter is
+available.\footnote{Normally, the ground-truth posterior is not
+  available; However, this functionality is useful in cases where the
+  posterior can be computed numerically or with an alternative method,
+  e.g., Rejection Sampling, and we want to measure the discrepancy
+  between the two approximations.}
+
+\subsubsection*{Parallelizing ROMC method}
+
+As discussed, ROMC has the significant advantage of being fully
+parallelisable. We exploit this fact by implementing a parallel
+version of the major fitting components; (a) solving the optimization
+problems, (b) constructing bounding box regions. We parallelize these
+processes using the built-in \proglang{Python} package
+\pkg{multiprocessing}. The specific package enables concurrency, using
+sub-processes instead of threads, for side-stepping the Global
+Interpreter (GIL). For activating the parallel version of the
+algorithm, the user simply has to set \code{elfi.ROMC(<output_node>,
+  parallelize = True)}.
+
+\subsubsection*{Simple one-dimensional example}
+
+For illustrating the functionalities we will use the following running
+example introduced by \citet{Ikonomov2019},
+
+\begin{gather} \label{eq:1D_example}
+  p(\theta) = \mathcal{U}(\theta;-2.5,2.5)\\ \label{eq:1D_example_eq_2}
+  p(y|\theta) = \left\{
+    \begin{array}{ll} \theta^4 + u & \mbox{if } \theta \in [-0.5, 0.5]
+\\ |\theta| - c + u & \mbox{otherwise}
+    \end{array} \right.\\
+  u \sim \mathcal{N}(0,1)
+\end{gather}
+
+\noindent
+
+The prior is a uniform distribution in the range \([-2.5, 2.5]\) and
+the likelihood is defined at Equation~\ref{eq:1D_example_eq_2}. The
+constant \(c\) is \(0.5 - 0.5^4\) ensures that the PDF is
+continuous. There is only one observation \(y_0 = 0\). The inference
+in this particular example can be performed quite easily without using
+a likelihood-free inference approach. We can exploit this fact for
+validating the accuracy of our implementation. At the following code
+snippet, we code the model at \pkg{ELFI}:
+
+\begin{Code}
+import elfi
+import scipy.stats as ss
+import numpy as np
+
+def simulator(t1, batch_size = 1, random_state = None):
+    c = 0.5 - 0.5**4
+    if t1 < -0.5:
+        y = ss.norm(loc = -t1-c, scale = 1).rvs(random_state = random_state)
+    elif t1 <= 0.5:
+        y = ss.norm(loc = t1**4, scale = 1).rvs(random_state = random_state)
+    else:
+        y = ss.norm(loc = t1-c, scale = 1).rvs(random_state = random_state)
+    return y
+
+# observation
+y = 0
+
+# Elfi graph
+t1 = elfi.Prior('uniform', -2.5, 5)
+sim = elfi.Simulator(simulator, t1, observed = y)
+d = elfi.Distance('euclidean', sim)
+
+# Initialize the ROMC inference method
+bounds = [(-2.5, 2.5)] # bounds of the prior
+parallelize = True # activate parallel execution
+romc = elfi.ROMC(d, bounds = bounds, parallelize = parallelize)
+\end{Code}
+
 
 %% -- ROMC implementation --
 \section{Implemented functionalities}
-\input{latex_files/ch4/4-0-intro.tex}
+
+At this section, we analyze the functionalities of the training, the
+inference and the evaluation part. Extended documentation for each
+method can be found in \pkg{ELFI}'s
+\href{https://elfi.readthedocs.io/en/latest/}{official
+  documentation}. Finally, we describe how a user may extend ROMC with
+its custom modules.
 
 \subsection{Training part}
 \label{subsec:training}
-\input{latex_files/ch4/4-1-training.tex}
+
+In this section, we describe the six functions of the training part:
+
+\begin{Code}
+>>> romc.solve_problems(n1, use_bo = False, optimizer_args = None)
+\end{Code}
+
+\noindent
+This method (a) draws integers for setting the seed, (b) defines the
+optimization problems and (c) solves them using either a
+gradient-based optimizer (default choice) or Bayesian optimization
+(BO), if \code{use_bo = True}. The tasks are completed sequentially,
+as shown in Figure~\ref{fig:romc_overview}. The optimization problems
+are defined after drawing \code{n1} integer numbers from a discrete
+uniform distribution \(u_i \sim \mathcal{U}\{1, 2^{32}-1\}\), where
+each integer \(u_i\) is the seed passed to \pkg{ELFI}'s random
+simulator. The user can pass a \code{Dict} with custom parameters to
+the optimizer through \code{optimizer_args}. For example, in the
+gradient-based case, the user may pass \code{optimizer_args =
+  \{"method": "L-BFGS-B", "jac": jac\}}, to select the
+\code{"L-BFGS-B"} optimizer and use the callable \code{jac} to compute
+the gradients in closed-form.
+
+\begin{Code}
+>>> romc.distance_hist(**kwargs)
+\end{Code}
+
+\noindent
+This function helps the user decide which threshold \(\epsilon\) to
+use by plotting a histogram of the distances at the optimal point
+\(d_i(\thetab_i^*) : \{i = 1, 2, \ldots, n_1\}\) or \(\hat{d}_i^*\) in
+case \code{use_bo = True}. The function forwards the keyword arguments
+to the underlying \code{pyplot.hist()} of the \pkg{matplotlib}
+package. In this way the user may customize some properties of the
+histogram, e.g., the number of bins.
+
+\begin{Code}
+>>> romc.estimate_regions(eps_filter, use_surrogate = None, fit_models = False)
+\end{Code}
+
+\noindent
+This method estimates the proposal regions around the optimal points,
+following Algorithm~\ref{alg:region_construction}. The choice about
+the distance function follows the previous optimization step; if a
+gradient-based optimizer has been used, then estimating the proposal
+region is based on the real distance \(d_i\). If BO is used, then the
+surrogate distance \(\hat{d}\) is chosen. Setting
+\code{use_surrogate=False} enforces the use of the real distance \(d\)
+even after BO. Finally, the parameter \code{fit_models} selects
+whether to fit local surrogate models \(\tilde{d}\) after estimating
+the proposal regions.
+
+\noindent
+The training part includes three more functions. The function
+\code{romc.fit_posterior(args*)} which is a syntactic sugar for
+applying \code{.solve_problems()} and \code{.estimate_regions()} in a
+single step. The function \code{romc.visualize_region(i)} plots the
+bounding box around the optimal point of the \(i\)-th optimization
+problem, when the parameter space is up to \(2D\). Finally,
+\code{romc.compute_eps(quantile)} returns the appropriate distance
+value \(d_{i=\kappa}^*\) where
+\(\kappa = \lfloor quantile \cdot n \rfloor\) from the collection
+\(\{ d_i^* \}, i = \{1, \ldots, n\}\) where \(n\) is the number
+of accepted solutions. It can be used to automate the selection of the
+threshold \(\epsilon\), e.g.,
+\code{eps=romc.compute_eps(quantile=0.9)}.
+
+
+\subsubsection*{Example - Training part}
+
+
+In the following snippet, we put together the routines to code the
+training part of the running example.
+
+\begin{Code}
+# Training (fitting) part
+n1 = 500 # number of optimization problems
+seed = 21 # seed for solving the optimization problems
+use_bo = False # set to True for switching to Bayesian optimization
+
+# Training step-by-step
+romc.solve_problems(n1 = n1, seed = seed, use_bo = use_bo)
+romc.theta_hist(bins = 100) # plot hist to decide which eps to use
+
+eps = .75 # threshold for the bounding box
+romc.estimate_regions(eps = eps) # build the bounding boxes
+
+romc.visualize_region(i = 1) # for inspecting visually the bounding box
+
+# Equivalent one-line command
+# romc.fit_posterior(n1 = n1, eps = eps, use_bo = use_bo, seed = seed)
+\end{Code}
+
+\begin{figure}[ht]
+  \begin{center}
+    \input{latex_files/images/chapter3/example_gt.tex}
+    \input{latex_files/images/chapter3/example_post.tex}
+  \end{center}
+  \caption[Histogram of distances at the one-dimensional example.]{Histogram of
+    distances and visualization of a specific region.}
+  \label{fig:running_example_romc_inference}
+\end{figure}
 
 \subsection{Inference part}
 \label{subsec:inference}
-\input{latex_files/ch4/4-2-inference.tex}
+
+In this section, we describe the four functions of the inference part:
+
+\begin{Code}
+>>> romc.sample(n2)
+\end{Code}
+
+\noindent
+This is the basic functionality of the inference, drawing \(n_2\)
+samples for each bounding box region, giving a total of
+\(k \cdot n_2\) samples, where \(k < n_1\) is the number of the
+optimal points remained after filtering. The samples are drawn from a
+uniform distribution \(q_i\) defined over the corresponding bounding
+box and the weight \(w_i\) is computed as in
+Algorithm~\ref{alg:sampling_GB}.
+
+\noindent
+The inference part includes three more function. The function
+\code{romc.compute_expectation(h)} computes the expectation
+\(\E_{p(\thetab|\data)}[h(\thetab)]\) as in
+Equation~\ref{eq:expectation}. The argument \code{h} can be any python
+\code{Callable}. The method \code{romc.eval_unnorm_posterior(theta,
+  eps_cutoff = False)} computes the unnormalized posterior
+approximation as in Equation~\ref{eq:approx_posterior}. The method \\
+\code{romc.eval_posterior(theta, eps_cutoff = False)} evaluates the
+normalized posterior estimating the partition function
+\(Z = \int p_{d,\epsilon}(\thetab|\data)d\thetab\) using Riemann's
+integral approximation. The approximation is computationally feasible
+only in a low-dimensional parametric space.
+
+\subsubsection*{Example - Inference part}
+
+In the following code snippet, we use the inference utilities to (a)
+get weighted samples from the approximate posterior, (b) compute an
+expectation and (c) evaluate the approximate posterior. We also use
+some of \pkg{ELFI}'s built-in tools to get a summary of the obtained
+samples. For \code{romc.compute_expectation()}, we demonstrate its use
+to compute the samples mean and the samples variance. Finally, we
+evaluate \code{romc.eval_posterior()} at multiple points to plot the
+approximate posterior of
+Figure~\ref{fig:running_example_romc_inference}. We observe that the
+approximation is quite close to the ground-truth.
+
+\begin{Code}
+# Inference part
+seed = 21
+n2 = 50
+romc.sample(n2 = n2, seed = seed)
+
+# visualize region, adding the samples now
+romc.visualize_region(i = 1)
+
+# Visualize marginal (built-in ELFI tool)
+weights = romc.result.weights
+romc.result.plot_marginals(weights = weights, bins = 100, range = (-3,3))
+
+# Summarize the samples (built-in ELFI tool)
+romc.result.summary()
+# Number of samples  : 19300
+# Sample means: theta: -0.0116
+
+# compute expectation
+exp_val = romc.compute_expectation(h = lambda x: np.squeeze(x))
+print("Expected value   : %.3f" % exp_val)
+# Expected value: -0.012
+
+exp_var = romc.compute_expectation(h = lambda x: np.squeeze(x)**2)
+print("Expected variance: %.3f" % exp_var)
+# Expected variance: 1.120
+
+# eval unnorm posterior
+romc.eval_unnorm_posterior(theta = 0)
+
+# check eval posterior
+romc.eval_posterior(theta = 0)
+\end{Code}
+
+
 
 \subsection{Evaluation part}
 \label{subsec:evaluation}
-\input{latex_files/ch4/4-3-evaluation.tex}
 
-\subsection{Extensibility} % better title
+The method \code{romc.compute_ess()} computes the Effective Sample
+Size (ESS) as \(\frac{(\sum_i w_i)^2}{\sum_i w_i^2}\), which is a
+useful quantity to measure how many samples actually contribute to an
+expectation. For example, in an extreme case of a big population of
+samples where only one has big weight, the ESS is much smaller than
+the samples population.
+
+\noindent
+The method \code{romc.compute_divergence(gt_posterior, bounds, step,
+  distance)} estimate the divergence between the ROMC approximation
+and the ground truth posterior. Since the estimation is performed
+using Riemann's approximation, the method can only work in low
+dimensional spaces. The method can be used for evaluation in synthetic
+examples where the ground truth is accessible. In a real-case
+scenarios, where it is not expected to have access to the ground-truth
+posterior, the user may set the approximate posterior obtained with
+any other inference approach for comparing the two methods. The
+argument \code{step} defines the step used in the Riemann's
+approximation and the argument \code{distance} can be either
+\code{"Jensen-Shannon"} or \code{"KL-divergence"}.
+
+\begin{Code}
+# Evaluation part
+res = romc.compute_divergence(wrapper, distance = "Jensen-Shannon")
+print("Jensen-Shannon divergence: %.3f" % res)
+# Jensen-Shannon divergence: 0.035
+
+nof_samples = len(romc.result.weights)
+ess = romc.compute_ess()
+print("Nof Samples: %d, ESS: %.3f" % (nof_samples, ess))
+# Nof Samples: 19300, ESS: 16196.214
+\end{Code}
+
+
+\subsection{Extend the implementation with custom modules}
 \label{subsec:extensibility}
-\input{latex_files/ch4/4-4-extensibility.tex}
+
+ROMC is a generic LFI framework; it describes a sequence of steps for
+approximating the posterior distribution without explicitly enforcing
+the algorithms that solve each step. Although a specific algorithm for
+each step is proposed by~\cite{Ikonomov2019}, in general, a user can
+experiment with alternative algorithms. Considering that, we designed
+the implementation to support flexibility.
+
+We have specified four critical parts where a user may intervene using
+custom solutions; (a) the gradient-based optimization, (b) the
+Bayesian optimization, (c) the proposal region construction and (d)
+the surrogate model fitting. Each of these parts corresponds to a
+function inside the \code{romc.OptimisationProblem} class; (a)
+\code{solve_gradients()}, (b) \code{solve_bo()}, (c)
+\code{build_region()} and (d) \code{fit_local_surrogate()}
+respectively. To replace any of these parts, the user must create a
+custom class that inherits the basic \code{OptimisatioProblem} class
+and overwrite the appropriate function.
+
+To illustrate that in practice, suppose a user wants to fit Deep
+Neural Networks instead of, the default, quadratic models as local
+surrogates \(\tilde{d}_i\). Therefore, the user must create a new
+class that inherits \code{OptimisationProblem} and overwrite the
+\code{fit_local_surrogate(**kwargs)} function with one that fits
+neural networks as local surrogates. We illustrate that in the
+following snippet using the \code{neural_network.MLPRegressor} class
+of the \pkg{scikit-learn} package.
+
+\begin{Code}
+class CustomOptim(OptimisationProblem):
+    def __init__(self, **kwargs):
+        super(CustomOptim, self).__init__(**kwargs)
+
+    def fit_local_surrogate(self, **kwargs):
+        nof_samples = 500
+        objective = self.objective # the distance function
+
+        # helper function
+        def local_surrogate(theta, model_scikit):
+            assert theta.ndim == 1
+            theta = np.expand_dims(theta, 0)
+            return float(model_scikit.predict(theta))
+
+        # create local surrogate model as a function of theta
+        def create_local_surrogate(model):
+            return partial(local_surrogate, model_scikit = model)
+
+        local_surrogates = []
+        for i in range(len(self.regions)):
+            # prepare dataset
+            x = self.regions[i].sample(nof_samples)
+            y = np.array([objective(ii) for ii in x])
+
+            # train Neural Network
+            mlp = MLPRegressor(hidden_layer_sizes = (10,10), solver = 'adam')
+            model = Pipeline([('linear', mlp)])
+            model = model.fit(x, y)
+            local_surrogates.append(create_local_surrogate(model))
+
+        self.local_surrogates = local_surrogates
+        self.state["local_surrogates"] = True
+\end{Code}
+
+In a similar way, the user can replace any of the other three
+functions. In each case, the custom function must change the value of
+some variables that hold the state of the training phase. In the
+following sections, we present which are these variables in each case.
+When implementing the custom functions, the user may need two helping
+classes; (a) \code{RomcOpimisationResult} that stores the result of
+the optimization step and (b) \code{NDimBoundingBox} that stores the
+bounding box. We present the definitions of these classes below and we
+illustrate how to use them in each case in the next sections. Both
+classes can be imported from the module
+\code{elfi.methods.inference.romc}.
+
+
+\begin{Code}
+class RomcOpimisationResult:
+    def __init__(self, x_min, f_min, hess_appr):
+        Parameters
+        ----------
+        x_min: np.ndarray (D,) or float, the minimum point
+        f_min: float, distance at the minimum point
+        hess_appr: np.ndarray (DxD), Hessian approximation at x_min
+        """
+
+class NDimBoundingBox:
+    def __init__(self, rotation, center, limits, eps_region):
+        Parameters
+        ----------
+        rotation: np.array (D,D),  rotation matrix for the bounding box
+        center: np.array (D,) center of the bounding box
+        limits: np.ndarray, shape: (D,2), the limits of the bounding box
+        eps_region: float, distance threshold
+\end{Code}
+
+\subsubsection*{(a) Extending the gradient-based optimization}
+
+For using a custom gradient-based optimization method, the user must
+overwrite the method \code{solve_gradients()}. The method can take any
+number of keyword arguments. The objective of the optimization problem
+(distance \(d_i\)) can be accessed through the variable
+\code{self.objective}, which is a callable. In the following snippet,
+after the comment \code{state variables}, we present the state
+variables that must be set by the method. The class
+\code{RomcOpimisationResult(x, y, jac, hess_inv)} must be used to
+store the optimization result.
+
+\begin{Code}
+def solve_gradients(self, **kwargs):
+    # inputs
+    # self.objective: the distance function, Callable: np.ndarray (D,) -> float
+
+    # custom solution procedure
+    x, y, jac, hess_inv = ...
+    success = True/False # whether gradient-based optimization was succesful
+
+    # state variables
+    self.state["attempted"] = True
+    if success:
+        self.result = RomcOpimisationResult(x, y, jac, hess_inv)
+        self.state["solved"] = True
+        return True
+    else:
+        return False
+\end{Code}
+
+\subsubsection*{(b) Extending the Bayesian Optimization}
+
+For replacing the Bayesian Optimization function, the procedure is
+similar to the gradient-based case. As presented in the following
+snippet, the only added state variables are (a) setting
+\code{self.surrogate = custom_surrogate}, where
+\code{custom_surrogate} is a \code{Callable} with signature
+\code{np.ndarray (D,) -> float}, and setting
+\code{self.state["has_fit_surrogate"] = True} if the optimization is
+successful.
+
+\begin{Code}
+def solve_bo(self, **kwargs):
+    # inputs
+    # self.objective: the distance function, Callable: np.ndarray (D,) -> float
+
+    # custom procedure
+    x, y, jac, hess_inv = ...
+    custom_surrogate = ...
+    success = True/False # whether Bayesian optimization was succesful
+
+    # state variables
+    self.state["attempted"] = True
+    if success:
+        self.result = RomcOpimisationResult(x, y, jac, hess_inv)
+        self.surrogate = custom_surrogate
+        self.state["solved"] = True
+        self.state["has_fit_surrogate"] = True
+        return True
+    else:
+        return False
+\end{Code}
+
+\subsubsection*{(c) Extending the proposal region construction}
+
+For replacing the proposal region construction the user must overwrite
+the \code{build_region} method. Using the objective function \(d_i\)
+(\code{self.objective}) the method must estimate a list of bounding
+boxes as a \code{List} with \code{NDimBoundingBox} instances and set
+the state variables presented below:
+
+\begin{Code}
+def build_region(self, **kwargs):
+    # inputs
+    # self.objective: the distance function, Callable: np.ndarray (D,) -> float
+
+    # custom build_region method
+    bounding_box: List[NDimBoundingBox] = ...
+    success = True/False # whether region built correctly
+
+    # state variables
+    self.eps_region = eps_region
+    if success:
+        # construct region
+        self.regions = bounding_box
+        self.state["region"] = True
+        return True
+    else:
+        return False
+\end{Code}
+
+\subsubsection*{(d) Extending the surrogate model fitting}
+
+For replacing the surrogate model fitting the user must overwrite the
+\code{fit_local_surrogate} method. Using the objective function
+\(d_i\) (\code{self.objective}) and the estimated bounding boxes
+(\code{self.regions}), the method must estimate a list of local
+surrogates, one for each region, as a \code{List} with callables and
+set the state variables presented below:
+
+\begin{Code}
+def fit_local_surrogate(self, **kwargs):
+    # inputs
+    # self.objective: Callable np.ndarray (D,) -> float, the distance function
+    # self.regions: List[NDimBoundingBox], the bounding boxes
+
+    # custom local surrogates
+    local_surrogates: List[Callable] = ...
+    success = True/False # whether local surrogates fit correctly
+
+    # side-effects
+    if success:
+        self.local_surrogates = custom_surrogates
+        self.state["local_surrogates"] = True
+        return True
+    else:
+        return False
+\end{Code}
+
+
+
+
+
 
 %% -- Use-case illustration ----------------------------------------------------
 \section{Use-case illustration}
