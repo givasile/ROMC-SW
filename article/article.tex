@@ -94,17 +94,17 @@
   efficiency limitations. In this paper, we present the implementation
   of the LFI method Robust Optimisation Monte Carlo (ROMC) in the
   \proglang{Python} package \pkg{ELFI}. ROMC is a novel and efficient
-  (highly-parallelisable) LFI framework that provides accurate
+  (highly-parallelizable) LFI framework that provides accurate
   weighted samples from the posterior. Our implementation can be used
   in two ways. First, a scientist may use it as an out-of-the-box LFI
-  algorithm; we provide an easy-to-use API harmonised with the
+  algorithm; we provide an easy-to-use API harmonized with the
   principles of \pkg{ELFI}, enabling effortless comparisons with the
   rest of the methods included in the package. Additionally, we have
   carefully split ROMC into isolated components for supporting
   extensibility. A researcher may experiment with novel method(s) for
   solving part(s) of ROMC without reimplementing everything from
   scratch. In both scenarios, the ROMC parts can run in a
-  fully-parallelised manner, exploiting all CPU cores. We also provide
+  fully-parallelized manner, exploiting all CPU cores. We also provide
   helpful functionalities for (i) inspecting the inference process and
   (ii) evaluating the obtained samples. Finally, we test the
   robustness of our implementation on some typical LFI examples.}
@@ -146,35 +146,48 @@ Optimization Monte Carlo (OMC), proposed by~\citet{Meeds2015}, is a
 novel LFI approach. The central idea is to convert the stochastic
 data-generating mechanism into a set of deterministic optimization
 processes. Afterwards, \citet{Forneron2016} described a similar method
-under the name `reverse sampler'. In their work,~\citet{Ikonomov2019},
-identified some critical limitations of OMC and proposed Robust OMC
-(ROMC) as an improved version of OMC with appropriate
-modifications.
+under the name `reverse sampler'. In their work,~\citet{Ikonomov2019}
+identified some critical limitations of OMC, so they proposed Robust
+OMC (ROMC) an improved version of OMC with appropriate modifications.
 
 In this paper, we present the implementation of ROMC at the
-\proglang{Python} package \pkg{ELFI} (Engine for likelihood-free
-inference)~\citet{1708.00707}. The implementation has been designed to
-ensure extensibility. ROMC is an LFI framework; it defines a sequence
-of algorithmic steps for approximating the posterior without enforcing
-a specific algorithm for solving each step. Therefore, a researcher
-may use ROMC as the backbone algorithm and develop novel methods to
-solve each separate step.\footnote{For being a ready-to-use
-  algorithm,~\citet{Ikonomov2019} proposed a default method for each
-  step, but this choice is by no means restrictive.} We have designed
-our software for facilitating such experimentation.
+\proglang{Python} package \pkg{ELFI} (\pkg{Engine for likelihood-free
+  inference})~\citet{1708.00707}. The implementation has been designed
+to ensure extensibility. ROMC is an LFI framework; it defines a
+sequence of algorithmic steps for approximating the posterior without
+enforcing a specific algorithm for solving each step. Therefore, a
+researcher may use ROMC as the backbone algorithm and develop novel
+methods to solve each separate step. For being a ready-to-use
+algorithm,~\citet{Ikonomov2019} proposed a default method for each
+step, but this choice is by no means restrictive. We have designed our
+software for facilitating such experimentation.
 
 To the best of our knowledge, this is the first implementation of the
 ROMC inference method to a generic LFI framework. We organize the
-evaluation in three steps. First, for securing that our implementation
-is accurate, we test it against an artificial example with a tractable
-likelihood. The artificial example also serves as a step-by-step guide
-for showcasing how to use the various functionalities of our
-implementation. Second, we use the second-order moving average (MA2)
-example from the \pkg{ELFI} package, using as ground truth the samples
-obtained with Rejection ABC~\citet{lintusaari2017} using a very high
-number of samples. Finally, we present the execution times of ROMC,
-measuring the speed-up achieved by the parallel version of the
+illustration and the evaluation of our implementation in three
+steps. First, for securing that our implementation is accurate, we
+test it against an artificial example with a tractable likelihood. The
+artificial example also serves as a step-by-step guide for showcasing
+how to use the various functionalities of our implementation. Second,
+we use the second-order moving average (MA2) example from the
+\pkg{ELFI} package, using as ground truth the samples obtained with
+Rejection ABC~\citet{lintusaari2017} using a very high number of
+samples. Finally, we present the execution times of ROMC, measuring
+the speed-up achieved by the parallel version of the
 implementation.
+
+The code of the implementation is available at the official \pkg{ELFI} \href{https://github.com/elfi-dev/elfi}{repository}. Apart
+from the examples presented in the paper, there are five \pkg{Google
+  Colab} notebooks available online, with end-to-end examples
+illustrating:
+(i) \href{https://colab.research.google.com/drive/1lGRp0XrNfZ64NN0ASB_tYEKowXwlveDC?usp=sharing}{ROMC on a synthetic \(1D\) example},
+(ii) \href{https://colab.research.google.com/drive/1Fof_WmCi1YizzSI_63aEsbLXsno5gSZ3?usp=sharing}{ROMC on a synthetic \(2D\) example},
+(iii) \href{https://colab.research.google.com/drive/1nkdACQ370SSc0KB1bHv4sBRaxMlMqoNH?usp=sharing}{ROMC on the Moving Average example},
+(iv) \href{https://colab.research.google.com/drive/1_jHVxPSH3XcNOORZJpLU0SPzs0PF8CQ5?usp=sharing}{how to extend ROMC with a Neural Network as a surrogate model},
+(v) \href{https://colab.research.google.com/drive/1RzB-V1QueP1y1nyzv_VOqR1nVz3DUH3v?usp=sharing}{how to extend ROMC with a custom proposal region module}.
+
+
+
 
 % \clearpage
 \section{Background}
@@ -193,7 +206,7 @@ parameterized family of probability density functions
 or computationally intractable. In these cases, we can only access the
 simulator \( m_r(\thetab) \), i.e., the black-box mechanism (computer
 code) that generates samples \(\yb\) in a stochastic manner from a set
-of parameters \(\thetab\). We denote the process of obtaining samples
+of parameters \(\thetab \in \mathbb{R}^D\). We denote the process of obtaining samples
 from the simulator with \( m_r(\thetab) \rightarrow \yb \). As shown
 by~\citet{Meeds2015}, it is feasible to isolate the randomness of the
 simulator by introducing a set of nuisance random variables denoted by
@@ -210,10 +223,10 @@ different ways\footnote{For example, at
 a specific integer converts the simulation to a deterministic piece of
 code.
 
-As stated at the Introduction, the modeling freedom of simulator-based
-models comes at the price of difficulties in inferring the parameters
-of interest. Denoting the observed data as \(\data\), the main
-difficulty lies at the intractability of the likelihood function
+The modeling freedom of simulator-based models comes at the price of
+difficulties in inferring the parameters of interest. Denoting the
+observed data as \(\data\), the main difficulty lies at the
+intractability of the likelihood function
 \(L(\thetab) = p(\data|\thetab)\). To better see the sources of the
 intractability, and to address them, we go back to the basic
 characterization of the likelihood as the (rescaled) probability of
@@ -224,14 +237,19 @@ generating data \(\yb\) that is similar to the observed data
 \begin{equation}
   \label{eq:likelihood}
   L(\thetab) = \lim_{\epsilon \to 0} c_\epsilon \int_{\yb \in B_{d,\epsilon}(\data)} p(\yb|\thetab)d\yb =
-  \lim_{\epsilon \to 0} c_\epsilon \Pr(\simulator(\thetab, \ub) \in \region(\data)  \mid \theta)
+  \lim_{\epsilon \to 0} c_\epsilon \Pr(\simulator(\thetab, \ub) \in \region(\data)  \mid \thetab)
 \end{equation}
 where \(c_\epsilon\) is a proportionality factor that depends on
 \(\epsilon\) and \(\region(\data)\) is an \(\epsilon\) region around
 \(\data\) that is defined through a distance function \(d\), i.e., \
-\(\region(\data) := \{\yb: d(\yb, \data) \leq \epsilon
-\}\). Equation~\ref{eq:likelihood} highlights the main source of
-intractability; computing
+\(\region(\data) := \{\yb: d(\yb, \data) \leq \epsilon \}\). In cases
+where the output \(\yb\) belongs to a high dimensional space, it is
+common to extract summary statistics \(\Phi\) before applying the
+distance \(d\). In these cases, the \(\epsilon\)-region is defined as
+\(\region(\data) := \{\yb: d(\Phi(\yb), \Phi(\data)) \leq \epsilon
+\}\). In our notation, the summary statistics are sometimes omitted
+for simplicity. Equation~\ref{eq:likelihood} highlights the main
+source of intractability; computing
 \(\Pr(\simulator(\thetab,\ub) \in \region(\data) | \thetab) \) as the
 fraction of samples that lie inside the \(\epsilon\) region around
 \(\data\) is computationally infeasible in the limit where
@@ -240,7 +258,7 @@ fraction of samples that lie inside the \(\epsilon\) region around
 
 \begin{equation}
   \label{eq:approx_likelihood}
-  L_{d, \epsilon}(\thetab) = \Pr(\yb \in \region(\data) \mid \theta), \quad \text{where  } \epsilon > 0.
+  L_{d, \epsilon}(\thetab) = \Pr(\yb \in \region(\data) \mid \thetab), \quad \text{where  } \epsilon > 0.
 \end{equation}
 
 and, in turn, to the approximate posterior:
@@ -250,8 +268,7 @@ and, in turn, to the approximate posterior:
   \propto L_{d, \epsilon}(\thetab) p(\thetab)
 \end{equation}
 
-The approximation in
-Equations~\ref{eq:approx_likelihood},~\ref{eq:approx_posterior} is by
+Equations~\ref{eq:approx_likelihood} and~\ref{eq:approx_posterior} is by
 no means the only strategy to deal with the intractability of the
 likelihood function in Equation~\ref{eq:likelihood}. Other strategies include
 modeling the (stochastic) relationship between \(\thetab\) and
@@ -330,7 +347,7 @@ and simulated data for each realization \(\ub_i \sim p(\ub)\), i.e.,\
 The weighting for each \(\thetab_i^*\) is proportional to the prior
 density at \(\thetab_i^*\) and inversely proportional to the determinant
 of the Jacobian matrix of the summary statistics at \(\thetab_i^*\). For
-further details on OMC we refer the reader to \citep{Meeds2015,
+further details on OMC we refer the reader to \citet{Meeds2015,
   Ikonomov2019}.
 
 
@@ -422,7 +439,7 @@ follows. Therefore, the bounding boxes are built in two steps. First,
 we compute their axes \(\mathbf{v}_m\), for \(m = \{1, \ldots, D\}\)
 based on the (estimated) curvature of the distance at \(\thetab_i^*\),
 and, second, we apply a line-search method along each axis to
-determine the size of the box. We refer the reader to
+determine the size of the bounding box. We refer the reader to
 Algorithm~\ref{alg:region_construction} for the details. After the
 bounding boxes construction, a uniform distribution \(q_i\) is defined
 on each bounding box, and is used as the proposal region for
@@ -430,9 +447,9 @@ importance sampling.
 
 \subsubsection*{(iii) Refining the estimate via a local surrogate model (optional)}
 
-For computing the weight \(w_{ij}\) in Equation~\ref{eq:sampling}, we
-need to check whether the samples \(\thetab_{ij}\) drawn from the
-bounding boxes are inside the acceptance region \(\accregioni\). This
+For computing the weight \(w_{ij}\) at Equation~\ref{eq:sampling}, we
+need to check whether the samples \(\thetab_{ij}\), drawn from the
+bounding boxes, are inside the acceptance region \(\accregioni\). This
 can be considered to be a safety-mechanism that corrects for any
 inaccuracies in the construction of \(\accregionihat\) above. However,
 this check involves evaluating the distance function
@@ -450,7 +467,7 @@ The training data for the quadratic model is obtained by sampling
 \(d_i(\thetab_{ij})\). The generation of the training data adds an
 extra computational cost, but leads to a significant speed-up when
 evaluating the weights \(w_{ij}\). Moreover, the extra cost is largely
-eliminated if Bayesian Optimization with a Gaussian process (GP)
+eliminated if Bayesian optimization with a Gaussian process (GP)
 surrogate model \(\hat{d}_i(\thetab)\) was used to obtain
 \(\thetab_i^*\) in the first step. In this case, we can use
 \(\hat{d}_i(\thetab)\) instead of \(d_i(\thetab)\) to generate the
@@ -549,15 +566,16 @@ mandatory tasks; (a) sample the nuisance variables
 \(\ub_i \sim p(\ub)\) for defining the deterministic distance
 functions \(d_i(\thetab)\) (Steps 3-5), (b) solve the optimization
 problems for obtaining \(\thetab_i^*, d_i^*\) and keep the solutions
-inside the threshold \(\epsilon\)(Steps 6-9), and (c) estimate the
+inside the threshold \(\epsilon\) (Steps 6-9), and (c) estimate the
 bounding boxes \(\accregionihat\) to define uniform distributions
 \(q_i\) on them (Step 10). Optionally, a surrogate model
-\(\tilde{d}_i\) can be fitted for a faster inference phase.
+\(\tilde{d}_i\) can be fitted for a faster inference phase (Step 11).
 
 If \(d_i(\thetab)\) is differentiable, using a gradient-based method
 is advised for obtaining \(\thetab_i^*\) faster. In this case, the
 gradients \(\nabla_{\thetab} d_i\) gradients are approximated
-automatically with finite-differences. This approximation requires two
+automatically with finite-differences, if they are not provided in
+closed-form by the user. Finite-differences approximation requires two
 evaluations of \(d_i\) for each parameter
 \(\theta_m, m \in \{1, \ldots, D\}\), which scales well only in
 low-dimensional problems. If \(d_i(\thetab)\) is not differentiable,
@@ -581,9 +599,8 @@ matrix can be also computed as \(\hessian_i = \jac_i^T\jac_i\), where
 the computational advantage of using only first-order
 derivatives. After defining the axes, we search for the bounding box
 limits with a line step algorithm (Steps 2-21). The key idea is to
-take long steps \(\eta\_\text{start}\) until crossing the boundary
-where \(d > \epsilon\) and then take small steps backwards to find the
-exact boundary position.
+take long steps \(\eta\_\text{start}\) until crossing the boundary and
+then take small steps backwards to find the exact boundary position.
 
 
 \begin{algorithm}[!ht]
@@ -641,9 +658,9 @@ weighted samples, computing the expectation is straightforward using
 Equation~\ref{eq:expectation}. Finally, evaluating the unnormalized
 posterior at a specific point \(\thetab\) requires access to the
 distance functions \(d_i\) and the prior distribution
-\(p(\thetab)\). Following Equation~\ref{eq:approx_posterior_omc}, the
-evaluation involves counting how many distance functions rating over
-all \(d_i(\thetab) < \epsilon\). It is worth noticing that for
+\(p(\thetab)\). Following Equation~\ref{eq:approx_posterior_omc}, we
+simply count for how many deterministic distance functions it holds
+that \(d_i(\thetab) < \epsilon\). It is worth noticing that for
 evaluating the unnormalized posterior, there is no need for solving
 the optimization problems and building the proposal regions.
 
@@ -651,13 +668,15 @@ the optimization problems and building the proposal regions.
     \centering
     \caption{Sampling. Requires a function of distance \(d_i\), the prior distribution \(p(\thetab)\), the proposal distribution \(q_i\)}\label{alg:sampling_GB}
     \begin{algorithmic}[1]
-      \State \(\thetab_{ij} \sim q_i\)
-          \If {\(d_i(\thetab_{ij}) > \epsilon\)}
-            \State Go to 2 \Comment{Reject sample}
-          \Else {}
+      \State \(\thetab_{ij} \sim q_i \forall i\) \Comment{Sample parameters}
+      \For {\(i \gets 1 \textrm{ to } n_1\)}
+      \For {\(j \gets 1 \textrm{ to } n_2\)}
+          \If {\(d_i(\thetab_{ij}) \leq \epsilon\)} \Comment{Accept sample}
             \State \(w_{ij} = \frac{p(\thetab_{ij})}{q(\thetab_{ij})}\) \Comment{Compute weight}
             \State Store \((w_{ij}, \thetab_{ij})\) \Comment{Store weighted sample}
-          \EndIf
+            \EndIf
+            \EndFor
+    \EndFor
     \end{algorithmic}
 \end{algorithm}
 
@@ -668,11 +687,11 @@ the optimization problems and building the proposal regions.
 \input{latex_files/graphs/romc_graph}
 
 The overview of our implementation is illustrated in
-Figure~\ref{fig:romc_overview}. Following \proglang{Python}'s naming
+Figure~\ref{fig:romc_overview}. Following \proglang{Python} naming
 principles, the methods starting with an underscore (green rectangles)
 represent internal (private) functions, whereas the rest (blue
 rectangles) are the methods exposed at the API. In
-Figure~\ref{fig:romc_overview}, it can be easily observed that the
+Figure~\ref{fig:romc_overview}, it can be observed that the
 implementation follows Algorithm~\ref{alg:romc_algorithm}. The
 training part includes all the steps until the computation of the
 proposal regions, i.e., sampling the nuisance variables, defining the
@@ -692,7 +711,7 @@ available.\footnote{Normally, the ground-truth posterior is not
   e.g., Rejection Sampling, and we want to measure the discrepancy
   between the two approximations.}
 
-\subsubsection*{Parallelizing ROMC method}
+\subsubsection*{Parallel version of ROMC}
 
 As discussed, ROMC has the significant advantage of being fully
 parallelisable. We exploit this fact by implementing a parallel
@@ -702,8 +721,8 @@ processes using the built-in \proglang{Python} package
 \pkg{multiprocessing}. The specific package enables concurrency, using
 sub-processes instead of threads, for side-stepping the Global
 Interpreter (GIL). For activating the parallel version of the
-algorithm, the user simply has to set \code{elfi.ROMC(<output_node>,
-  parallelize = True)}.
+algorithm, the user simply has to set \\
+\code{elfi.ROMC(<output_node>, parallelize = True)}.
 
 \subsubsection*{Simple one-dimensional example}
 
@@ -996,32 +1015,36 @@ print("Nof Samples: %d, ESS: %.3f" % (nof_samples, ess))
 \subsection{Extend the implementation with custom modules}
 \label{subsec:extensibility}
 
-ROMC is a generic LFI framework; it describes a sequence of steps for
-approximating the posterior distribution without explicitly enforcing
-the algorithms that solve each step. Although a specific algorithm for
-each step is proposed by~\cite{Ikonomov2019}, in general, a user can
-experiment with alternative algorithms. Considering that, we designed
-the implementation to support flexibility.
+ROMC is a generic LFI framework as it describes a sequence of steps
+for approximating the posterior distribution without explicitly
+enforcing a specific algorithm for each step. For completeness,
+\cite{Ikonomov2019} propose a method for each step but, in general, a
+user can experiment with alternative methods. Considering that, we
+designed the implementation to support flexibility.
 
 We have specified four critical parts where a user may intervene using
-custom solutions; (a) the gradient-based optimization, (b) the
-Bayesian optimization, (c) the proposal region construction and (d)
-the surrogate model fitting. Each of these parts corresponds to a
-function inside the \code{romc.OptimisationProblem} class; (a)
+custom methods; (a) gradient-based optimization, (b) Bayesian
+optimization, (c) proposal region construction and (d) surrogate model
+fitting. Each of these parts corresponds to an internal function
+inside the \code{romc.OptimisationProblem} class; (a)
 \code{solve_gradients()}, (b) \code{solve_bo()}, (c)
-\code{build_region()} and (d) \code{fit_local_surrogate()}
+\code{build_region()} and (d) \code{fit_local_surrogate()},
 respectively. To replace any of these parts, the user must create a
-custom class that inherits the basic \code{OptimisatioProblem} class
-and overwrite the appropriate function.
+custom class that inherits \code{OptimisatioProblem} and overwrite the
+appropriate function(s).
 
-To illustrate that in practice, suppose a user wants to fit Deep
+To illustrate this in practice, suppose a user wants to fit Deep
 Neural Networks instead of, the default, quadratic models as local
 surrogates \(\tilde{d}_i\). Therefore, the user must create a new
 class that inherits \code{OptimisationProblem} and overwrite the
 \code{fit_local_surrogate(**kwargs)} function with one that fits
 neural networks as local surrogates. We illustrate that in the
 following snippet using the \code{neural_network.MLPRegressor} class
-of the \pkg{scikit-learn} package.
+of the \pkg{scikit-learn} package. The reader can find the end-to-end
+example
+\href{https://colab.research.google.com/drive/1_jHVxPSH3XcNOORZJpLU0SPzs0PF8CQ5?usp=sharing}{here}
+as an online Colab notebook.
+
 
 \begin{Code}
 class CustomOptim(OptimisationProblem):
@@ -1059,15 +1082,15 @@ class CustomOptim(OptimisationProblem):
 \end{Code}
 
 In a similar way, the user can replace any of the other three
-functions. In each case, the custom function must change the value of
-some variables that hold the state of the training phase. In the
-following sections, we present which are these variables in each case.
-When implementing the custom functions, the user may need two helping
-classes; (a) \code{RomcOpimisationResult} that stores the result of
-the optimization step and (b) \code{NDimBoundingBox} that stores the
-bounding box. We present the definitions of these classes below and we
-illustrate how to use them in each case in the next sections. Both
-classes can be imported from the module
+functions. In each case, the custom function must update some
+class-level variables that hold the state of the training phase. In
+the following sections, we present which are these variables in each
+function. Furthermore, when implementing custom functions, the user
+may use two helping classes; (a) \code{RomcOpimisationResult}, that
+stores the result of the optimization and (b) \code{NDimBoundingBox},
+that stores the bounding box. We present their definitions in the
+following snippets and we illustrate how to use them in the next
+sections. Both classes can be imported from the module
 \code{elfi.methods.inference.romc}.
 
 
@@ -1076,77 +1099,72 @@ class RomcOpimisationResult:
     def __init__(self, x_min, f_min, hess_appr):
         Parameters
         ----------
-        x_min: np.ndarray (D,) or float, the minimum point
-        f_min: float, distance at the minimum point
-        hess_appr: np.ndarray (DxD), Hessian approximation at x_min
-        """
+        x_min: np.ndarray (D,), minimum
+        f_min: float, distance at x_min
+        hess_appr: np.ndarray (D,D), Hessian approximation at x_min
 
 class NDimBoundingBox:
-    def __init__(self, rotation, center, limits, eps_region):
+    def __init__(self, rotation, center, limits):
         Parameters
         ----------
-        rotation: np.array (D,D),  rotation matrix for the bounding box
-        center: np.array (D,) center of the bounding box
-        limits: np.ndarray, shape: (D,2), the limits of the bounding box
-        eps_region: float, distance threshold
+        rotation: np.ndarray (D,D), rotation matrix for the bounding box
+        center: np.ndarray (D,) center of the bounding box
+        limits: np.ndarray (D,2), the limits of the bounding box
 \end{Code}
 
-\subsubsection*{(a) Extending the gradient-based optimization}
+\subsubsection*{(a) Extending gradient-based optimization}
 
-For using a custom gradient-based optimization method, the user must
-overwrite the method \code{solve_gradients()}. The method can take any
-number of keyword arguments. The objective of the optimization problem
-(distance \(d_i\)) can be accessed through the variable
-\code{self.objective}, which is a callable. In the following snippet,
-after the comment \code{state variables}, we present the state
-variables that must be set by the method. The class
-\code{RomcOpimisationResult(x, y, jac, hess_inv)} must be used to
-store the optimization result.
+For replacing the default gradient-based optimization method, the user
+must overwrite the function \code{solve_gradients()}. Using the
+objective function \(d_i\) (\code{self.objective}), the custom method
+must store the result of the optimization as a
+\code{RomcOptimisationResult} instance. In the following snippet,
+after the comment \code{\# state variables}, we present the
+class-level variables that must be set by the method.
 
 \begin{Code}
 def solve_gradients(self, **kwargs):
-    # inputs
-    # self.objective: the distance function, Callable: np.ndarray (D,) -> float
+    # useful variables
+    # self.objective: Callable, the distance function
 
-    # custom solution procedure
-    x, y, jac, hess_inv = ...
-    success = True/False # whether gradient-based optimization was succesful
+    # code custom solution here
+    result = RomcOptimisationResult(x = .., y = .., jac = .., hess_inv = ..)
+    success: bool = ... # whether optimization was successful
 
     # state variables
     self.state["attempted"] = True
     if success:
-        self.result = RomcOpimisationResult(x, y, jac, hess_inv)
+        self.result = result
         self.state["solved"] = True
         return True
     else:
         return False
 \end{Code}
 
-\subsubsection*{(b) Extending the Bayesian Optimization}
+\subsubsection*{(b) Extending Bayesian Optimization}
 
-For replacing the Bayesian Optimization function, the procedure is
-similar to the gradient-based case. As presented in the following
-snippet, the only added state variables are (a) setting
-\code{self.surrogate = custom_surrogate}, where
-\code{custom_surrogate} is a \code{Callable} with signature
-\code{np.ndarray (D,) -> float}, and setting
+For replacing the default Bayesian optimization function, the
+procedure is similar to the gradient-based case. As presented in the
+following snippet, the additional class-level variables that must be
+set are; (a) \code{self.surrogate = custom_surrogate}, where
+\code{custom_surrogate} is a \code{Callable} and (b)
 \code{self.state["has_fit_surrogate"] = True} if the optimization is
 successful.
 
 \begin{Code}
 def solve_bo(self, **kwargs):
-    # inputs
-    # self.objective: the distance function, Callable: np.ndarray (D,) -> float
+    # useful variables
+    # self.objective: Callable, the distance function
 
-    # custom procedure
-    x, y, jac, hess_inv = ...
-    custom_surrogate = ...
-    success = True/False # whether Bayesian optimization was succesful
+    # code custom solution here
+    result = RomcOptimisationResult(x = .., y = .., jac = .., hess_inv = ..)
+    custom_surrogate = ... # store a Callable here
+    success: bool = ... # whether optimization was successful
 
     # state variables
     self.state["attempted"] = True
     if success:
-        self.result = RomcOpimisationResult(x, y, jac, hess_inv)
+        self.result = result
         self.surrogate = custom_surrogate
         self.state["solved"] = True
         self.state["has_fit_surrogate"] = True
@@ -1157,23 +1175,26 @@ def solve_bo(self, **kwargs):
 
 \subsubsection*{(c) Extending the proposal region construction}
 
-For replacing the proposal region construction the user must overwrite
-the \code{build_region} method. Using the objective function \(d_i\)
-(\code{self.objective}) the method must estimate a list of bounding
-boxes as a \code{List} with \code{NDimBoundingBox} instances and set
-the state variables presented below:
+For replacing the construction of the proposal region the user must
+overwrite the \code{build_region} method. Using the objective function
+\(d_i\) (\code{self.objective}) the method must estimate a list of
+bounding boxes as a \code{List} with \code{NDimBoundingBox} instances
+and set the state variables presented below. An end-to-end example for
+using a custom region construction module can be found
+\href{https://colab.research.google.com/drive/1RzB-V1QueP1y1nyzv_VOqR1nVz3DUH3v?usp=sharing}{here}.
 
 \begin{Code}
 def build_region(self, **kwargs):
-    # inputs
-    # self.objective: the distance function, Callable: np.ndarray (D,) -> float
+    # useful variables
+    # self.objective: Callable, the distance function
 
     # custom build_region method
+    eps: float = ... # epsilon used in region estimation
     bounding_box: List[NDimBoundingBox] = ...
-    success = True/False # whether region built correctly
+    success: bool = ... # whether region built successfully
 
     # state variables
-    self.eps_region = eps_region
+    self.eps_region = eps
     if success:
         # construct region
         self.regions = bounding_box
@@ -1188,21 +1209,22 @@ def build_region(self, **kwargs):
 For replacing the surrogate model fitting the user must overwrite the
 \code{fit_local_surrogate} method. Using the objective function
 \(d_i\) (\code{self.objective}) and the estimated bounding boxes
-(\code{self.regions}), the method must estimate a list of local
-surrogates, one for each region, as a \code{List} with callables and
-set the state variables presented below:
+(\code{self.regions}), the method must create a list of local
+surrogates, one for each region, as a \code{List} with
+\code{Callables} and set the state variables as presented in the
+following snippet.
 
 \begin{Code}
 def fit_local_surrogate(self, **kwargs):
-    # inputs
-    # self.objective: Callable np.ndarray (D,) -> float, the distance function
+    # useful variables
+    # self.objective: Callable, the distance function
     # self.regions: List[NDimBoundingBox], the bounding boxes
 
     # custom local surrogates
-    local_surrogates: List[Callable] = ...
-    success = True/False # whether local surrogates fit correctly
+    local_surrogates: List[Callable] = ... # the surrogate models
+    success: bool = ... # whether surrogates fit successfully
 
-    # side-effects
+    # state variables
     if success:
         self.local_surrogates = custom_surrogates
         self.state["local_surrogates"] = True
@@ -1212,17 +1234,242 @@ def fit_local_surrogate(self, **kwargs):
 \end{Code}
 
 
-
-
-
-
 %% -- Use-case illustration ----------------------------------------------------
 \section{Use-case illustration}
-\input{latex_files/ch5/5-ma2.tex}
+
+In this section, we test the implementation using the second-order
+moving average (MA2) example, which is one of the standard models of
+\pkg{ELFI}. We perform the inference using three different versions of
+ROMC; (i) with a gradient-based optimizer, (ii) with Bayesian
+Optimization and (iii) fitting a Neural Network as a surrogate
+model. The later illustrates how to extend the implementation,
+replacing part of ROMC with a user-defined component. Finally, we
+measure the execution speed-up using the parallel version of ROMC.
+
+\subsubsection*{Model Definition}
+
+MA2 is a probabilistic model for time series analysis. The observation
+at time \(t\) is given by,
+
+\begin{gather} \label{eq:ma2}
+y_t = w_t + \theta_1 w_{t-1} + \theta_2 w_{t-2}, \quad t=1, \ldots, T\\
+\theta_1, \theta_2 \in \R, \quad  w_k \sim \mathcal{N}(0,1), k \in \mathbb{Z}
+\end{gather}
+
+\noindent
+The random variable \(w_{k} \sim \mathcal{N}(0,1) \) is white noise
+and the two parameters of interest, \(\theta_1, \theta_2\), model the
+dependence from the previous observations. The parameter \(T\) is the
+number of sequential observations which is set to \(T=100\). For
+securing that the inference problem is identifiable, i.e., the
+likelihood has only one mode, we use the prior proposed
+by~\cite{Marin2012},
+
+\begin{equation} \label{eq:ma2_prior}
+p(\thetab) = p(\theta_1)p(\theta_2|\theta_1)
+= \mathcal{U}(\theta_1;-2,2)\mathcal{U}(\theta_2;\theta_1-1, \theta_1+1)
+\end{equation}
+
+\noindent
+The observation vector \(\yb_0 = (y_1, \ldots, y_{100})\) is generated
+with \(\thetab^*=(0.6, 0.2)\). The dimensionality of the output
+\(\yb\) is high, therefore we use summary statistics. Considering that
+the output vector represents a time-series signal, we select the
+autocovariances with \(\mathrm{lag}=1\) and \(\mathrm{lag}=2\), as
+shown in Equations~\ref{eq:ma2_summary_1}
+and~\ref{eq:ma2_summary_2}. The distance between the observation and
+the simulator output is measured with the squared Euclidean distance,
+as shown in Equation~\ref{eq:ma2_summary_4}.
+
+\begin{gather}
+  \label{eq:ma2_summary_1} s_1(\yb) = \frac{1}{T-1} \sum_{t=2}^T y_ty_{t-1}\\
+  \label{eq:ma2_summary_2} s_2(\yb) = \frac{1}{T-2} \sum_{t=3}^T y_ty_{t-2} \\
+  s(\yb) = (s_1(\yb), s_2(\yb))\\
+  \label{eq:ma2_summary_4} d = ||s(\yb) - s(\yb_0)||_2^2
+\end{gather}
+
+\subsubsection*{Inference}
+
+To demonstrate the full capabilities of our ROMC implementation, we
+perform inference using three different methods: (i) a gradient-based
+optimizer, (ii) Bayesian optimization, and (iii) fitting a neural
+network (NN) as a surrogate model. The use of a NN as a surrogate
+model serves as an example of the extensibility of our implementation,
+as described in Chapter~\ref{subsec:extensibility}. For the NN, we
+employ the \pkg{MLPRegressor} class from the \pkg{scikit-learn}
+package. The NN (\(\tilde{d}_i\)) substitutes the actual distance
+function (\(d_i\)) inside the proposal regions. Therefore, all
+inference actions, namely, sampling, expectation computation, and
+posterior evaluation are based on \(\tilde{d}_i\). We use a NN with
+two hidden layers of 10 neurons each and train it using 500 examples
+from each proposal region. To compare the results of ROMC inference
+with a traditional ABC algorithm, we also include Rejection Sampling
+in our analysis.
+
+In Figure \ref{fig:ma2_5}, we illustrate the acceptance region of the
+same deterministic simulator, in the gradient-based and the Bayesian
+optimization case. The acceptance regions are quite similar even though the
+different optimization schemes lead to different optimal points.
+
+In Figure \ref{fig:ma2_3}, we demonstrate the histograms of the
+marginal posteriors, for each approach; (a) Rejection ABC, (b) ROMC
+with gradient-based optimization (c) ROMC with Bayesian optimization
+and (d) ROMC with the NN extension. We observe a significant agreement
+between the different approaches. At Table \ref{tab:ma2} we present
+the empirical mean \(\mu\) and standard deviation \(\sigma\) for each
+inference approach and finally, in Figure \ref{fig:ma2_4}, we
+illustrate the unnormalized posterior for the three different
+variations of the ROMC method. The results show that all ROMC
+variations provide consistent results between them which are in
+agreement with the Rejection ABC algorithm.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{ c|c|c|c|c }
+\hline
+& \(\mu_{\theta_1}\) & \(\sigma_{\theta_1}\) & \(\mu_{\theta_2}\) & \(\sigma_{\theta_2}\) \\
+\hline \hline
+Rejection ABC & 0.516 & 0.142 & 0.07 & 0.172 \\
+\hline
+ROMC (gradient-based) & 0.501 & 0.142 & 0.033 & 0.169 \\
+\hline
+ROMC (Bayesian optimization) & 0.494 & 0.16 & 0.086 & 0.167 \\
+\hline
+ROMC (Neural Network) & 0.491 & 0.138 & 0.04 & 0.172 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Comparison of the samples obtained from the estimated
+  posterior with (a) Rejection sampling and (b) the different versions
+  of ROMC. We observe that the obtained samples share similar
+  statistics along all methods. \label{tab:ma2}}
+\end{table}
+
+\begin{figure}[ht]
+    \begin{center}
+        \includegraphics[width=0.49\textwidth]{./latex_files/images/chapter4/ma2_region_1.png}
+        \includegraphics[width=0.49\textwidth]{./latex_files/images/chapter4/ma2_region_1_bo.png}
+    \end{center}
+  \caption[The acceptance region of a specific deterministic simulator.]{The acceptance region in a specific optimization problem. In the left figure the region obtained with gradient-based optimizer and in the right one with Bayesian Optimization.}
+  \label{fig:ma2_5}
+\end{figure}
+
+
+\begin{figure}[ht]
+  \begin{center}
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t1_rejection.tex}
+    }
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t1_romc.tex}
+    }
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t1_romc_bo.tex}
+    }
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t1_romc_nn.tex}
+    }\\
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t2_rejection.tex}
+    }
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t2_romc.tex}
+    }
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t2_romc_bo.tex}
+    }
+    \resizebox{.24\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_hist_t2_romc_nn.tex}
+    }
+    \end{center}
+    \caption[MA2 example, evaluation of the marginal
+    distributions.]{Histogram of the marginal posterior distributions
+      using three different inference approaches; (a) in the first
+      row, the samples are obtained using Rejection ABC sampling (b)
+      in the second row, using ROMC with a gradient-based optimizer
+      and (c) in the third row, using ROMC with Bayesian optimization
+      approach. The vertical (red) line represents the samples mean
+      \(\mu\) and the horizontal (black) the standard deviation
+      \(\sigma\).}
+  \label{fig:ma2_3}
+\end{figure}
+
+\begin{figure}[ht]
+  \begin{center}
+    \resizebox{.32\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_romc_posterior.tex}
+    }
+    \resizebox{.32\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_romc_posterior_bo.tex}
+    }
+    \resizebox{.32\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/mae2_romc_posterior_nn.tex}
+    }
+    \end{center}
+    \caption[MA2 example, posterior distribution.]{The unnormalized posterior distribution using the ROMC method with (a) a gradient-based optimization (b) Bayesian Optimization (c) gradient-based with a Neural Network as a surrogate model.}
+  \label{fig:ma2_4}
+\end{figure}
+
+
+\subsubsection*{Parallelize the implementation}
+
+As stated above, ROMC is an approach that can be executed in a
+fully-parallelized manner, exploiting all CPU cores. In our
+implementation, we support a parallel version of the the training
+part, namely, for solving the optimization problems and for estimating
+the proposal regions. The parallel version of the algorithm is built
+on top of the built-in \proglang{Python} package \pkg{multiprocess}
+for using all the available CPU cores. In
+Figure~\ref{fig:exec_parallel} we observe the execution times for
+performing the inference on the MA2 model; the parallel version
+performs both tasks almost five times faster than the sequential. The
+result is reasonable given that the experiments have run in a single
+machine with the Intel® Core™ i7-8750H Processor, which has six
+separate cores.
+
+
+\begin{figure}[ht]
+  \begin{center}
+    \resizebox{.49\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/exec_time_solve.tex}
+    }
+    \resizebox{.49\columnwidth}{!}{%
+      \input{./latex_files/images/chapter4/exec_time_regions.tex}
+    }
+    \end{center}
+    \caption[Execution time exploiting Parallelize]{Comparison
+      between parallel and sequential execution of ROMC. We observe
+      that the parallel version runs almost 5 times faster.}
+      \label{fig:exec_parallel}
+\end{figure}
+
 
 %% -- Summary/conclusions/discussion -------------------------------------------
 \section{Summary and discussion} \label{sec:summary}
-\input{latex_files/ch6/6-summary.tex}
+
+In this paper, we presented the implementation of the LFI method ROMC
+at the \proglang{Python} package \pkg{ELFI}. We highlighted two
+different use-cases. First, we illustrated how a user may exploit the
+provided API to solve an LFI problem. Second, we focus on the scenario
+where a researcher wants to intervene and alter parts of the method to
+experiment with new approaches. Since (Robust) Optimization Monte
+Carlo is a novel approach for statistical inference and, to the best
+of our knowledge, this is the first open-source implementation on a
+generic package, we believe that the later is the biggest
+contribution.
+
+There are still open challenges for enabling ROMC to solve
+high-dimensional LFI problems efficiently. The first is enabling the
+execution of ROMC execution into a distributed environment, i.e., a
+cluster of computers. ROMC can be characterized as an
+\textit{embarrassingly parallel} workload; each optimization problem
+is an entirely independent task. Therefore, supporting inference into
+a cluster of computers can radically speed up the inference. The
+second is the implementation of the method on a framework that supports
+automatic differentiation. Automatic differentiation is necessary for
+efficiently solving optimization problems, especially in
+high-dimensional parametric models.
+
 
 %% -- Optional special unnumbered sections -------------------------------------
 
