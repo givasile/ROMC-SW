@@ -1,4 +1,4 @@
-\documentclass[article]{jss}
+\documentclass[article, shortnames]{jss}
 %% -- LaTeX packages and custom commands ---------------------------------------
 
 \usepackage[usenames,dvipsnames]{xcolor}
@@ -126,7 +126,7 @@
 \begin{document}
 
 %% -- Introduction -------------------------------------------------------------
-\section{Introduction}
+\section[Introduction]{Introduction}
 \label{sec:intro}
 
 Simulator-based models are particularly captivating due to the
@@ -190,7 +190,7 @@ illustrating:
 
 
 % \clearpage
-\section{Background}
+\section[Background]{Background}
 
 We first give a short introduction to simulator-based models, we then
 focus on OMC and its robust version, ROMC, and we, finally, introduce
@@ -206,22 +206,22 @@ parameterized family of probability density functions
 or computationally intractable. In these cases, we can only access the
 simulator \( m_r(\thetab) \), i.e., the black-box mechanism (computer
 code) that generates samples \(\yb\) in a stochastic manner from a set
-of parameters \(\thetab \in \mathbb{R}^D\). We denote the process of obtaining samples
-from the simulator with \( m_r(\thetab) \rightarrow \yb \). As shown
-by~\citet{Meeds2015}, it is feasible to isolate the randomness of the
-simulator by introducing a set of nuisance random variables denoted by
-\(\ub \sim p(\ub)\). Therefore, for a specific tuple
-\((\thetab, \ub)\) the simulator becomes a deterministic mapping
-\(g\), such that \(\yb=\simulator(\thetab,\ub)\). In terms of computer
-code, the randomness of a random process is governed by the global
-seed. Although each package may handle the randomness in slightly
-different ways\footnote{For example, at
-  \pkg{Numpy}~\citet{harris2020array}, the pseudo-random number
-  generation is based on a global state, whereas, in
-  \pkg{JAX}~\citet{jax2018github} random functions consume a key that
-  is passed as parameter. }, in all cases, setting the initial seed to
-a specific integer converts the simulation to a deterministic piece of
-code.
+of parameters \(\thetab \in \mathbb{R}^D\). We denote the process of
+obtaining samples from the simulator with
+\( m_r(\thetab) \rightarrow \yb \). As shown by~\citet{Meeds2015}, it
+is feasible to isolate the randomness of the simulator by introducing
+a set of nuisance random variables denoted by \(\ub \sim
+p(\ub)\). Therefore, for a specific tuple \((\thetab, \ub)\) the
+simulator becomes a deterministic mapping \(g\), such that
+\(\yb=\simulator(\thetab,\ub)\). In terms of computer code, the
+randomness of a random process is governed by the global seed. There
+are some differences on how each scientific package handles the
+randomness; for example, at \pkg{Numpy}~\citet{harris2020array} the
+pseudo-random number generation is based on a global state, whereas,
+at \pkg{JAX}~\citet{jax2018github} random functions consume a key that
+is passed as a parameter. However, in all cases, setting the initial
+seed to a specific integer converts the simulation to a deterministic
+piece of code.
 
 The modeling freedom of simulator-based models comes at the price of
 difficulties in inferring the parameters of interest. Denoting the
@@ -650,9 +650,9 @@ and/or (c) evaluate the unnormalized posterior
 (Equation~\ref{eq:approx_posterior_omc}). Sampling is performed by
 getting \(n_2\) samples from each proposal distribution \(q_i\). For
 each sample \(\thetab_{ij}\), the distance function\footnote{As
-  before, if a surrogate model \(\hat{d}\) is available, it can be
-  utilized as the distance function.} is evaluated for checking if it
-lies inside the acceptance region. Algorithm~\ref{alg:sampling_GB}
+  before, a surrogate model \(\hat{d}\) can be utilized as the
+  distance function if it is available.} is evaluated for checking if
+it lies inside the acceptance region. Algorithm~\ref{alg:sampling_GB}
 defines the steps for computing a weighted sample. After we obtain
 weighted samples, computing the expectation is straightforward using
 Equation~\ref{eq:expectation}. Finally, evaluating the unnormalized
@@ -1451,10 +1451,10 @@ high-dimensional parametric models.
 
 \section*{Computational details}
 
-The results in this paper were obtained using \proglang{Python}~3.7.9
-with the \pkg{ELFI}~0.8.3 package. The experiments have been executed
-in a single machine with an Intel® Core™ i7-8750H Processor an with
-Ubuntu 20.04 lts operating system.
+The results in this paper were obtained using \proglang{Python~3.7.9}
+with the \pkg{ELFI~0.8.3} package. The experiments have been executed
+in a single machine with an \proglang{Intel® Core™ i7-8750H} Processor
+an with \proglang{Ubuntu 20.04} lts operating system.
 
 \section*{Acknowledgments}
 

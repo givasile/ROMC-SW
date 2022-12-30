@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 from elfi.examples import ma2
 import numpy as np
 import elfi
-import tikzplotlib as tplt
 import matplotlib
+
 matplotlib.rcParams['text.usetex'] = True
 logging.basicConfig(level=logging.INFO)
 savefig = False
@@ -183,11 +183,7 @@ plt.plot(theta, y, 'r-.', label=r'Posterior: $p(\theta|y_0)$')
 plt.legend()
 if savefig:
     plt.savefig(os.path.join(
-        prepath, "chapter3/example_gt.png"), bbox_inches='tight')
-    plt.savefig(os.path.join(
         prepath, "chapter3/example_gt.pdf"), bbox_inches='tight')
-    # tplt.clean_figure()
-    # tplt.save(os.path.join(prepath, "chapter3/example_gt.tex"))
 plt.show(block=False)
 
 
@@ -213,56 +209,18 @@ n1 = 500
 seed = 21
 eps = .75
 romc.solve_problems(n1=n1, seed=seed, use_bo=False, optimizer_args=None)
-# if savefig:
-#     romc.distance_hist(bins=100,
-#                        savefig=os.path.join(prepath, "chapter3/example_theta_dist.png"))
-# else:
-#     romc.distance_hist(bins=100)
 romc.estimate_regions(eps_filter=eps, use_surrogate=False,
                       region_args=None, fit_models=False)
-# if savefig:
-#     romc.visualize_region(0,
-#                          savefig=os.path.join(prepath, "chapter3/example_region.png"))
-# else:
-#     romc.visualize_region(0)
 
-# sampling
+# sampling part
 n2 = 50
 romc.sample(n2=n2)
-# if savefig:
-#     romc.visualize_region(i=0, savefig=os.path.join(
-#         prepath, "chapter3/example_region_samples.png"))
-# else:
-#     romc.visualize_region(i=0)
-
-# print summary statistics
-romc.result.summary()
 
 # compute expectation
 print("Expected value   : %.3f" %
       romc.compute_expectation(h=lambda x: np.squeeze(x)))
 print("Expected variance: %.3f" %
       romc.compute_expectation(h=lambda x: np.squeeze(x)**2))
-
-# ############# PLOT HISTOGRAM OF SAMPLES  ##################
-# plt.figure()
-# plt.title("Histogram of the samples drawn")
-# plt.hist(x=romc.result.samples_array,
-#          weights=romc.result.weights,
-#          bins=70, density=True, range=(-3, 3))
-# theta = np.linspace(-3, 3, 60)
-# y = np.squeeze(np.array([gt_posterior_pdf(th) for th in theta]))
-# plt.plot(theta, y, 'r-.', label="True Posterior")
-# plt.xlabel(r'$\theta$')
-# plt.ylabel(r'density')
-# plt.ylim([0, .6])
-# if savefig:
-#     plt.savefig(os.path.join(
-#         prepath, "chapter3/example_marginal.png"), bbox_inches='tight')
-#     # tplt.clean_figure()
-#     tplt.save(os.path.join(prepath, "chapter3/example_marginal.tex"))
-# plt.show(block=False)
-
 
 # plot histogram of samples along with the ground-truth prior, likelihood, posterior
 plt.figure()
@@ -299,11 +257,7 @@ plt.plot(theta, y, 'r-.', label="True Posterior")
 plt.legend()
 if savefig:
     plt.savefig(os.path.join(
-        prepath, "chapter3/example_posterior.png"), bbox_inches='tight')
-    plt.savefig(os.path.join(
         prepath, "chapter3/example_posterior.pdf"), bbox_inches='tight')
-    # tplt.clean_figure()
-    # tplt.save(os.path.join(prepath, "chapter3/example_post.tex"))
 plt.show(block=False)
 
 
@@ -383,77 +337,30 @@ seed = 1
 np.random.seed(seed)
 model = ma2.get_model(seed_obs=seed)
 
-# # plot prior samples
-# x = model.generate(1000, outputs=["t1", "t2"])
-# plt.figure()
-# plt.title("Samples from the prior")
-# plt.xlabel(r"$\theta_1$")
-# plt.ylabel(r"$\theta_2$")
-# plt.plot(x["t1"], x["t2"], "bo")
-# if savefig:
-#     plt.savefig(os.path.join(prepath, "mae2_prior_samples.png"),
-#                 bbox_inches="tight")
-#     tplt.clean_figure()
-#     tplt.save(os.path.join(prepath, "ma2_prior_samples.tex"))
-# plt.show(block=False)
-
 n1 = 100
 n2 = 200
 bounds = [(-2, 2), (-1.25, 1.25)]
 eps = .01
 vis_ind_1 = 1
-# vis_ind_2 = 3
-# vis_ind_3 = 12
 
 # define model
 romc = elfi.ROMC(model, bounds=bounds, discrepancy_name="d")
 
 # fitting part
 romc.solve_problems(n1=n1, seed=seed)
-# if savefig:
-#     romc.distance_hist(savefig=os.path.join(
-#         prepath, "ma2_distance_hist.png"))
-# else:
-#     romc.distance_hist()
 romc.estimate_regions(eps_filter=eps, fit_models=True)
 
 # sampling part
 tmp = romc.sample(n2=n2, seed=seed)
 if savefig:
     romc.visualize_region(vis_ind_1, savefig=os.path.join(
-        prepath, "ma2_region_1.png"))
-    romc.visualize_region(vis_ind_1, savefig=os.path.join(
         prepath, "ma2_region_1.pdf"))
 else:
     romc.visualize_region(vis_ind_1)
 
-# if savefig:
-#     romc.visualize_region(vis_ind_2, savefig=os.path.join(
-#         prepath, "ma2_region_2.png"))
-# else:
-#     romc.visualize_region(vis_ind_2)
-
-# if savefig:
-#     romc.visualize_region(vis_ind_3, savefig=os.path.join(
-#         prepath, "ma2_region_3.png"))
-# else:
-#     romc.visualize_region(vis_ind_3)
-
-# print summary statistics
-print(romc.result.summary())
-print(romc.result.samples_cov())
-
 # plot/save the marginal posterior distribution
 name = "t1"
 if savefig:
-    plot_marginal(romc.result.samples["t1"], romc.result.weights,
-                  romc.result.sample_means_array[0],
-                  np.sqrt(romc.result.samples_cov()[0, 0]),
-                  r"ROMC (gradient-based) - $\theta_1$",
-                  r"$\theta_1$",
-                  r"density",
-                  60,
-                  (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_romc.png"))
     plot_marginal(romc.result.samples["t1"], romc.result.weights,
                   romc.result.sample_means_array[0],
                   np.sqrt(romc.result.samples_cov()[0, 0]),
@@ -481,14 +388,6 @@ if savefig:
                   r"$\theta_2$",
                   r"density",
                   60,
-                  (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc.png"))
-    plot_marginal(romc.result.samples["t2"], romc.result.weights,
-                  romc.result.sample_means_array[1],
-                  np.sqrt(romc.result.samples_cov()[1, 1]),
-                  r"ROMC (gradient-based) - $\theta_2$",
-                  r"$\theta_2$",
-                  r"density",
-                  60,
                   (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc.pdf"))
 else:
     plot_marginal(romc.result.samples["t2"], romc.result.weights,
@@ -503,10 +402,6 @@ else:
 
 # plot/save the romc posterior
 if savefig:
-    plot_romc_posterior('ROMC (gradient-based)',
-                        romc.eval_unnorm_posterior,
-                        nof_points=50,
-                        savefig=os.path.join(prepath, "mae2_romc_posterior.png"))
     plot_romc_posterior('ROMC (gradient-based)',
                         romc.eval_unnorm_posterior,
                         nof_points=50,
@@ -542,50 +437,19 @@ romc1 = elfi.ROMC(model, bounds=bounds, discrepancy_name="d")
 
 # fitting part
 romc1.solve_problems(n1=n1, seed=seed, use_bo=True)
-# if savefig:
-#     romc1.distance_hist(savefig=os.path.join(
-#         prepath, "ma2_distance_hist_bo.png"))
-# else:
-#     romc1.distance_hist()
 romc1.estimate_regions(eps_filter=eps, use_surrogate=False, fit_models=True)
 
 # sampling part
 tmp = romc1.sample(n2=n2)
 if savefig:
     romc1.visualize_region(vis_ind_1, savefig=os.path.join(
-        prepath, "ma2_region_1_bo.png"))
-    romc1.visualize_region(vis_ind_1, savefig=os.path.join(
         prepath, "ma2_region_1_bo.pdf"))
 else:
     romc1.visualize_region(vis_ind_1)
 
-# if savefig:
-#     romc1.visualize_region(vis_ind_2, savefig=os.path.join(
-#         prepath, "ma2_region_2_bo.png"))
-# else:
-#     romc1.visualize_region(vis_ind_2)
-
-# if savefig:
-#     romc1.visualize_region(vis_ind_3, savefig=os.path.join(
-#         prepath, "ma2_region_3_bo.png"))
-# else:
-#     romc1.visualize_region(vis_ind_3)
-
-# print summart statistics
-print(romc1.result.summary())
-print(romc1.result.samples_cov())
-
 # plot/save the marginal posterior distribution
 name = "t1"
 if savefig:
-    plot_marginal(romc1.result.samples["t1"], romc1.result.weights,
-                  romc1.result.sample_means_array[0],
-                  np.sqrt(romc1.result.samples_cov()[0, 0]),
-                  r"ROMC (BO) - $\theta_1$",
-                  r"$\theta_1$",
-                  r"density",
-                  60,
-                  (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_romc_bo.png"))
     plot_marginal(romc1.result.samples["t1"], romc1.result.weights,
                   romc1.result.sample_means_array[0],
                   np.sqrt(romc1.result.samples_cov()[0, 0]),
@@ -613,14 +477,6 @@ if savefig:
                   r"$\theta_2$",
                   r"density",
                   60,
-                  (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc_bo.png"))
-    plot_marginal(romc1.result.samples["t2"], romc1.result.weights,
-                  romc1.result.sample_means_array[1],
-                  np.sqrt(romc1.result.samples_cov()[1, 1]),
-                  r"ROMC (BO) - $\theta_2$",
-                  r"$\theta_2$",
-                  r"density",
-                  60,
                   (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc_bo.pdf"))
 else:
     plot_marginal(romc1.result.samples["t2"], romc1.result.weights,
@@ -634,10 +490,6 @@ else:
 
 # plot/save the romc posterior with BO
 if savefig:
-    plot_romc_posterior('ROMC (BO)',
-                        romc1.eval_unnorm_posterior,
-                        nof_points=50,
-                        savefig=os.path.join(prepath, "mae2_romc_posterior_bo.png"))
     plot_romc_posterior('ROMC (BO)',
                         romc1.eval_unnorm_posterior,
                         nof_points=50,
@@ -665,14 +517,6 @@ if savefig:
                   r"$\theta_1$",
                   r"density",
                   60,
-                  (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_rejection.png"))
-    plot_marginal(result.samples["t1"], None,
-                  result.sample_means_array[0],
-                  np.std(result.samples_array[:, 0]),
-                  r"Rejection ABC - $\theta_1$",
-                  r"$\theta_1$",
-                  r"density",
-                  60,
                   (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_rejection.pdf"))
 else:
     plot_marginal(result.samples["t1"], None,
@@ -693,14 +537,6 @@ if savefig:
                   r"$\theta_2$",
                   r"density",
                   60,
-                  (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_rejection.png"))
-    plot_marginal(result.samples["t2"], None,
-                  result.sample_means_array[1],
-                  np.std(result.samples_array[:, 1]),
-                  r"Rejection ABC - $\theta_2$",
-                  r"$\theta_2$",
-                  r"density",
-                  60,
                   (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_rejection.pdf"))
 
 else:
@@ -712,11 +548,6 @@ else:
                   r"density",
                   60,
                   (-0.5, 1), (0, 3), savepath=savefig)
-
-# print summary statistics using Rejection sampling
-print(result.summary())
-print("%.3f, %.3f" % (np.std(result.samples_array[:, 0]), np.std(result.samples_array[:, 1])))
-
 
 ######################################################################
 # Part 4. Generates the subfigures used in the Neural Network        #
@@ -733,9 +564,6 @@ n1 = 100
 n2 = 200
 bounds = [(-2, 2), (-1.25, 1.25)]
 eps = .01
-# vis_ind_1 = 1
-# vis_ind_2 = 3
-# vis_ind_3 = 12
 
 # the custom optimization class
 class CustomOptim(OptimisationProblem):
@@ -784,47 +612,14 @@ romc = elfi.ROMC(model, bounds=bounds, discrepancy_name="d",
 
 # fitting part
 romc.solve_problems(n1=n1, seed=seed)
-# if savefig:
-#     romc.distance_hist(savefig=os.path.join(
-#         prepath, "ma2_distance_hist_nn.png"))
-# else:
-#     romc.distance_hist()
 romc.estimate_regions(eps_filter=eps, fit_models=True)
 
 # sampling part
 romc.sample(n2=n2, seed=seed)
 
-
-# if savefig:
-#     romc.visualize_region(vis_ind_1, savefig=os.path.join(prepath, "ma2_region_1_nn.png"))
-# else:
-#     romc.visualize_region(vis_ind_1)
-
-# if savefig:
-#     romc.visualize_region(vis_ind_2, savefig=os.path.join(prepath, "ma2_region_2_nn.png"))
-# else:
-#     romc.visualize_region(vis_ind_2)
-
-# if savefig:
-#     romc.visualize_region(vis_ind_3, savefig=os.path.join(prepath, "ma2_region_3_nn.png"))
-# else:
-#     romc.visualize_region(vis_ind_3)
-
-# print summary statistics of the samples
-print(romc.result.summary())
-print(romc.result.samples_cov())
-
 # plot/save the marginal posterior distribution
 name = "t1"
 if savefig:
-    plot_marginal(romc.result.samples["t1"], romc.result.weights,
-                  romc.result.sample_means_array[0],
-                  np.sqrt(romc.result.samples_cov()[0, 0]),
-                  r"ROMC (Neural Network) - $\theta_1$",
-                  r"$\theta_1$",
-                  r"density",
-                  60,
-                  (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_romc_nn.png"))
     plot_marginal(romc.result.samples["t1"], romc.result.weights,
                   romc.result.sample_means_array[0],
                   np.sqrt(romc.result.samples_cov()[0, 0]),
@@ -852,14 +647,6 @@ if savefig:
                   r"$\theta_2$",
                   r"density",
                   60,
-                  (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc_nn.png"))
-    plot_marginal(romc.result.samples["t2"], romc.result.weights,
-                  romc.result.sample_means_array[1],
-                  np.sqrt(romc.result.samples_cov()[1, 1]),
-                  r"ROMC (Neural Network) - $\theta_2$",
-                  r"$\theta_2$",
-                  r"density",
-                  60,
                   (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc_nn.pdf"))
 
 else:
@@ -874,18 +661,6 @@ else:
 
 # plot/save the romc posterior
 if savefig:
-    plot_romc_posterior('ROMC (Neural Network)',
-                        romc.eval_unnorm_posterior,
-                        nof_points=50,
-                        savefig=os.path.join(prepath, "mae2_romc_posterior_nn.png"))
-    plot_marginal(romc.result.samples["t2"], romc.result.weights,
-                  romc.result.sample_means_array[1],
-                  np.sqrt(romc.result.samples_cov()[1, 1]),
-                  r"ROMC (Neural Network) - $\theta_2$",
-                  r"$\theta_2$",
-                  r"density",
-                  60,
-                  (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc_nn.png"))
     plot_romc_posterior('ROMC (Neural Network)',
                         romc.eval_unnorm_posterior,
                         nof_points=50,
@@ -952,7 +727,6 @@ plt.xlabel(r"$n_1$")
 plt.ylabel("time (sec)")
 plt.legend()
 if savefig:
-    plt.savefig(os.path.join(prepath, "exec_time_solve.png"), bbox_inches="tight")
     plt.savefig(os.path.join(prepath, "exec_time_solve.pdf"), bbox_inches="tight")
     # tplt.save(os.path.join(prepath, "exec_time_solve.tex"))
 plt.show(block=False)
@@ -966,7 +740,6 @@ plt.xlabel(r"$n_1$")
 plt.ylabel("time (sec)")
 plt.legend()
 if savefig:
-    plt.savefig(os.path.join(prepath, "exec_time_regions.png"), bbox_inches="tight")
     plt.savefig(os.path.join(prepath, "exec_time_regions.pdf"), bbox_inches="tight")
     # tplt.save(os.path.join(prepath, "exec_time_regions.tex"))
 plt.show(block=False)
