@@ -184,8 +184,10 @@ plt.legend()
 if savefig:
     plt.savefig(os.path.join(
         prepath, "chapter3/example_gt.png"), bbox_inches='tight')
-    tplt.clean_figure()
-    tplt.save(os.path.join(prepath, "chapter3/example_gt.tex"))
+    plt.savefig(os.path.join(
+        prepath, "chapter3/example_gt.pdf"), bbox_inches='tight')
+    # tplt.clean_figure()
+    # tplt.save(os.path.join(prepath, "chapter3/example_gt.tex"))
 plt.show(block=False)
 
 
@@ -298,8 +300,10 @@ plt.legend()
 if savefig:
     plt.savefig(os.path.join(
         prepath, "chapter3/example_posterior.png"), bbox_inches='tight')
+    plt.savefig(os.path.join(
+        prepath, "chapter3/example_posterior.pdf"), bbox_inches='tight')
     # tplt.clean_figure()
-    tplt.save(os.path.join(prepath, "chapter3/example_post.tex"))
+    # tplt.save(os.path.join(prepath, "chapter3/example_post.tex"))
 plt.show(block=False)
 
 
@@ -348,7 +352,7 @@ def plot_marginal(samples, weights, mean, std, title, xlabel, ylabel, bins, rang
     plt.legend()
     if savepath:
         plt.savefig(savepath, bbox_inches='tight')
-        tplt.save(savepath[:-3] + "tex")
+        # tplt.save(savepath[:-3] + "tex")
     plt.show(block=False)
 
 # helping functions for ploting the 2D posterior pdf
@@ -371,7 +375,7 @@ def plot_romc_posterior(title, posterior, nof_points, savefig):
     plt.colorbar()
     if savefig:
         plt.savefig(savefig, bbox_inches='tight')
-        tplt.save(savefig[:-3] + "tex")
+        # tplt.save(savefig[:-3] + "tex")
     plt.show(block=False)
 
 # Set seed for reproducibility
@@ -418,6 +422,8 @@ tmp = romc.sample(n2=n2, seed=seed)
 if savefig:
     romc.visualize_region(vis_ind_1, savefig=os.path.join(
         prepath, "ma2_region_1.png"))
+    romc.visualize_region(vis_ind_1, savefig=os.path.join(
+        prepath, "ma2_region_1.pdf"))
 else:
     romc.visualize_region(vis_ind_1)
 
@@ -448,6 +454,14 @@ if savefig:
                   r"density",
                   60,
                   (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_romc.png"))
+    plot_marginal(romc.result.samples["t1"], romc.result.weights,
+                  romc.result.sample_means_array[0],
+                  np.sqrt(romc.result.samples_cov()[0, 0]),
+                  r"ROMC (gradient-based) - $\theta_1$",
+                  r"$\theta_1$",
+                  r"density",
+                  60,
+                  (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_romc.pdf"))
 else:
     plot_marginal(romc.result.samples["t1"], romc.result.weights,
                   romc.result.sample_means_array[0],
@@ -468,6 +482,14 @@ if savefig:
                   r"density",
                   60,
                   (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc.png"))
+    plot_marginal(romc.result.samples["t2"], romc.result.weights,
+                  romc.result.sample_means_array[1],
+                  np.sqrt(romc.result.samples_cov()[1, 1]),
+                  r"ROMC (gradient-based) - $\theta_2$",
+                  r"$\theta_2$",
+                  r"density",
+                  60,
+                  (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc.pdf"))
 else:
     plot_marginal(romc.result.samples["t2"], romc.result.weights,
                   romc.result.sample_means_array[1],
@@ -485,6 +507,10 @@ if savefig:
                         romc.eval_unnorm_posterior,
                         nof_points=50,
                         savefig=os.path.join(prepath, "mae2_romc_posterior.png"))
+    plot_romc_posterior('ROMC (gradient-based)',
+                        romc.eval_unnorm_posterior,
+                        nof_points=50,
+                        savefig=os.path.join(prepath, "mae2_romc_posterior.pdf"))
 else:
     plot_romc_posterior('ROMC (gradient-based)',
                         romc.eval_unnorm_posterior,
@@ -528,6 +554,8 @@ tmp = romc1.sample(n2=n2)
 if savefig:
     romc1.visualize_region(vis_ind_1, savefig=os.path.join(
         prepath, "ma2_region_1_bo.png"))
+    romc1.visualize_region(vis_ind_1, savefig=os.path.join(
+        prepath, "ma2_region_1_bo.pdf"))
 else:
     romc1.visualize_region(vis_ind_1)
 
@@ -558,6 +586,14 @@ if savefig:
                   r"density",
                   60,
                   (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_romc_bo.png"))
+    plot_marginal(romc1.result.samples["t1"], romc1.result.weights,
+                  romc1.result.sample_means_array[0],
+                  np.sqrt(romc1.result.samples_cov()[0, 0]),
+                  r"ROMC (BO) - $\theta_1$",
+                  r"$\theta_1$",
+                  r"density",
+                  60,
+                  (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_romc_bo.pdf"))
 else:
     plot_marginal(romc1.result.samples["t1"], romc1.result.weights,
                   romc1.result.sample_means_array[0],
@@ -578,6 +614,14 @@ if savefig:
                   r"density",
                   60,
                   (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc_bo.png"))
+    plot_marginal(romc1.result.samples["t2"], romc1.result.weights,
+                  romc1.result.sample_means_array[1],
+                  np.sqrt(romc1.result.samples_cov()[1, 1]),
+                  r"ROMC (BO) - $\theta_2$",
+                  r"$\theta_2$",
+                  r"density",
+                  60,
+                  (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc_bo.pdf"))
 else:
     plot_marginal(romc1.result.samples["t2"], romc1.result.weights,
                   romc1.result.sample_means_array[1],
@@ -594,6 +638,10 @@ if savefig:
                         romc1.eval_unnorm_posterior,
                         nof_points=50,
                         savefig=os.path.join(prepath, "mae2_romc_posterior_bo.png"))
+    plot_romc_posterior('ROMC (BO)',
+                        romc1.eval_unnorm_posterior,
+                        nof_points=50,
+                        savefig=os.path.join(prepath, "mae2_romc_posterior_bo.pdf"))
 else:
     plot_romc_posterior('ROMC (BO)',
                         romc1.eval_unnorm_posterior,
@@ -618,6 +666,14 @@ if savefig:
                   r"density",
                   60,
                   (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_rejection.png"))
+    plot_marginal(result.samples["t1"], None,
+                  result.sample_means_array[0],
+                  np.std(result.samples_array[:, 0]),
+                  r"Rejection ABC - $\theta_1$",
+                  r"$\theta_1$",
+                  r"density",
+                  60,
+                  (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_rejection.pdf"))
 else:
     plot_marginal(result.samples["t1"], None,
                   result.sample_means_array[0],
@@ -638,6 +694,15 @@ if savefig:
                   r"density",
                   60,
                   (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_rejection.png"))
+    plot_marginal(result.samples["t2"], None,
+                  result.sample_means_array[1],
+                  np.std(result.samples_array[:, 1]),
+                  r"Rejection ABC - $\theta_2$",
+                  r"$\theta_2$",
+                  r"density",
+                  60,
+                  (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_rejection.pdf"))
+
 else:
     plot_marginal(result.samples["t2"], None,
                   result.sample_means_array[1],
@@ -760,6 +825,14 @@ if savefig:
                   r"density",
                   60,
                   (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_romc_nn.png"))
+    plot_marginal(romc.result.samples["t1"], romc.result.weights,
+                  romc.result.sample_means_array[0],
+                  np.sqrt(romc.result.samples_cov()[0, 0]),
+                  r"ROMC (Neural Network) - $\theta_1$",
+                  r"$\theta_1$",
+                  r"density",
+                  60,
+                  (0.3, 1.2), (0, 3.5), os.path.join(prepath, "mae2_hist_t1_romc_nn.pdf"))
 else:
     plot_marginal(romc.result.samples["t1"], romc.result.weights,
                   romc.result.sample_means_array[0],
@@ -780,6 +853,15 @@ if savefig:
                   r"density",
                   60,
                   (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc_nn.png"))
+    plot_marginal(romc.result.samples["t2"], romc.result.weights,
+                  romc.result.sample_means_array[1],
+                  np.sqrt(romc.result.samples_cov()[1, 1]),
+                  r"ROMC (Neural Network) - $\theta_2$",
+                  r"$\theta_2$",
+                  r"density",
+                  60,
+                  (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc_nn.pdf"))
+
 else:
     plot_marginal(romc.result.samples["t2"], romc.result.weights,
                   romc.result.sample_means_array[1],
@@ -796,6 +878,18 @@ if savefig:
                         romc.eval_unnorm_posterior,
                         nof_points=50,
                         savefig=os.path.join(prepath, "mae2_romc_posterior_nn.png"))
+    plot_marginal(romc.result.samples["t2"], romc.result.weights,
+                  romc.result.sample_means_array[1],
+                  np.sqrt(romc.result.samples_cov()[1, 1]),
+                  r"ROMC (Neural Network) - $\theta_2$",
+                  r"$\theta_2$",
+                  r"density",
+                  60,
+                  (-0.5, 1), (0, 3), os.path.join(prepath, "mae2_hist_t2_romc_nn.png"))
+    plot_romc_posterior('ROMC (Neural Network)',
+                        romc.eval_unnorm_posterior,
+                        nof_points=50,
+                        savefig=os.path.join(prepath, "mae2_romc_posterior_nn.pdf"))
 else:
     plot_romc_posterior('ROMC (Neural Network)',
                         romc.eval_unnorm_posterior,
@@ -858,8 +952,9 @@ plt.xlabel(r"$n_1$")
 plt.ylabel("time (sec)")
 plt.legend()
 if savefig:
-    plt.savefig(os.path.join(prepath, "exec_time_solve"), bbox_inches="tight")
-    tplt.save(os.path.join(prepath, "exec_time_solve.tex"))
+    plt.savefig(os.path.join(prepath, "exec_time_solve.png"), bbox_inches="tight")
+    plt.savefig(os.path.join(prepath, "exec_time_solve.pdf"), bbox_inches="tight")
+    # tplt.save(os.path.join(prepath, "exec_time_solve.tex"))
 plt.show(block=False)
 
 # Figure with the exec times for estimating the proposal regions
@@ -871,6 +966,7 @@ plt.xlabel(r"$n_1$")
 plt.ylabel("time (sec)")
 plt.legend()
 if savefig:
-    plt.savefig(os.path.join(prepath, "exec_time_regions"), bbox_inches="tight")
-    tplt.save(os.path.join(prepath, "exec_time_regions.tex"))
+    plt.savefig(os.path.join(prepath, "exec_time_regions.png"), bbox_inches="tight")
+    plt.savefig(os.path.join(prepath, "exec_time_regions.pdf"), bbox_inches="tight")
+    # tplt.save(os.path.join(prepath, "exec_time_regions.tex"))
 plt.show(block=False)

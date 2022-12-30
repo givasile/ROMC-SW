@@ -886,8 +886,10 @@ romc.visualize_region(i = 1) # for inspecting visually the bounding box
 
 \begin{figure}[ht]
   \begin{center}
-    \input{latex_files/images/chapter3/example_gt.tex}
-    \input{latex_files/images/chapter3/example_post.tex}
+    \includegraphics[width=0.49\textwidth]{latex_files/images/chapter3/example_gt.pdf}
+    \includegraphics[width=0.49\textwidth]{latex_files/images/chapter3/example_posterior.pdf}
+    % \input{latex_files/images/chapter3/example_gt.tex}
+    % \input{latex_files/images/chapter3/example_post.tex}
   \end{center}
   \caption[Histogram of distances at the one-dimensional example.]{Histogram of
     distances and visualization of a specific region.}
@@ -1333,7 +1335,7 @@ Rejection ABC & 0.516 & 0.142 & 0.07 & 0.172 \\
 \hline
 ROMC (gradient-based) & 0.501 & 0.142 & 0.033 & 0.169 \\
 \hline
-ROMC (Bayesian optimization) & 0.494 & 0.16 & 0.086 & 0.167 \\
+ROMC (Bayesian optimization) & 0.501 & 0.17 & 0.087 & 0.175 \\
 \hline
 ROMC (Neural Network) & 0.491 & 0.138 & 0.04 & 0.172 \\
 \hline
@@ -1347,8 +1349,8 @@ ROMC (Neural Network) & 0.491 & 0.138 & 0.04 & 0.172 \\
 
 \begin{figure}[ht]
     \begin{center}
-        \includegraphics[width=0.49\textwidth]{./latex_files/images/chapter4/ma2_region_1.png}
-        \includegraphics[width=0.49\textwidth]{./latex_files/images/chapter4/ma2_region_1_bo.png}
+        \includegraphics[width=0.49\textwidth]{./latex_files/images/chapter4/ma2_region_1.pdf}
+        \includegraphics[width=0.49\textwidth]{./latex_files/images/chapter4/ma2_region_1_bo.pdf}
     \end{center}
   \caption[The acceptance region of a specific deterministic simulator.]{The acceptance region in a specific optimization problem. In the left figure the region obtained with gradient-based optimizer and in the right one with Bayesian Optimization.}
   \label{fig:ma2_5}
@@ -1357,30 +1359,14 @@ ROMC (Neural Network) & 0.491 & 0.138 & 0.04 & 0.172 \\
 
 \begin{figure}[ht]
   \begin{center}
-    \resizebox{.24\columnwidth}{!}{%
-      \input{./latex_files/images/chapter4/mae2_hist_t1_rejection.tex}
-    }
-    \resizebox{.24\columnwidth}{!}{%
-      \input{./latex_files/images/chapter4/mae2_hist_t1_romc.tex}
-    }
-    \resizebox{.24\columnwidth}{!}{%
-      \input{./latex_files/images/chapter4/mae2_hist_t1_romc_bo.tex}
-    }
-    \resizebox{.24\columnwidth}{!}{%
-      \input{./latex_files/images/chapter4/mae2_hist_t1_romc_nn.tex}
-    }\\
-    \resizebox{.24\columnwidth}{!}{%
-      \input{./latex_files/images/chapter4/mae2_hist_t2_rejection.tex}
-    }
-    \resizebox{.24\columnwidth}{!}{%
-      \input{./latex_files/images/chapter4/mae2_hist_t2_romc.tex}
-    }
-    \resizebox{.24\columnwidth}{!}{%
-      \input{./latex_files/images/chapter4/mae2_hist_t2_romc_bo.tex}
-    }
-    \resizebox{.24\columnwidth}{!}{%
-      \input{./latex_files/images/chapter4/mae2_hist_t2_romc_nn.tex}
-    }
+    \includegraphics[width=0.24\textwidth]{./latex_files/images/chapter4/mae2_hist_t1_rejection.pdf}
+    \includegraphics[width=0.24\textwidth]{./latex_files/images/chapter4/mae2_hist_t1_romc.pdf}
+    \includegraphics[width=0.24\textwidth]{./latex_files/images/chapter4/mae2_hist_t1_romc_bo.pdf}
+    \includegraphics[width=0.24\textwidth]{./latex_files/images/chapter4/mae2_hist_t1_romc_nn.pdf}\\
+    \includegraphics[width=0.24\textwidth]{./latex_files/images/chapter4/mae2_hist_t2_rejection.pdf}
+    \includegraphics[width=0.24\textwidth]{./latex_files/images/chapter4/mae2_hist_t2_romc.pdf}
+    \includegraphics[width=0.24\textwidth]{./latex_files/images/chapter4/mae2_hist_t2_romc_bo.pdf}
+    \includegraphics[width=0.24\textwidth]{./latex_files/images/chapter4/mae2_hist_t2_romc_nn.pdf}
     \end{center}
     \caption[MA2 example, evaluation of the marginal
     distributions.]{Histogram of the marginal posterior distributions
@@ -1396,15 +1382,9 @@ ROMC (Neural Network) & 0.491 & 0.138 & 0.04 & 0.172 \\
 
 \begin{figure}[ht]
   \begin{center}
-    \resizebox{.32\columnwidth}{!}{%
-      \input{./latex_files/images/chapter4/mae2_romc_posterior.tex}
-    }
-    \resizebox{.32\columnwidth}{!}{%
-      \input{./latex_files/images/chapter4/mae2_romc_posterior_bo.tex}
-    }
-    \resizebox{.32\columnwidth}{!}{%
-      \input{./latex_files/images/chapter4/mae2_romc_posterior_nn.tex}
-    }
+    \includegraphics[width=0.32\textwidth]{./latex_files/images/chapter4/mae2_romc_posterior.pdf}
+    \includegraphics[width=0.32\textwidth]{./latex_files/images/chapter4/mae2_romc_posterior_bo.pdf}
+    \includegraphics[width=0.32\textwidth]{./latex_files/images/chapter4/mae2_romc_posterior_nn.pdf}
     \end{center}
     \caption[MA2 example, posterior distribution.]{The unnormalized posterior distribution using the ROMC method with (a) a gradient-based optimization (b) Bayesian Optimization (c) gradient-based with a Neural Network as a surrogate model.}
   \label{fig:ma2_4}
@@ -1430,12 +1410,8 @@ separate cores.
 
 \begin{figure}[ht]
   \begin{center}
-    \resizebox{.49\columnwidth}{!}{%
-      \input{./latex_files/images/chapter4/exec_time_solve.tex}
-    }
-    \resizebox{.49\columnwidth}{!}{%
-      \input{./latex_files/images/chapter4/exec_time_regions.tex}
-    }
+    \includegraphics[width=0.49\textwidth]{./latex_files/images/chapter4/exec_time_solve.pdf}
+    \includegraphics[width=0.49\textwidth]{./latex_files/images/chapter4/exec_time_regions.pdf}
     \end{center}
     \caption[Execution time exploiting Parallelize]{Comparison
       between parallel and sequential execution of ROMC. We observe
