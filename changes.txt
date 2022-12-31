@@ -5,8 +5,8 @@ o Code should have enough spaces to facilitate reading.  Please
 include spaces before and after operators and after commas (unless
 spaces have syntactical meaning).
 
->> We have added spaces to all before and after all operators inside
-   \code{}.
+>> We have added spaces to all before and after all operators
+   inside \code{}.
 
 --
 
@@ -82,7 +82,7 @@ Code:
 
 o Please make sure that the files needed to replicate all code/examples within the manuscript are included in a standalone replication script.
 
->> We have checked it.
+>> We have checked that the code replicates the reusult presented in the paper.
 
 --
 
@@ -97,4 +97,5 @@ Other changes:
 >> We have added links to five (5) online Google Colab notebooks with
    end-to-end examples on how to use the ROMC method.
 
->> We have done some rephrased on parts of the manuscript.
+>> We have made some rephrasing some parts of the manuscript; most
+   changes are at Section 4.4.

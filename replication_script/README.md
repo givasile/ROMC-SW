@@ -8,7 +8,7 @@ The directory contains:
 
 ***
 
-For running the script using `requirements-from-repo.txt`, follow the steps:
+For running the script `replication_script.py`, follow the steps:
 
 - Install `Python 3.7.9` in your system
 - Initiate a virtual environment
@@ -45,8 +45,6 @@ The replication script is divided in 5 parts;
 
 Comments:
 
-- The figures are stored in both `.png` and `.tex` version. For the latter to work, apart from the python package tikzplotlib, the latest `Tex` environment must be installed. If this is not the case, you may set `savefig=False` at line 20 of the `replication_script.py`.
-
-- The `replication_script.py` takes about 30 minutes to run.
+- The `replication_script.py` takes about 25 minutes to run.
 
 ***
