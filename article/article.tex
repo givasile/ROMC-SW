@@ -153,14 +153,14 @@ OMC (ROMC) an improved version of OMC with appropriate modifications.
 In this paper, we present the implementation of ROMC at the
 \proglang{Python} package \pkg{ELFI} (\pkg{Engine for likelihood-free
   inference})~\citet{1708.00707}. The implementation has been designed
-to ensure extensibility. ROMC is an LFI framework; it defines a
+to facilitate extensibility. ROMC is an LFI framework; it defines a
 sequence of algorithmic steps for approximating the posterior without
-enforcing a specific algorithm for solving each step. Therefore, a
-researcher may use ROMC as the backbone algorithm and develop novel
-methods to solve each separate step. For being a ready-to-use
-algorithm,~\citet{Ikonomov2019} proposed a default method for each
-step, but this choice is by no means restrictive. We have designed our
-software for facilitating such experimentation.
+enforcing a specific algorithm for each step. Therefore, a researcher
+may use ROMC as the backbone method and apply novel algorithms to each
+separate step. For being a ready-to-use LFI
+method,~\citet{Ikonomov2019} propose a particular (default) algorithm
+for each step, but this choice is by no means restrictive. We have
+designed our software for facilitating such experimentation.
 
 To the best of our knowledge, this is the first implementation of the
 ROMC inference method to a generic LFI framework. We organize the
@@ -168,23 +168,26 @@ illustration and the evaluation of our implementation in three
 steps. First, for securing that our implementation is accurate, we
 test it against an artificial example with a tractable likelihood. The
 artificial example also serves as a step-by-step guide for showcasing
-how to use the various functionalities of our implementation. Second,
-we use the second-order moving average (MA2) example from the
+the various functionalities of our implementation. Second, we use the
+second-order moving average (MA2) example~\citet{Marin2012} from the
 \pkg{ELFI} package, using as ground truth the samples obtained with
 Rejection ABC~\citet{lintusaari2017} using a very high number of
 samples. Finally, we present the execution times of ROMC, measuring
-the speed-up achieved by the parallel version of the
-implementation.
+the speed-up achieved by the parallel version of the implementation.
 
-The code of the implementation is available at the official \pkg{ELFI} \href{https://github.com/elfi-dev/elfi}{repository}. Apart
-from the examples presented in the paper, there are five \pkg{Google
-  Colab} notebooks available online, with end-to-end examples
-illustrating:
-(i) \href{https://colab.research.google.com/drive/1lGRp0XrNfZ64NN0ASB_tYEKowXwlveDC?usp=sharing}{ROMC on a synthetic \(1D\) example},
-(ii) \href{https://colab.research.google.com/drive/1Fof_WmCi1YizzSI_63aEsbLXsno5gSZ3?usp=sharing}{ROMC on a synthetic \(2D\) example},
-(iii) \href{https://colab.research.google.com/drive/1nkdACQ370SSc0KB1bHv4sBRaxMlMqoNH?usp=sharing}{ROMC on the Moving Average example},
-(iv) \href{https://colab.research.google.com/drive/1_jHVxPSH3XcNOORZJpLU0SPzs0PF8CQ5?usp=sharing}{how to extend ROMC with a Neural Network as a surrogate model},
-(v) \href{https://colab.research.google.com/drive/1RzB-V1QueP1y1nyzv_VOqR1nVz3DUH3v?usp=sharing}{how to extend ROMC with a custom proposal region module}.
+The code of the implementation is available at the official \pkg{ELFI}
+\href{https://github.com/elfi-dev/elfi}{repository}. Apart from the
+examples presented in the paper, there are five \pkg{Google
+  Colab}~\citet{Bisong2019} notebooks available online, with
+end-to-end examples illustrating how to: (i)
+\href{https://colab.research.google.com/drive/1lGRp0XrNfZ64NN0ASB_tYEKowXwlveDC?usp=sharing}{use ROMC
+  on a synthetic \(1D\) example}, (ii)
+\href{https://colab.research.google.com/drive/1Fof_WmCi1YizzSI_63aEsbLXsno5gSZ3?usp=sharing}{use ROMC
+  on a synthetic \(2D\) example}, (iii)
+\href{https://colab.research.google.com/drive/1nkdACQ370SSc0KB1bHv4sBRaxMlMqoNH?usp=sharing}{use ROMC
+  on the Moving Average example}, (iv)
+\href{https://colab.research.google.com/drive/1_jHVxPSH3XcNOORZJpLU0SPzs0PF8CQ5?usp=sharing}{extend ROMC with a Neural Network as a surrogate model}, (v)
+\href{https://colab.research.google.com/drive/1RzB-V1QueP1y1nyzv_VOqR1nVz3DUH3v?usp=sharing}{extend ROMC with a custom proposal region module}.
 
 
 
@@ -564,12 +567,12 @@ At the training (fitting) part, the goal is the estimation of the
 proposal regions \(\hat{\accregioni}\), which expands to three
 mandatory tasks; (a) sample the nuisance variables
 \(\ub_i \sim p(\ub)\) for defining the deterministic distance
-functions \(d_i(\thetab)\) (Steps 3-5), (b) solve the optimization
+functions \(d_i(\thetab)\) (steps 3-5), (b) solve the optimization
 problems for obtaining \(\thetab_i^*, d_i^*\) and keep the solutions
-inside the threshold \(\epsilon\) (Steps 6-9), and (c) estimate the
+inside the threshold \(\epsilon\) (steps 6-9), and (c) estimate the
 bounding boxes \(\accregionihat\) to define uniform distributions
-\(q_i\) on them (Step 10). Optionally, a surrogate model
-\(\tilde{d}_i\) can be fitted for a faster inference phase (Step 11).
+\(q_i\) on them (step 10). Optionally, a surrogate model
+\(\tilde{d}_i\) can be fitted for a faster inference phase (step 11).
 
 If \(d_i(\thetab)\) is differentiable, using a gradient-based method
 is advised for obtaining \(\thetab_i^*\) faster. In this case, the
@@ -589,7 +592,7 @@ the line search approach for finding the region boundaries. The axes
 of each bounding box \(\vb_m, m = \{1, \ldots, D\}\) are defined as
 the directions with the highest curvature at \(\thetab_i^*\) computed
 by the eigenvalues of the Hessian matrix \(\hessian_i\) of \(d_i\) at
-\(\thetab_i\) (Step 1). Depending on the algorithm used in the
+\(\thetab_i\) (step 1). Depending on the algorithm used in the
 optimization step, we either use the real distance \(d_i\) or the
 Gaussian Process approximation \(\hat{d}_i\). When the distance
 function is the Euclidean distance (default choice), the Hessian
@@ -598,7 +601,7 @@ matrix can be also computed as \(\hessian_i = \jac_i^T\jac_i\), where
 \(\Phi(g(\thetab, \ub_i))\) at \(\thetab_i^*\). This approximation has
 the computational advantage of using only first-order
 derivatives. After defining the axes, we search for the bounding box
-limits with a line step algorithm (Steps 2-21). The key idea is to
+limits with a line step algorithm (steps 2-21). The key idea is to
 take long steps \(\eta\_\text{start}\) until crossing the boundary and
 then take small steps backwards to find the exact boundary position.
 
@@ -1451,8 +1454,8 @@ high-dimensional parametric models.
 
 \section*{Computational details}
 
-The results in this paper were obtained using \proglang{Python~3.7.9}
-with the \pkg{ELFI~0.8.3} package. The experiments have been executed
+The results in this paper were obtained using \proglang{Python~3.9}
+with the \pkg{ELFI~0.8.4} package. The experiments have been executed
 in a single machine with an \proglang{Intel® Core™ i7-8750H} Processor
 an with \proglang{Ubuntu 20.04} lts operating system.
 
