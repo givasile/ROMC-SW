@@ -15,3 +15,8 @@ env*
 .idea/
 
 .python-version
+
+.emacs.desktop
+
+.env
+.env_old
