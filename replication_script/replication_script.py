@@ -204,23 +204,57 @@ dim = data.shape[-1]
 # define romc inference
 romc = elfi.ROMC(dist, bounds)
 
-# fitting part
+# Example - Training part
+# Training (fitting) part
 n1 = 500
 seed = 21
+use_bo = False
+
+# Training step-by-step
+romc.solve_problems(n1=n1, seed=seed, use_bo=use_bo, optimizer_args=None)
+
 eps = .75
-romc.solve_problems(n1=n1, seed=seed, use_bo=False, optimizer_args=None)
 romc.estimate_regions(eps_filter=eps, use_surrogate=False,
                       region_args=None, fit_models=False)
 
-# sampling part
+romc.visualize_region(i=2)
+
+# Inference part
+seed = 21
 n2 = 50
-romc.sample(n2=n2)
+romc.sample(n2=n2, seed=seed)
+
+# visualize_region, adding the samples now
+romc.visualize_region(i=2)
+
+# visualize marginal (built-in ELFI tool)
+weights = romc.result.weights
+romc.result.plot_marginals(weights=weights, bins=100, range=(-3, 3))
+plt.show(block=False)
+
+# summarize the samples (built-in ElFI tool)
+romc.result.summary()
+# Method: ROMC
+# Number of samples: 19300
+# Parameter                Mean               2.5%              97.5%
+# theta:                 -0.012             -1.985              1.987
 
 # compute expectation
-print("Expected value   : %.3f" %
-      romc.compute_expectation(h=lambda x: np.squeeze(x)))
-print("Expected variance: %.3f" %
-      romc.compute_expectation(h=lambda x: np.squeeze(x)**2))
+exp_eval = romc.compute_expectation(h=lambda x: np.squeeze(x))
+print("Expected value   : %.3f" % exp_eval)
+# Expected value: -0.012
+
+exp_var = romc.compute_expectation(h=lambda x: np.squeeze(x)**2)
+print("Expected variance: %.3f" % exp_var)
+# Expected variance: 1.120
+
+# eval unnorm posterior
+print("%.3f" % romc.eval_unnorm_posterior(theta = np.array([[0]])))
+# 58.800
+
+# check eval posterior
+print("%.3f" % romc.eval_posterior(theta = np.array([[0]])))
+# 0.289
 
 # plot histogram of samples along with the ground-truth prior, likelihood, posterior
 plt.figure()
@@ -262,7 +296,7 @@ plt.show(block=False)
 
 
 # Evaluating the approximate posterior, comparing with the ground truth
-def gt_posterior_pdf_with_batching(x):
+def wrapper(x):
     """Wrapper for enabling batching in the ground truth posterior.
     """
     res = []
@@ -271,12 +305,16 @@ def gt_posterior_pdf_with_batching(x):
         res.append(gt_posterior_pdf(float(tmp)))
     return np.array(res)
 
-# compute divergence between romc posterior vs gt_posterior_pdf
-print(romc.compute_divergence(gt_posterior_pdf_with_batching, distance="Jensen-Shannon"))
+# 4.3 Evaluation part
+res = romc.compute_divergence(wrapper, distance="Jensen-Shannon")
+print("Jensen-Shannon divergence: %.3f" % res)
+# Jensen-Shannon divergence: 0.035
 
 # compute ESS
-print("Nof Samples: %d, ESS: %.3f" % (len(romc.result.weights), romc.compute_ess()))
-
+nof_samples = len(romc.result.weights)
+ess = romc.compute_ess()
+print("Nof Samples: %d, ESS: %.3f" % (nof_samples, ess))
+# Nof Samples: 19300, ESS: 16196.214
 
 ######################################################################
 # Part 2. Generates the subfigures used in the gradient-based        #
@@ -412,6 +450,11 @@ else:
                         nof_points=50,
                         savefig=False)
 
+# save ROMC (gradient-based) results
+romc_gb_mu_th1, romc_gb_mu_th2 = romc.result.sample_means_array
+romc_gb_sigma_th1 = np.sqrt(romc.result.samples_cov()[0, 0])
+romc_gb_sigma_th2 = np.sqrt(romc.result.samples_cov()[1, 1])
+
 
 ######################################################################
 # Part 3. Generates the subfigures used in the Bayesian optimization #
@@ -440,7 +483,7 @@ romc1.solve_problems(n1=n1, seed=seed, use_bo=True)
 romc1.estimate_regions(eps_filter=eps, use_surrogate=False, fit_models=True)
 
 # sampling part
-tmp = romc1.sample(n2=n2)
+tmp = romc1.sample(n2=n2, seed=seed)
 if savefig:
     romc1.visualize_region(vis_ind_1, savefig=os.path.join(
         prepath, "ma2_region_1_bo.pdf"))
@@ -500,6 +543,11 @@ else:
                         nof_points=50,
                         savefig=False)
 
+# save ROMC (Bayesian Optimization) results
+romc_bo_mu_th1, romc_bo_mu_th2 = romc1.result.sample_means_array
+romc_bo_sigma_th1 = np.sqrt(romc1.result.samples_cov()[0, 0])
+romc_bo_sigma_th2 = np.sqrt(romc1.result.samples_cov()[1, 1])
+
 
 # Perform the inference using rejection sampling
 N = 10000
@@ -548,6 +596,13 @@ else:
                   r"density",
                   60,
                   (-0.5, 1), (0, 3), savepath=savefig)
+
+# save Rejection ABC results
+romc_rej_mu_th1 = result.sample_means_array[0]
+romc_rej_mu_th2 = result.sample_means_array[1] 
+romc_rej_sigma_th1 = np.std(result.samples_array[:, 0])
+romc_rej_sigma_th2 = np.std(result.samples_array[:, 1])
+
 
 ######################################################################
 # Part 4. Generates the subfigures used in the Neural Network        #
@@ -599,12 +654,12 @@ class CustomOptim(OptimisationProblem):
         self.local_surrogates = local_surrogates
         self.state["local_surrogates"] = True
 
-    @staticmethod
-    def create_local_surrogate(model):
-        def _local_surrogate(th):
-            th = np.expand_dims(th, 0)
-            return float(model.predict(th))
-        return _local_surrogate
+    # @staticmethod
+    # def create_local_surrogate(model):
+    #     def _local_surrogate(th):
+    #         th = np.expand_dims(th, 0)
+    #         return float(model.predict(th))
+    #     return _local_surrogate
 
 # initiate ROMC with custom_optim_class
 romc = elfi.ROMC(model, bounds=bounds, discrepancy_name="d",
@@ -670,6 +725,17 @@ else:
                         romc.eval_unnorm_posterior,
                         nof_points=50,
                         savefig=False)
+
+# save ROMC (Neural Network) results
+romc_nn_mu_th1, romc_nn_mu_th2 = romc.result.sample_means_array
+romc_nn_sigma_th1 = np.sqrt(romc.result.samples_cov()[0, 0])
+romc_nn_sigma_th2 = np.sqrt(romc.result.samples_cov()[1, 1])
+
+# print results of Table 1
+print("Rejection ABC | %.3f | %.3f | %.3f | %.3f |" % (romc_rej_mu_th1, romc_rej_sigma_th1, romc_rej_mu_th2, romc_rej_sigma_th2))
+print("ROMC (gradient-based) | %.3f | %.3f | %.3f | %.3f |" % (romc_gb_mu_th1, romc_gb_sigma_th1, romc_gb_mu_th2, romc_gb_sigma_th2))
+print("ROMC (Bayesian Optimization) | %.3f | %.3f | %.3f | %.3f |" % (romc_bo_mu_th1, romc_bo_sigma_th1, romc_bo_mu_th2, romc_bo_sigma_th2))
+print("ROMC (Neural Network) | %.3f | %.3f | %.3f | %.3f |" % (romc_nn_mu_th1, romc_nn_sigma_th1, romc_nn_mu_th2, romc_nn_sigma_th2))
 
 
 ######################################################################

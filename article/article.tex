@@ -777,7 +777,7 @@ d = elfi.Distance('euclidean', sim)
 
 # Initialize the ROMC inference method
 bounds = [(-2.5, 2.5)] # bounds of the prior
-parallelize = True # activate parallel execution
+parallelize = False # True activates parallel execution
 romc = elfi.ROMC(d, bounds = bounds, parallelize = parallelize)
 \end{Code}
 
@@ -881,7 +881,7 @@ romc.theta_hist(bins = 100) # plot hist to decide which eps to use
 eps = .75 # threshold for the bounding box
 romc.estimate_regions(eps = eps) # build the bounding boxes
 
-romc.visualize_region(i = 1) # for inspecting visually the bounding box
+romc.visualize_region(i = 2) # for inspecting visually the bounding box
 
 # Equivalent one-line command
 # romc.fit_posterior(n1 = n1, eps = eps, use_bo = use_bo, seed = seed)
@@ -959,8 +959,10 @@ romc.result.plot_marginals(weights = weights, bins = 100, range = (-3,3))
 
 # Summarize the samples (built-in ELFI tool)
 romc.result.summary()
-# Number of samples  : 19300
-# Sample means: theta: -0.0116
+# Method: ROMC
+# Number of samples: 19300
+# Parameter                Mean               2.5%              97.5%
+# theta:                 -0.012             -1.985              1.987
 
 # compute expectation
 exp_val = romc.compute_expectation(h = lambda x: np.squeeze(x))
@@ -972,10 +974,12 @@ print("Expected variance: %.3f" % exp_var)
 # Expected variance: 1.120
 
 # eval unnorm posterior
-romc.eval_unnorm_posterior(theta = 0)
+print("%.3f" % romc.eval_unnorm_posterior(theta = np.array([[0]])))
+# 58.800
 
 # check eval posterior
-romc.eval_posterior(theta = 0)
+print("%.3f" % romc.eval_posterior(theta = np.array([[0]])))
+# 0.289
 \end{Code}
 
 
@@ -1334,13 +1338,13 @@ agreement with the Rejection ABC algorithm.
 \hline
 & \(\mu_{\theta_1}\) & \(\sigma_{\theta_1}\) & \(\mu_{\theta_2}\) & \(\sigma_{\theta_2}\) \\
 \hline \hline
-Rejection ABC & 0.516 & 0.142 & 0.07 & 0.172 \\
+Rejection ABC & 0.516 & 0.142 & 0.070 & 0.172 \\
 \hline
 ROMC (gradient-based) & 0.501 & 0.142 & 0.033 & 0.169 \\
 \hline
-ROMC (Bayesian optimization) & 0.494 & 0.16 & 0.086 & 0.167 \\
+ROMC (Bayesian optimization) & 0.513 & 0.169 & 0.090 & 0.174 \\
 \hline
-ROMC (Neural Network) & 0.491 & 0.138 & 0.04 & 0.172 \\
+ROMC (Neural Network) & 0.491 & 0.138 & 0.040 & 0.172 \\
 \hline
 \end{tabular}
 \end{center}

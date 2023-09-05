@@ -10,20 +10,27 @@ The directory contains:
 
 For running the script `replication_script.py`, follow the steps:
 
-- Install `Python 3.7.9` in your system
-- Initiate a virtual environment
+1. Install `Python 3.9` at your system and initialize a virtual environment
 
-`python -m venv env`
+You can use any approach for Step 1. Two easy solutions are (i) using Anaconda 
 
-`source env/bin/activate`
+```
+conda create -n romc python=3.9
+conda activate romc
+pip install --upgrafe pip
+pip install -r requirements.txt
+```
 
-* Install all packages described in requirements.txt:
+or (ii) download and install `python=3.9` executable and then create a virtual environment using:
 
-`pip install --upgrade pip`
+```
+python -m venv env
+source env/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
 
-`pip install -r requirements.txt`
-
-* Run the script
+2. Run the script
 
 `python replication_script.py`
 
