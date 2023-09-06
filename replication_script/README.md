@@ -17,7 +17,7 @@ You can use any approach for Step 1. Two easy solutions are (i) using Anaconda
 ```
 conda create -n romc python=3.9
 conda activate romc
-pip install --upgrafe pip
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 

@@ -16,7 +16,7 @@ import elfi
 import matplotlib
 
 # matplotlib.rcParams['text.usetex'] = True
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.CRITICAL)
 savefig = False
 
 ######################################################################
@@ -204,6 +204,9 @@ dim = data.shape[-1]
 # define romc inference
 romc = elfi.ROMC(dist, bounds)
 
+print("\n######################################################################")
+print("PART 1 - Generates all and outputs until page 19 (running example of the paper)\n")
+
 # Example - Training part
 # Training (fitting) part
 n1 = 500
@@ -316,10 +319,16 @@ ess = romc.compute_ess()
 print("Nof Samples: %d, ESS: %.3f" % (nof_samples, ess))
 # Nof Samples: 19300, ESS: 16196.214
 
+print("######################################################################\n")
+
 ######################################################################
 # Part 2. Generates the subfigures used in the gradient-based        #
 # optimisation version of the example at chapter 5, i.e. figures 5, 6#
 ######################################################################
+
+print("\n##############################################################")
+print("PARTS 2,3,4 - Generate all figures and outputs for Section 5\n")
+
 
 # set the path for storing images
 prepath = './images/chapter4/'
@@ -380,6 +389,9 @@ n2 = 200
 bounds = [(-2, 2), (-1.25, 1.25)]
 eps = .01
 vis_ind_1 = 1
+
+print("\n######################################################################")
+print("PART 2 - Fit the gradient-based ROMC for Section 5\n")
 
 # define model
 romc = elfi.ROMC(model, bounds=bounds, discrepancy_name="d")
@@ -455,11 +467,16 @@ romc_gb_mu_th1, romc_gb_mu_th2 = romc.result.sample_means_array
 romc_gb_sigma_th1 = np.sqrt(romc.result.samples_cov()[0, 0])
 romc_gb_sigma_th2 = np.sqrt(romc.result.samples_cov()[1, 1])
 
+print("######################################################################\n")
 
 ######################################################################
 # Part 3. Generates the subfigures used in the Bayesian optimization #
 # version of the example at chapter 5, i.e. figures 5, 6             #
 ######################################################################
+
+print("\n######################################################################")
+print("PART 3 - Fit the Bayesian Optimization ROMC and the Rejection Sampling for Section 5\n")
+
 # seed for reproducibility
 seed = 1
 np.random.seed(seed)
@@ -552,8 +569,8 @@ romc_bo_sigma_th2 = np.sqrt(romc1.result.samples_cov()[1, 1])
 # Perform the inference using rejection sampling
 N = 10000
 rej = elfi.Rejection(model, discrepancy_name="d", batch_size=10000, seed=seed)
-vis = dict(xlim=[-2, 2], ylim=[-1, 1])
-result = rej.sample(N, threshold=.1, vis=vis)
+# vis = dict(xlim=[-2, 2], ylim=[-1, 1])
+result = rej.sample(N, threshold=.1, vis=None)
 
 # plot/save the marginal posterior distribution using Rejection sampling
 name = "t1"
@@ -603,11 +620,16 @@ romc_rej_mu_th2 = result.sample_means_array[1]
 romc_rej_sigma_th1 = np.std(result.samples_array[:, 0])
 romc_rej_sigma_th2 = np.std(result.samples_array[:, 1])
 
+print("######################################################################\n")
 
 ######################################################################
 # Part 4. Generates the subfigures used in the Neural Network        #
 # extension example of chapter 5, i.e. figures 5, 6                  #
 ######################################################################
+
+print("\n######################################################################")
+print("PART 4 - Fit the Neural Network ROMC for Section 5\n")
+
 # seed for reproducibility
 seed = 1
 np.random.seed(seed)
@@ -731,17 +753,29 @@ romc_nn_mu_th1, romc_nn_mu_th2 = romc.result.sample_means_array
 romc_nn_sigma_th1 = np.sqrt(romc.result.samples_cov()[0, 0])
 romc_nn_sigma_th2 = np.sqrt(romc.result.samples_cov()[1, 1])
 
+print("######################################################################\n")
+
+
 # print results of Table 1
-print("Rejection ABC | %.3f | %.3f | %.3f | %.3f |" % (romc_rej_mu_th1, romc_rej_sigma_th1, romc_rej_mu_th2, romc_rej_sigma_th2))
-print("ROMC (gradient-based) | %.3f | %.3f | %.3f | %.3f |" % (romc_gb_mu_th1, romc_gb_sigma_th1, romc_gb_mu_th2, romc_gb_sigma_th2))
+print("\n\n\n")
+print("########################## Table 1 ###########################")
+print("Rejection ABC                | %.3f | %.3f | %.3f | %.3f |" % (romc_rej_mu_th1, romc_rej_sigma_th1, romc_rej_mu_th2, romc_rej_sigma_th2))
+print("ROMC (gradient-based)        | %.3f | %.3f | %.3f | %.3f |" % (romc_gb_mu_th1, romc_gb_sigma_th1, romc_gb_mu_th2, romc_gb_sigma_th2))
 print("ROMC (Bayesian Optimization) | %.3f | %.3f | %.3f | %.3f |" % (romc_bo_mu_th1, romc_bo_sigma_th1, romc_bo_mu_th2, romc_bo_sigma_th2))
-print("ROMC (Neural Network) | %.3f | %.3f | %.3f | %.3f |" % (romc_nn_mu_th1, romc_nn_sigma_th1, romc_nn_mu_th2, romc_nn_sigma_th2))
+print("ROMC (Neural Network)        | %.3f | %.3f | %.3f | %.3f |" % (romc_nn_mu_th1, romc_nn_sigma_th1, romc_nn_mu_th2, romc_nn_sigma_th2))
+print("##############################################################")
+
+print("\n##########################################################")
 
 
 ######################################################################
 # Part 5; Generates the figures for measuring the execution time.    #
 # i.e. figure 7                                                      #
 ######################################################################
+
+print("\n######################################################################")
+print("PART 5 - Generate the figures that measure the execution time\n")
+
 np.random.seed(21)
 seed = 21
 prepath = './images/chapter4'
@@ -809,3 +843,5 @@ if savefig:
     plt.savefig(os.path.join(prepath, "exec_time_regions.pdf"), bbox_inches="tight")
     # tplt.save(os.path.join(prepath, "exec_time_regions.tex"))
 plt.show(block=False)
+
+print("\n######################################################################")

@@ -2,19 +2,19 @@ Section editor comments:
 
 I have been able to install Python 3.7.9 (by using a DMG file from the main Python website), install the required packages listed in requirements.txt and run the replication script.
 
->> We have operated the latest experiments with python 3.9. Therefore, although the reproducibility script seems to also work with python 3.7.9, we propose using python 3.9 (3.9.17). Please, check the README.md for instructions.
+>> We have operated the latest experiments with python 3.9. Therefore, although the reproducibility script seems to also work with python 3.7.9, we propose using python 3.9 (3.9.17). Please see the README.md for instructions.
 
 * The figures produced by the script match those in the paper (but see below).
 * However, there are a number of outputs that are not produced by the replication sctipt. These should be included in the replication script so that all the results included in the paper can be reproduced. Output in the paper that is not produced by the replication script includes:
 
   * Page 15, Section 4.2. romc.result.summary() and two print() commands.
-  >> We have added romc.result.summary() at line 234 and the print commands at lines 242 - 257.
+  >> We have added romc.result.summary() at line 239 and the print commands at lines 247 - 261.
 
   * Page 15, Section 4.3. The code presented at the bottom of the page does not seem to match that in the replication script (it looks similar though). Please double-check this.
-  >> We have updated the code at lines 308 - 317 to perfectly match the manuscript.
+  >> We have updated the code at lines 311 - 320 to perfectly match the manuscript.
 
   * Page 21. Table 1. The contents of the table are not produced by the replication script.
-  >> We have added them to the script, see lines 734-738.
+  >> We have added them to the script, see lines 760-766.
 
 * Page 14. Code 'romc.sample(n2 = n2, seed = seed)' in paper is 'romc.sample(n2 = n2)' in replication script. Should the seed be used here? This may happen in other parts of the paper and replication script. Please, double-check.
 >> We have added `seed=seed` at line 225. We have double-checked that the code in the replication script matches with the snippets of the paper.
@@ -29,19 +29,19 @@ I have been able to install Python 3.7.9 (by using a DMG file from the main Pyth
 >> The replication script has run in Python 3.9. We have updated the installation instructions at README.md.
 
 
-For facilitating the review, we add a mapping between the snippets appearing at the paper and the equivalent lines that appear at the `replication_scripy.py`:
+For facilitating the review, we add a mapping between the snippets appearing at the paper and the equivalent lines that appear at the `replication_script.py`:
 
 Example - Training part (page 13)
-Lines 207 -220
+Lines 211 -223
 
 Example - Inference part (page 14)
-Lines 222 - 257
+Lines 225 - 260
 
 Example - Evaluation part (page 15)
-Lines 308 - 317
+Lines 311 - 320
 
 CustomOptim class (page 16)
-Lines 624 - 655
+Lines 646 - 677
 
 Table 1 (page 21)
-Lines 734 - 738
+Lines 760 - 766
