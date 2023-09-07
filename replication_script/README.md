@@ -8,23 +8,24 @@ The directory contains:
 
 ***
 
-For running the script `replication_script.py`, follow the steps:
+For running the script `replication_script.py`, there are two approaches:
 
-1. Install `Python 3.9` at your system and initialize a virtual environment
-
-You can use any approach for Step 1. Two easy solutions are (i) using Anaconda 
+1. Install an Anaconda environment:
 
 ```
 conda create -n romc python=3.9
 conda activate romc
 pip install --upgrade pip
 pip install -r requirements.txt
+python replication_script.py
 ```
 
+2. Building a Docker image
 
-2. Run the script
-
-`python replication_script.py`
+``` shell
+docker build -t romc_jss .
+docker run -it romc_jss
+```
 
 ***
 
