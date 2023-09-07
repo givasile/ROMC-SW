@@ -14,6 +14,9 @@ from elfi.examples import ma2
 import numpy as np
 import elfi
 import matplotlib
+import random
+
+random.seed(21)
 
 # matplotlib.rcParams['text.usetex'] = True
 logging.basicConfig(level=logging.CRITICAL)

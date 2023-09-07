@@ -21,14 +21,6 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-or (ii) download and install `python=3.9` executable and then create a virtual environment using:
-
-```
-python -m venv env
-source env/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-```
 
 2. Run the script
 
