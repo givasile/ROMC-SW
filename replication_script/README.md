@@ -5,10 +5,12 @@ The directory contains:
 - `replication_script.py`: Standalone script that replicates all the examples presented in the article
 
 - `requirements.txt`: Pip requirements for running the replication_script.py.
-
+- `dockerfile.txt`: for building the docker image
 ***
 
-For running the script `replication_script.py`, there are two approaches:
+We propose two approaches for running the `replication_script.py`. During testing we noticed that there is a reproducibility issue related to the Bayesian Optimization execution. Some parts of the underlying GPy library relate to Cython executables which makes the execution OS-sensitive. This means that for the Anaconda-based environment, the Bayesian Optimization part (and only thay) gives slighlty different numbers, if running the script in different PCs . Please, notice, that results are consistent between different runs on the same PC; running `replication_script.py` multiple times will output the exact same numbers.
+
+For this reason, we propose a second approach, creating a docker image and running the script through the image which ensures perfect reproducibility. Bellow, we summarize the two approaches:
 
 1. Install an Anaconda environment:
 
@@ -20,7 +22,7 @@ pip install -r requirements.txt
 python replication_script.py
 ```
 
-2. Building a Docker image
+2. Install docker (version 24.0.6) and build/run a docker image:
 
 ``` shell
 docker build -t romc_jss .
